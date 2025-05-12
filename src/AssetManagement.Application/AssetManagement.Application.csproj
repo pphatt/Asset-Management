@@ -1,0 +1,53 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+	<PropertyGroup>
+		<TargetFramework>net9.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<SpaRoot>FrontEnd\</SpaRoot>
+		<DefaultItemExcludes>$(DefaultItemExcludes);$(SpaRoot)node_modules\**</DefaultItemExcludes>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.4" />
+		<PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="9.0.4" />
+		<PackageReference Include="Swashbuckle.AspNetCore" Version="8.1.1" />
+	</ItemGroup>
+	
+	<!-- Remove source React from publish -->
+	<ItemGroup>
+		<Content Remove="$(SpaRoot)**" />
+		<None Remove="$(SpaRoot)**" />
+		<None Include="$(SpaRoot)**" Exclude="$(SpaRoot)node_modules\**" />
+	</ItemGroup>
+	<ItemGroup>
+	  <ProjectReference Include="..\AssetManagement.Contracts\AssetManagement.Contracts.csproj" />
+	  <ProjectReference Include="..\AssetManagement.Domain\AssetManagement.Domain.csproj" />
+	</ItemGroup>	
+
+	<!-- Ensure Node.js is installed -->
+	<Target Name="DebugEnsureNodeEnv" BeforeTargets="Build" Condition=" '$(Configuration)' == 'Debug' And !Exists('$(SpaRoot)node_modules') ">		
+		<Exec Command="node --version" ContinueOnError="true">
+			<Output TaskParameter="ExitCode" PropertyName="ErrorCode" />
+		</Exec>
+		<Error Condition="'$(ErrorCode)' != '0'" Text="Node.js is required to build and run this project. To continue, please install Node.js from https://nodejs.org/, and then restart your command prompt or IDE." />
+		<Message Importance="high" Text="Restoring dependencies using 'npm'. This may take several minutes..." />
+		<Exec WorkingDirectory="$(SpaRoot)" Command="npm install" />
+	</Target>
+
+	<!-- As part of publishing, ensure the JS resources are freshly built in production mode -->
+	<Target Name="PublishRunWebpack" AfterTargets="ComputeFilesToPublish">		
+		<Exec WorkingDirectory="$(SpaRoot)" Command="npm install" />
+		<Exec WorkingDirectory="$(SpaRoot)" Command="npm run build" />
+
+		<!-- Include the newly-built files in the publish output -->
+		<ItemGroup>
+			<DistFiles Include="$(SpaRoot)build\**" />
+			<ResolvedFileToPublish Include="@(DistFiles->'%(FullPath)')" Exclude="@(ResolvedFileToPublish)">
+				<RelativePath>%(DistFiles.Identity)</RelativePath>
+				<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+				<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+			</ResolvedFileToPublish>
+		</ItemGroup>
+	</Target>
+</Project>
