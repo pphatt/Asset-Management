@@ -1,47 +1,60 @@
-# ASP.NET
-# Build and test ASP.NET projects.
-# Add steps that publish symbols, save build artifacts, deploy, and more:
-# https://docs.microsoft.com/azure/devops/pipelines/apps/aspnet/build-aspnet-4
+variables:
+  - name: BuildParameters.RestoreBuildProjects
+    value: '**/*.csproj'
+  - name: BuildParameters.TestProjects
+    value: '**/*[Tt]ests/*.csproj'
+  - name: BuildConfiguration
+    value: 'Release'
 
 trigger:
-- main
+  branches:
+    include:
+      - refs/heads/master
+  batch: true
 
-pool:
-  vmImage: 'windows-latest'
+name: $(date:yyyyMMdd)$(rev:.r)
 
-variables:
-  solution: '**/*.sln'
-  buildPlatform: 'Any CPU'
-  buildConfiguration: 'Release'
+jobs:
+- job: BuildAndTest
+  displayName: Build, Test, and Publish Job
+  pool:
+    vmImage: 'windows-latest'
 
-steps:
-- task: NuGetToolInstaller@1
+  steps:
+    - checkout: self
+      fetchDepth: 1
 
-- task: NuGetCommand@2
-  inputs:
-    restoreSolution: '$(solution)'
+    - task: DotNetCoreCLI@2
+      displayName: Restore
+      inputs:
+        command: 'restore'
+        projects: '$(BuildParameters.RestoreBuildProjects)'
 
-- task: VSBuild@1
-  inputs:
-    solution: '$(solution)'
-    msbuildArgs: '--configuration $(BuildConfiguration)'
-    platform: '$(buildPlatform)'
-    configuration: '$(buildConfiguration)'
+    - task: DotNetCoreCLI@2
+      displayName: Build
+      inputs:
+        projects: '$(BuildParameters.RestoreBuildProjects)'
+        arguments: '--configuration $(BuildConfiguration)'
 
-- task: VSTest@2
-  inputs:
-    platform: '$(buildPlatform)'
-    configuration: '$(buildConfiguration)'
+    - task: DotNetCoreCLI@2
+      displayName: Test
+      inputs:
+        command: 'test'
+        projects: '$(BuildParameters.TestProjects)'
+        arguments: '--configuration $(BuildConfiguration)'
 
-- task: DotNetCoreCLI@2
-  inputs:
-    command: 'publish'
-    arguments: '--configuration $(BuildConfiguration) --output $(build.artifactstagingdirectory)"'
-    publishWebProjects: true
+    - task: DotNetCoreCLI@2
+      displayName: Publish
+      inputs:
+        command: 'publish'
+        publishWebProjects: true
+        projects: '$(BuildParameters.RestoreBuildProjects)'
+        arguments: '--configuration $(BuildConfiguration) --output $(build.artifactstagingdirectory)'
+        zipAfterPublish: true
 
-- task: PublishBuildArtifacts@1
-  inputs:
-    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-    TargetPath: '\\my\share\$(Build.DefinitionName)\$(Build.BuildNumber)'
-    ArtifactName: 'drop'
-    publishLocation: 'Container'
+    - task: PublishBuildArtifacts@1
+      displayName: Publish Artifact
+      condition: succeededOrFailed()
+      inputs:
+        PathtoPublish: '$(build.artifactstagingdirectory)'
+        TargetPath: '\\my\share\$(Build.DefinitionName)\$(Build.BuildNumber)'
