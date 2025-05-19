@@ -1,4 +1,4 @@
-namespace AssetManagement.Contracts.Dtos;
+namespace AssetManagement.Contracts.DTOs;
 // This Dto support to return the result of Api
 public class ApiResponse<T>
 {

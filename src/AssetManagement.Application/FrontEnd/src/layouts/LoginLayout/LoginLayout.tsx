@@ -3,5 +3,5 @@ interface Props {
 }
 
 export default function LoginLayout({ children }: Props) {
-  return <div>LoginLayout{children}</div>;
+  return <div>{children}</div>;
 }

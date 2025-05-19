@@ -1,4 +1,4 @@
-using AssetManagement.Contracts.Dtos;
+using AssetManagement.Contracts.DTOs;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AssetManagement.Application.Extensions;
@@ -96,7 +96,7 @@ public static class ApiResponseExtensions
                 Errors = errors ?? [message]
             };
         }
-
+        
         /// Converts a provided error message and optional list of errors into an ApiResponse object
         /// representing a failed operation.
         /// <typeparam name="T">The type of the data expected in the response.</typeparam>

@@ -37,5 +37,6 @@ public class GenericRepository<T> : IGenericRepository<T> where T : class
     public void Update(T entity)
     {
         _dbContext.Update(entity);
+        _dbContext.SaveChanges();
     }
 }

@@ -1,9 +1,14 @@
-import { AuthResponse } from "src/types/auth.type";
-import http from "src/utils/http";
+import { AuthResponse, LoginRequest } from '../types/auth.type';
+import http from '../utils/http';
 
 const authApi = {
-  loginAccount: (body: { email: string; password: string }) =>
-    http.post<AuthResponse>("/login", body),
+  // loginAccount: (body: LoginRequest) =>
+  //   http.post<AuthResponse>("auth/login", body),
+
+  loginAccount: async (body: LoginRequest): Promise<HttpResponse<AuthResponse>> => {
+    const { data } = await http.post('auth/login', body);
+    return data;
+  },
 };
 
 export default authApi;

@@ -19,6 +19,8 @@ builder.Services.AddSpaStaticFiles(configuration =>
 builder.Services.AddOpenApi();
 builder.Services.AddSwaggerConfig();
 builder.Services.AddSqlServerConfig(builder.Configuration);
+builder.Services.AddAuthConfig(builder.Configuration);
+
 
 var app = builder.Build();
 

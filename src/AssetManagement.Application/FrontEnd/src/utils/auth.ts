@@ -1,4 +1,4 @@
-import { User } from "src/types/user.type";
+import { IUser } from "src/types/user.type";
 
 export const cookieEventTarget = new EventTarget();
 
@@ -6,7 +6,7 @@ const getCookie = (name: string) => {
   const nameEQ = `${name}=`;
   const cookies = document.cookie.split(";");
   for (let i = 0; i < cookies.length; i++) {
-    let cookie = cookies[i].trim();
+    const cookie = cookies[i].trim();
     if (cookie.indexOf(nameEQ) === 0) {
       return cookie.substring(nameEQ.length);
     }
@@ -21,7 +21,7 @@ export const clearCookieSession = () => {
 
 export const getAccessTokenFromCookie = () => getCookie("access_token") || "";
 
-export const getProfileFromCookie = (): User | null => {
+export const getProfileFromCookie = (): IUser | null => {
   const result = getCookie("profile");
   return result ? JSON.parse(decodeURIComponent(result)) : null;
 };

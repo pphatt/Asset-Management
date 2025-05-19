@@ -1,8 +1,18 @@
-import { User } from "src/types/user.type";
-import { SuccessResponse } from "src/types/utils.type";
+import { User } from '../types/user.type';
 
-export type AuthResponse = SuccessResponse<{
-  access_token: string;
+export type LoginRequest = {
+  username: string;
+  password: string;
+};
+
+// export type AuthResponse = SuccessResponse<{
+//   accessToken: string;
+//   expires: string;
+//   userInfo: User;
+// }>;
+
+export type AuthResponse = {
+  accessToken: string;
   expires: string;
-  user: User;
-}>;
+  userInfo: User;
+};

@@ -7,7 +7,7 @@ using AssetManagement.Contracts.DTOs;
 using AssetManagement.Contracts.Parameters;
 using Microsoft.EntityFrameworkCore;
 
-namespace AssetManagement.Domain.Services
+namespace AssetManagement.Application.Services
 {
     public class UserService : IUserService
     {

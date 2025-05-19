@@ -100,39 +100,41 @@ export function DataTableFacetedFilter<TData, TValue>({
         </button>
       </div>
 
-      {showDropdown && (
-        <div className="absolute top-full left-0 mt-0.5 w-[110px] bg-white border border-gray-300 shadow-sm z-10">
-          <div className="p-2">
-            <label className="flex items-center space-x-2 mb-1.5 cursor-pointer">
-              <div
-                className={`flex h-4 w-4 items-center justify-center rounded border border-primary ${isAllSelected ? "bg-red-600" : ""}`}
-                onClick={handleAllOption}
-              >
-                {isAllSelected && <Check className="h-3 w-3 text-white" />}
-              </div>
-              <span className="text-sm">All</span>
-            </label>
-
-            {options.map((option) => {
-              const isSelected = selectedValues.has(option.value);
-              return (
-                <label
-                  key={option.value}
-                  className="flex items-center space-x-2 mb-1.5 cursor-pointer"
+      {
+        showDropdown && (
+          <div className="absolute top-full left-0 mt-0.5 w-[110px] bg-white border border-gray-300 shadow-sm z-10">
+            <div className="p-2">
+              <label className="flex items-center space-x-2 mb-1.5 cursor-pointer">
+                <div
+                  className={`flex h-4 w-4 items-center justify-center rounded border border-primary ${isAllSelected ? "bg-red-600" : ""}`}
+                  onClick={handleAllOption}
                 >
-                  <div
-                    className={`flex h-4 w-4 items-center justify-center rounded border border-primary ${isSelected ? "bg-red-600" : ""}`}
-                    onClick={() => handleOptionClick(option.value)}
+                  {isAllSelected && <Check className="h-3 w-3 text-white" />}
+                </div>
+                <span className="text-sm">All</span>
+              </label>
+
+              {options.map((option) => {
+                const isSelected = selectedValues.has(option.value);
+                return (
+                  <label
+                    key={option.value}
+                    className="flex items-center space-x-2 mb-1.5 cursor-pointer"
                   >
-                    {isSelected && <Check className="h-3 w-3 text-white" />}
-                  </div>
-                  <span className="text-sm">{option.label}</span>
-                </label>
-              );
-            })}
+                    <div
+                      className={`flex h-4 w-4 items-center justify-center rounded border border-primary ${isSelected ? "bg-red-600" : ""}`}
+                      onClick={() => handleOptionClick(option.value)}
+                    >
+                      {isSelected && <Check className="h-3 w-3 text-white" />}
+                    </div>
+                    <span className="text-sm">{option.label}</span>
+                  </label>
+                );
+              })}
+            </div>
           </div>
-        </div>
-      )}
-    </div>
+        )
+      }
+    </div >
   );
 }

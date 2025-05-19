@@ -1,0 +1,177 @@
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
+using AssetManagement.Application.Services.Interfaces;
+using AssetManagement.Contracts.DTOs;
+using AssetManagement.Contracts.DTOs.Response;
+using AssetManagement.Contracts.DTOs.Resquest;
+using AssetManagement.Domain.Entities;
+using AssetManagement.Domain.Repositories;
+using Microsoft.IdentityModel.Tokens;
+
+namespace AssetManagement.Application.Services
+{
+    public class AuthService : IAuthService
+    {
+        private readonly IUserRepository _userRepository;
+        private readonly IConfiguration _configuration;
+        private readonly IPasswordHasher _passwordHasher;
+        public AuthService(IUserRepository userRepository, IConfiguration configuration, IPasswordHasher passwordHasher)
+        {
+            _passwordHasher = passwordHasher;
+            _userRepository = userRepository;
+            _configuration = configuration;
+        }
+
+        private UserDto MapToUserDto(User user)
+        {
+            return new UserDto
+            {
+                StaffCode = user.StaffCode,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Username = user.Username,
+                JoinedDate = user.JoinedDate,
+                Type = user.Type.ToString(),
+                IsPasswordUpdated = user.IsPasswordUpdated,
+            };
+        }
+
+        public async Task<LoginResponse> LoginAsync(LoginRequest loginRequest)
+        {
+            try
+            {
+                var user = await _userRepository.GetByUsernameAsync(loginRequest.Username);
+
+                if (user == null)
+                {
+                    throw new UnauthorizedAccessException("Invalid username or password");
+                }
+
+                var passwordComparisonResult = _passwordHasher.VerifyPassword(loginRequest.Password, user.Password);
+
+                if (!passwordComparisonResult)
+                {
+                    throw new UnauthorizedAccessException("Invalid username or password");
+                }
+
+                var claims = new[]
+                {
+                    new Claim(ClaimTypes.Name, user.Username),
+                    new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                    new Claim(ClaimTypes.Role, user.Type.ToString())
+                };
+
+                var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]!));
+                var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+                var token = new JwtSecurityToken(
+                    issuer: _configuration["Jwt:Issuer"],
+                    audience: _configuration["Jwt:Audience"],
+                    claims: claims,
+                    expires: DateTime.UtcNow.AddHours(1),
+                    signingCredentials: creds
+                );
+
+                var userInfo = MapToUserDto(user);
+
+                return new LoginResponse
+                {
+                    AccessToken = new JwtSecurityTokenHandler().WriteToken(token),
+                    UserInfo = userInfo
+                };
+            }
+            catch (Exception ex)
+            {
+                throw new UnauthorizedAccessException(ex.Message);
+            }
+        }
+
+        public Task<bool> VerifyToken(string token)
+        {
+            try
+            {
+                var tokenHandler = new JwtSecurityTokenHandler();
+                var key = Encoding.ASCII.GetBytes(_configuration["Jwt:Key"]!);
+
+                tokenHandler.ValidateToken(token, new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(key),
+                    ValidateIssuer = true,
+                    ValidIssuer = _configuration["Jwt:Issuer"],
+                    ValidateAudience = true,
+                    ValidAudience = _configuration["Jwt:Audience"],
+                    ValidateLifetime = true,
+                    ClockSkew = TimeSpan.Zero
+                }, out SecurityToken validatedToken);
+                return Task.FromResult(true);
+            }
+            catch
+            {
+                return Task.FromResult(false);
+            }
+        }
+
+        public Task LogoutAsync()
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<ChangePasswordResponse> ChangePasswordAsync(string username, ChangePasswordRequest request)
+        {
+            try
+            {
+                var user = await _userRepository.GetByUsernameAsync(username);
+                var hashPassword = _passwordHasher.HashPassword(request.Password);
+
+                if (user == null)
+                {
+                    throw new UnauthorizedAccessException("Invalid username or password");
+                }
+
+                if (hashPassword != user.Password)
+                {
+                    throw new UnauthorizedAccessException("Invalid username or password");
+                }
+
+                var newHashPassword = _passwordHasher.HashPassword(request.NewPassword);
+                if (newHashPassword == user.Password)
+                {
+                    throw new UnauthorizedAccessException("New password must be different from the old password");
+                }
+                user.Password = newHashPassword;
+                user.IsPasswordUpdated = true;
+                _userRepository.Update(user);
+
+                var claims = new[]
+                {
+                    new Claim(ClaimTypes.Name, user.Username),
+                    new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                    new Claim(ClaimTypes.Role, user.Type.ToString())
+                };
+
+                var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]!));
+                var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+                var token = new JwtSecurityToken(
+                    issuer: _configuration["Jwt:Issuer"],
+                    audience: _configuration["Jwt:Audience"],
+                    claims: claims,
+                    expires: DateTime.UtcNow.AddHours(1),
+                    signingCredentials: creds
+                );
+
+                var userInfo = MapToUserDto(user);
+
+                return new ChangePasswordResponse
+                {
+                    AccessToken = new JwtSecurityTokenHandler().WriteToken(token),
+                    UserInfo = userInfo
+                };
+            }
+            catch (Exception ex)
+            {
+                throw new UnauthorizedAccessException(ex.Message);
+            }
+        }
+    }
+}

@@ -1,4 +1,4 @@
-﻿namespace AssetManagement.Data.Database.Configurations;
+﻿namespace AssetManagement.Data.Configuration;
 
 public class AssetConfig
 {

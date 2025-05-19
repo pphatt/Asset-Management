@@ -1,5 +1,3 @@
-"use client";
-
 import React, { useEffect, useState } from "react";
 import {
   ColumnDef,
@@ -21,7 +19,6 @@ import { DataTableToolbar } from "./data-table-toolbar";
 import { FilterTable } from "./filter-table";
 import { useTable } from "@/stores/table-context";
 import { DataPagination } from "./data-pagination";
-import { Button } from "../button";
 
 declare module "@tanstack/react-table" {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -34,6 +31,7 @@ interface DataTableProps<T> {
   columns: ColumnDef<T>[];
   filter: FilterTable<T>;
   title?: string;
+  subTitle?: string;
   extraButton?: React.ReactNode;
   toolbar?: React.ReactNode;
 }
@@ -42,6 +40,7 @@ export function DataTable<T>({
   columns,
   filter,
   title,
+  subTitle,
   extraButton,
   toolbar,
 }: DataTableProps<T>) {
@@ -90,9 +89,14 @@ export function DataTable<T>({
         {extraButton}
       </div>
       <div className="bg-white p-4 rounded-md shadow-sm">
-        <div className="flex justify-between items-center mb-4 gap-x-6">
-          {toolbar ?? <DataTableToolbar filter={filter} />}
-          <Button className="w-[10rem]">Create new user</Button>
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-medium">{subTitle || "User List"}</h2>
+          <div className="flex gap-4">
+            {toolbar ?? <DataTableToolbar filter={filter} />}
+            <button className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700">
+              Create new user
+            </button>
+          </div>
         </div>
 
         <div className="overflow-x-auto">
@@ -134,7 +138,7 @@ export function DataTable<T>({
                         <td
                           key={cell.id}
                           className={`py-2 relative
-                            ${cell.column.id !== "actions" ? "after:absolute after:bottom-0 after:left-0 after:w-[calc(100%-20px)] after:h-[1px] after:bg-gray-300" : "w-[5vw]"}
+                            ${cell.column.id !== "actions" ? "after:absolute after:bottom-0 after:left-0 after:w-[calc(100%-20px)] after:h-[1px] after:bg-gray-300" : ""}
                             `}
                         >
                           {flexRender(

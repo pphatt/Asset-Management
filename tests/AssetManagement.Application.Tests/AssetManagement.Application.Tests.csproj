@@ -18,4 +18,8 @@
     <Using Include="Xunit" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\AssetManagement.Application\AssetManagement.Application.csproj" />
+  </ItemGroup>
+
 </Project>
