@@ -1,4 +1,7 @@
 ﻿using AssetManagement.Application.Extensions;
+using AssetManagement.Application.Middlewares;
+using AssetManagement.Data;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,8 +18,25 @@ builder.Services.AddSpaStaticFiles(configuration =>
 
 builder.Services.AddOpenApi();
 builder.Services.AddSwaggerConfig();
+builder.Services.AddSqlServerConfig(builder.Configuration);
 
 var app = builder.Build();
+
+// Test database connection
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<AssetManagementDbContext>();
+    try
+    {
+        dbContext.Database.OpenConnection();
+        Console.WriteLine("Database connected successfully.");
+        dbContext.Database.CloseConnection();
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Database connection failed: {ex.Message}");
+    }
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -45,6 +65,7 @@ app.MapFallbackToFile("index.html", new StaticFileOptions
 });
 
 app.UseAuthorization();
+app.UseMiddleware<ErrorHandlingMiddleware>();
 
 app.MapControllers();
 

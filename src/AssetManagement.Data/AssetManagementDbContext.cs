@@ -1,8 +1,10 @@
-﻿using AssetManagement.Domain.Entities;
+﻿using System.Reflection;
+using AssetManagement.Data.Data;
+using AssetManagement.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
-using System.Reflection;
 
 namespace AssetManagement.Data;
+
 public class AssetManagementDbContext : DbContext
 {
     public AssetManagementDbContext(DbContextOptions<AssetManagementDbContext> options)
@@ -12,10 +14,20 @@ public class AssetManagementDbContext : DbContext
 
     public DbSet<Asset> Assets { get; set; }
 
+    public DbSet<User> Users { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
         modelBuilder.ApplyConfigurationsFromAssembly(
             Assembly.GetExecutingAssembly());
+
+        #region Seeding Data
+
+        modelBuilder.SeedUsers();
+
+        #endregion
     }
+
+
 }

@@ -6,15 +6,32 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "watch": "nodemon --watch src --ext ts,tsx,js,jsx --exec \"npm run build\"",
     "lint": "eslint .",
     "preview": "vite preview"
   },
   "dependencies": {
+    "@hookform/resolvers": "^5.0.1",
+    "@tailwindcss/postcss": "^4.1.6",
+    "@tanstack/react-query": "^5.76.1",
+    "@tanstack/react-query-devtools": "^5.76.1",
+    "@tanstack/react-table": "^8.21.3",
+    "axios": "^1.9.0",
+    "classnames": "^2.5.1",
+    "lodash": "^4.17.21",
+    "lucide-react": "^0.510.0",
+    "postcss": "^8.5.3",
     "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+    "react-dom": "^19.1.0",
+    "react-hook-form": "^7.56.3",
+    "react-router-dom": "^7.6.0",
+    "react-toastify": "^11.0.5",
+    "tailwindcss": "^4.1.6",
+    "yup": "^1.6.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.25.0",
+    "@types/node": "^22.15.18",
     "@types/react": "^19.1.2",
     "@types/react-dom": "^19.1.2",
     "@vitejs/plugin-react": "^4.4.1",
@@ -22,6 +39,7 @@
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.19",
     "globals": "^16.0.0",
+    "nodemon": "^3.1.10",
     "typescript": "~5.8.3",
     "typescript-eslint": "^8.30.1",
     "vite": "^6.3.5"

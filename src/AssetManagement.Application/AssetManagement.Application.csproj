@@ -11,6 +11,10 @@
 	<ItemGroup>
 		<PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.4" />
 		<PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="9.0.4" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.4">
+		  <PrivateAssets>all</PrivateAssets>
+		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="8.1.1" />
 	</ItemGroup>
 	
@@ -22,6 +26,7 @@
 	</ItemGroup>
 	<ItemGroup>
 	  <ProjectReference Include="..\AssetManagement.Contracts\AssetManagement.Contracts.csproj" />
+		<ProjectReference Include="..\AssetManagement.Data\AssetManagement.Data.csproj" />
 	  <ProjectReference Include="..\AssetManagement.Domain\AssetManagement.Domain.csproj" />
 	</ItemGroup>	
 

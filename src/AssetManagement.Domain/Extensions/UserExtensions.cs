@@ -1,0 +1,70 @@
+using AssetManagement.Domain.Entities;
+using AssetManagement.Domain.Enums;
+
+namespace AssetManagement.Domain.Extensions
+{
+    public static class UserExtensions
+    {
+        public static IQueryable<User> ApplySearch(this IQueryable<User> query, string? searchTerm)
+        {
+            if (string.IsNullOrEmpty(searchTerm))
+                return query;
+
+            return query.Where(u => u.FullName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) || u.StaffCode.Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
+        }
+
+        public static IQueryable<User> ApplyFilters(this IQueryable<User> query, string? userType)
+        {
+            if (string.IsNullOrEmpty(userType))
+                return query;
+
+            var result = userType.ToLower() switch
+            {
+                "all" => query,
+                "staff" => query.Where(u => u.Type == UserTypeEnum.Staff),
+                "admin" => query.Where(u => u.Type == UserTypeEnum.Admin),
+                _ => query,
+            };
+
+            return result;
+        }
+
+        public static IQueryable<User> ApplySorting(this IQueryable<User> query, IList<(string, string)> sortingCriteria)
+        {
+            if (sortingCriteria.Count > 0)
+            {
+                IOrderedQueryable<User>? orderedQuery = null;
+                foreach (var (property, order) in sortingCriteria)
+                {
+                    if (orderedQuery == null)
+                    {
+                        orderedQuery = property.ToLower() switch
+                        {
+                            "name" => order == "desc" ? query.OrderByDescending(u => u.FullName) : query.OrderBy(u => u.FullName),
+                            "code" => order == "desc" ? query.OrderByDescending(u => u.StaffCode) : query.OrderBy(u => u.StaffCode),
+                            "username" => order == "desc" ? query.OrderByDescending(u => u.Username) : query.OrderBy(u => u.Username),
+                            "joined" => order == "desc" ? query.OrderByDescending(u => u.JoinedDate) : query.OrderBy(u => u.JoinedDate),
+                            "type" => order == "desc" ? query.OrderByDescending(u => u.Type) : query.OrderBy(u => u.Type),
+                            _ => query.OrderBy(u => u.Id),
+                        };
+                    }
+                    else
+                    {
+                        orderedQuery = property.ToLower() switch
+                        {
+                            "name" => order == "desc" ? orderedQuery.ThenByDescending(u => u.FullName) : orderedQuery.ThenBy(u => u.FullName),
+                            "code" => order == "desc" ? orderedQuery.ThenByDescending(u => u.StaffCode) : orderedQuery.ThenBy(u => u.StaffCode),
+                            "username" => order == "desc" ? orderedQuery.ThenByDescending(u => u.Username) : orderedQuery.ThenBy(u => u.Username),
+                            "joined" => order == "desc" ? orderedQuery.ThenByDescending(u => u.JoinedDate) : orderedQuery.ThenBy(u => u.JoinedDate),
+                            "type" => order == "desc" ? orderedQuery.ThenByDescending(u => u.Type) : orderedQuery.ThenBy(u => u.Type),
+                            _ => orderedQuery.ThenBy(u => u.Id),
+                        };
+                    }
+                }
+                query = orderedQuery ?? query;
+            }
+
+            return query;
+        }
+    }
+}
