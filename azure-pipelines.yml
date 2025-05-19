@@ -9,7 +9,7 @@ variables:
 trigger:
   branches:
     include:
-      - refs/heads/master
+      - main
   batch: true
 
 name: $(date:yyyyMMdd)$(rev:.r)
