@@ -9,6 +9,6 @@ namespace AssetManagement.Application.Services.Interfaces
         // <summary>
         // Retrieves a paginated list of users based on the provided query parameters
         // </summary>
-        Task<PagedResult<UserDto>> GetUsersAsync(UserQueryParameters p);
+        Task<PagedResult<UserDto>> GetUsersAsync(string userId, UserQueryParameters queryParams);
     }
 }

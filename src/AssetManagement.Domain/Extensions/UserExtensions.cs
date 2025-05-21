@@ -10,15 +10,23 @@ namespace AssetManagement.Domain.Extensions
             if (string.IsNullOrEmpty(searchTerm))
                 return query;
 
-            return query.Where(u => u.FullName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) || u.StaffCode.Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
+            string normalizedSearchTerm = searchTerm.Trim().ToLower();
+
+            return query.Where(u =>
+                u.FirstName.Trim().ToLower().Contains(normalizedSearchTerm) ||
+                u.LastName.Trim().ToLower().Contains(normalizedSearchTerm) ||
+                u.StaffCode.Contains(normalizedSearchTerm));
         }
 
-        public static IQueryable<User> ApplyFilters(this IQueryable<User> query, string? userType)
+        public static IQueryable<User> ApplyFilters(this IQueryable<User> query, string? userType, LocationEnum userLocation)
         {
+            // Apply location filter - admin can only see users from their own location
+            query = query.Where(u => u.Location == userLocation);
+
             if (string.IsNullOrEmpty(userType))
                 return query;
 
-            var result = userType.ToLower() switch
+            query = userType.ToLower() switch
             {
                 "all" => query,
                 "staff" => query.Where(u => u.Type == UserTypeEnum.Staff),
@@ -26,7 +34,7 @@ namespace AssetManagement.Domain.Extensions
                 _ => query,
             };
 
-            return result;
+            return query;
         }
 
         public static IQueryable<User> ApplySorting(this IQueryable<User> query, IList<(string, string)> sortingCriteria)
@@ -40,7 +48,8 @@ namespace AssetManagement.Domain.Extensions
                     {
                         orderedQuery = property.ToLower() switch
                         {
-                            "name" => order == "desc" ? query.OrderByDescending(u => u.FullName) : query.OrderBy(u => u.FullName),
+                            "name" => order == "desc" ? query.OrderByDescending(u => u.FirstName).ThenByDescending(u => u.LastName)
+                                : query.OrderBy(u => u.FirstName).ThenBy(u => u.LastName),
                             "code" => order == "desc" ? query.OrderByDescending(u => u.StaffCode) : query.OrderBy(u => u.StaffCode),
                             "username" => order == "desc" ? query.OrderByDescending(u => u.Username) : query.OrderBy(u => u.Username),
                             "joined" => order == "desc" ? query.OrderByDescending(u => u.JoinedDate) : query.OrderBy(u => u.JoinedDate),
@@ -52,7 +61,8 @@ namespace AssetManagement.Domain.Extensions
                     {
                         orderedQuery = property.ToLower() switch
                         {
-                            "name" => order == "desc" ? orderedQuery.ThenByDescending(u => u.FullName) : orderedQuery.ThenBy(u => u.FullName),
+                            "name" => order == "desc" ? orderedQuery.ThenByDescending(u => u.FirstName).ThenByDescending(u => u.LastName)
+                                : orderedQuery.ThenBy(u => u.FirstName).ThenBy(u => u.LastName),
                             "code" => order == "desc" ? orderedQuery.ThenByDescending(u => u.StaffCode) : orderedQuery.ThenBy(u => u.StaffCode),
                             "username" => order == "desc" ? orderedQuery.ThenByDescending(u => u.Username) : orderedQuery.ThenBy(u => u.Username),
                             "joined" => order == "desc" ? orderedQuery.ThenByDescending(u => u.JoinedDate) : orderedQuery.ThenBy(u => u.JoinedDate),

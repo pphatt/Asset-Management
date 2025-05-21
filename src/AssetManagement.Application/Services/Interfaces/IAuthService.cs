@@ -8,6 +8,6 @@ public interface IAuthService
     Task<LoginResponse> LoginAsync(LoginRequest loginRequest);
     // Task RegisterAsync(RegisterRequestDto registerRequest);
     Task LogoutAsync();
-    Task<bool> VerifyToken(string token);
+    bool VerifyToken(string token);
     Task<ChangePasswordResponse> ChangePasswordAsync(string username, ChangePasswordRequest loginRequest);
 }

@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using MassTransit;
 
 namespace AssetManagement.Domain.Entities;
 

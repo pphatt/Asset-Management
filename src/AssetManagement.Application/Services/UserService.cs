@@ -18,16 +18,20 @@ namespace AssetManagement.Application.Services
             _userRepository = userRepository;
         }
 
-        public async Task<PagedResult<UserDto>> GetUsersAsync(UserQueryParameters queryParams)
+        public async Task<PagedResult<UserDto>> GetUsersAsync(string userId, UserQueryParameters queryParams)
         {
-            IQueryable<User> query = _userRepository.GetAll();
+            var user = await _userRepository.GetByIdAsync(Guid.Parse(userId));
+            if (user is null)
+            {
+                throw new KeyNotFoundException($"Cannot find user with id {userId}");
+            }
+
+            IQueryable<User> query = _userRepository.GetAll()
+                .ApplySearch(queryParams.SearchTerm)
+                .ApplyFilters(queryParams.UserType, user.Location)
+                .ApplySorting(queryParams.GetSortCriteria());
 
             int total = await query.CountAsync();
-
-            IQueryable<User> processedQuery = query
-                .ApplySearch(queryParams.SearchTerm)
-                .ApplyFilters(queryParams.UserType)
-                .ApplySorting(queryParams.GetSortCriteria());
 
             var items = await query
                 .Skip((queryParams.PageNumber - 1) * queryParams.PageSize)

@@ -1,6 +1,7 @@
 using System.Text;
 using AssetManagement.Application.Services;
 using AssetManagement.Application.Services.Interfaces;
+using AssetManagement.Data.Helpers.Hashing;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 

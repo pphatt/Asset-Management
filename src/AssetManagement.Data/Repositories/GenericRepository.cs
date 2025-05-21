@@ -14,16 +14,6 @@ public class GenericRepository<T> : IGenericRepository<T> where T : class
         _dbSet = dbContext.Set<T>();
     }
 
-    public void Add(T entity)
-    {
-        _dbContext.Add(entity);
-    }
-
-    public void Delete(T entity)
-    {
-        _dbContext.Remove(entity);
-    }
-
     public IQueryable<T> GetAll()
     {
         return _dbSet.AsQueryable();
@@ -32,6 +22,18 @@ public class GenericRepository<T> : IGenericRepository<T> where T : class
     public async Task<T?> GetByIdAsync(params object[]? keyValues)
     {
         return await _dbSet.FindAsync(keyValues);
+    }
+
+    public void Add(T entity)
+    {
+        _dbContext.Add(entity);
+        _dbContext.SaveChanges();
+    }
+
+    public void Delete(T entity)
+    {
+        _dbContext.Remove(entity);
+        _dbContext.SaveChanges();
     }
 
     public void Update(T entity)

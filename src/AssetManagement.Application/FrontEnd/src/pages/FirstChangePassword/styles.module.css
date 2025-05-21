@@ -1,0 +1,104 @@
+.card-header {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    color: #D90D1E;
+    background-color: #eff1f5;
+    height: 70px;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    padding: 10px 30px;
+    border: 1px solid black;
+    text-align: center;
+}
+
+.card-title {
+    font-size: 22px;
+    font-weight: 600;
+}
+
+.card-content {
+    background-color: #fafcfc;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+    border: 1px solid black;
+    border-top: none; /* Avoid double border with header */
+    padding: 20px 30px 30px;
+}
+
+.form-row {
+    display: flex;
+    align-items: flex-start;
+    width: 100%;
+}
+
+.form-label {
+    color: #1f2937;
+    width: 210px;
+    font-size: 16px;
+}
+
+.input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    flex: 1;
+}
+
+.form-input {
+}
+
+.form-input:focus {
+    border-color: #D90D1E;
+}
+
+.icon-group {
+    position: absolute;
+    right: 10px;
+    display: flex;
+    gap: 6px;
+    align-items: center;
+}
+
+.icon-check {
+    color: #22c55e; /* Green for checkmark */
+    font-size: 14px;
+}
+
+.icon-cross {
+    color: #ef4444; /* Red for cross */
+    font-size: 14px;
+}
+
+.icon-eye {
+    color: #6b7280; /* Gray for eye icon */
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.icon-hidden {
+    display: none;
+}
+
+.login-btn-wrapper {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    margin-top: 20px;
+}
+
+.login-btn {
+    background-color: #D90D1E;
+    color: white;
+    padding: 8px 20px;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.login-btn:hover {
+    background-color: #b91c1c; /* Darker red on hover */
+}

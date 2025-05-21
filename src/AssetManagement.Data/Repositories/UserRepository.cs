@@ -18,7 +18,7 @@ public class UserRepository : GenericRepository<User>, IUserRepository
             .FirstOrDefaultAsync(u => u.Username == username);
         if (user == null)
         {
-            throw new Exception("User not found");
+            throw new KeyNotFoundException("User not found");
         }
         return user;
     }

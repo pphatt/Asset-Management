@@ -1,6 +1,5 @@
 ﻿using System.Text.RegularExpressions;
-using AssetManagement.Application.Services;
-using AssetManagement.Application.Services.Interfaces;
+using AssetManagement.Data.Helpers.Hashing;
 
 namespace AssetManagement.Application.Tests
 {

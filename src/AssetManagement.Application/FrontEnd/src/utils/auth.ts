@@ -2,6 +2,33 @@ import { IUser } from "src/types/user.type";
 
 export const cookieEventTarget = new EventTarget();
 
+export const setCookie = (name: string, value: string, durations: number) => {
+  // Validate inputs
+  if (!name || !value) {
+    console.warn('setCookie: Name and value must not be empty');
+    return;
+  }
+  if (durations < 0) {
+    console.warn('setCookie: Duration must not be negative');
+    return;
+  }
+
+  // Calculate expiration in milliseconds
+  const expires = durations === 0 ? '' : `expires=${new Date(Date.now() + durations).toUTCString()}`;
+
+  // Build cookie string
+  const cookieString = [
+    `${name}=${encodeURIComponent(value)}`,
+    expires,
+    'path=/',
+    'SameSite=None; Secure',
+  ]
+      .filter(Boolean)
+      .join('; ');
+
+  document.cookie = cookieString;
+};
+
 const getCookie = (name: string) => {
   const nameEQ = `${name}=`;
   const cookies = document.cookie.split(";");

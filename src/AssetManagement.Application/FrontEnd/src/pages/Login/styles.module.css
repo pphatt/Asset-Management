@@ -1,18 +1,13 @@
 .card-header {
     display: flex;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
-
     color: #D90D1E;
     background-color: #eff1f5;
-
     height: 70px;
-
     padding: 10px 20px;
-
     border-radius: 8px;
     border: 1px solid black;
-
     text-align: center;
 }
 
@@ -22,38 +17,29 @@
 
 .card-content {
     background-color: #fafcfc;
-
     border: 1px solid black;
     border-bottom-left-radius: 8px;
     border-bottom-right-radius: 8px;
-
     padding: 30px 64px 40px;
 }
 
 .form-row {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-
+    align-items: flex-start;
     width: 100%;
-
-    margin-bottom: 20px;
 }
 
 .form-label {
     display: flex;
     justify-content: space-between;
-
     color: black;
-
     width: 94px;
-
     font-size: 17px;
 }
 
 .form-input {
     width: 222px;
-
     margin: 0 25px 0 0;
 }
 
@@ -61,12 +47,10 @@
     display: flex;
     justify-content: flex-end;
     align-items: center;
-
     margin: 0 25px 0 0;
 }
 
 .login-btn {
     margin: 0;
-
     font-size: 17px;
 }

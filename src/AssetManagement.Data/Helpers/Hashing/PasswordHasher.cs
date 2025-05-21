@@ -1,8 +1,7 @@
-﻿using AssetManagement.Application.Services.Interfaces;
-using System.Security.Cryptography;
+﻿using System.Security.Cryptography;
 using System.Text;
 
-namespace AssetManagement.Application.Services
+namespace AssetManagement.Data.Helpers.Hashing
 {
     public class PasswordHasher : IPasswordHasher
     {
@@ -61,5 +60,4 @@ namespace AssetManagement.Application.Services
             }
         }
     }
-
 }

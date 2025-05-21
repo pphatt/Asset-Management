@@ -1,26 +1,28 @@
 ﻿using AssetManagement.Application.Extensions;
 using AssetManagement.Application.Middlewares;
+using AssetManagement.Application.Services;
+using AssetManagement.Application.Services.Interfaces;
 using AssetManagement.Data;
+using AssetManagement.Data.Helpers.Seeding;
+using AssetManagement.Data.Repositories;
+using AssetManagement.Domain.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
+using AssetManagement.Data.Helpers.Hashing;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-
+// Register services
 builder.Services.AddControllers();
-
-// Configure to serve static files for SPA (in Production)
-builder.Services.AddSpaStaticFiles(configuration =>
-{
-    configuration.RootPath = "FrontEnd/build";
-});
-
+builder.Services.AddSpaStaticFiles(cfg => cfg.RootPath = "FrontEnd/build");
 builder.Services.AddOpenApi();
 builder.Services.AddSwaggerConfig();
 builder.Services.AddSqlServerConfig(builder.Configuration);
 builder.Services.AddAuthConfig(builder.Configuration);
-
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
+builder.Services.AddTransient<DataSeeder>();
 
 var app = builder.Build();
 
@@ -40,18 +42,27 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-// Configure the HTTP request pipeline.
+// Swagger in development mode
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
     app.UseSwagger();
     app.UseSwaggerUI();
+
+    // Seeding data in development mode
+    using (var scope = app.Services.CreateScope())
+    {
+        var dataSeeder = scope.ServiceProvider.GetRequiredService<DataSeeder>();
+        await dataSeeder.SeedAsync();
+    }
 }
 
-app.UseHttpsRedirection();
+// Errors handling
+app.UseMiddleware<ErrorHandlingMiddleware>();
 
-//// Serve static files from FrontEnd/build
-app.UseDefaultFiles(); // Look for index.html
+// Security and static files
+app.UseHttpsRedirection();
+app.UseDefaultFiles();
 app.UseStaticFiles(new StaticFileOptions
 {
     FileProvider = new PhysicalFileProvider(
@@ -59,15 +70,16 @@ app.UseStaticFiles(new StaticFileOptions
     RequestPath = ""
 });
 
-// Fallback to index.html for React Router
+// SPA fallback
 app.MapFallbackToFile("index.html", new StaticFileOptions
 {
     FileProvider = new PhysicalFileProvider(
         Path.Combine(Directory.GetCurrentDirectory(), "FrontEnd", "build"))
 });
 
+// Authentication & Authorization
+app.UseAuthentication();
 app.UseAuthorization();
-app.UseMiddleware<ErrorHandlingMiddleware>();
 
 app.MapControllers();
 

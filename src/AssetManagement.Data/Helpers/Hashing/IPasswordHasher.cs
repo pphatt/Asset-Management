@@ -1,4 +1,4 @@
-﻿namespace AssetManagement.Application.Services.Interfaces
+﻿namespace AssetManagement.Data.Helpers.Hashing
 {
     public interface IPasswordHasher
     {

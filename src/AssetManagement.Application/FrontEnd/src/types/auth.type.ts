@@ -1,8 +1,13 @@
-import { User } from '../types/user.type';
+import { User } from "../types/user.type";
 
 export type LoginRequest = {
   username: string;
   password: string;
+};
+
+export type PasswordUpdateRequest = {
+  password: string;
+  newPassword: string;
 };
 
 // export type AuthResponse = SuccessResponse<{

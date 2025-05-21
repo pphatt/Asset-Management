@@ -5,6 +5,7 @@ using AssetManagement.Application.Services.Interfaces;
 using AssetManagement.Contracts.DTOs;
 using AssetManagement.Contracts.DTOs.Response;
 using AssetManagement.Contracts.DTOs.Resquest;
+using AssetManagement.Data.Helpers.Hashing;
 using AssetManagement.Domain.Entities;
 using AssetManagement.Domain.Repositories;
 using Microsoft.IdentityModel.Tokens;
@@ -39,59 +40,39 @@ namespace AssetManagement.Application.Services
 
         public async Task<LoginResponse> LoginAsync(LoginRequest loginRequest)
         {
-            try
+            var user = await _userRepository.GetByUsernameAsync(loginRequest.Username);
+            if (user == null)
             {
-                var user = await _userRepository.GetByUsernameAsync(loginRequest.Username);
-
-                if (user == null)
-                {
-                    throw new UnauthorizedAccessException("Invalid username or password");
-                }
-
-                var passwordComparisonResult = _passwordHasher.VerifyPassword(loginRequest.Password, user.Password);
-
-                if (!passwordComparisonResult)
-                {
-                    throw new UnauthorizedAccessException("Invalid username or password");
-                }
-
-                var claims = new[]
-                {
-                    new Claim(ClaimTypes.Name, user.Username),
-                    new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                    new Claim(ClaimTypes.Role, user.Type.ToString())
-                };
-
-                var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]!));
-                var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-                var token = new JwtSecurityToken(
-                    issuer: _configuration["Jwt:Issuer"],
-                    audience: _configuration["Jwt:Audience"],
-                    claims: claims,
-                    expires: DateTime.UtcNow.AddHours(1),
-                    signingCredentials: creds
-                );
-
-                var userInfo = MapToUserDto(user);
-
-                return new LoginResponse
-                {
-                    AccessToken = new JwtSecurityTokenHandler().WriteToken(token),
-                    UserInfo = userInfo
-                };
+                throw new UnauthorizedAccessException("Invalid username");
             }
-            catch (Exception ex)
+
+            if (!user.IsActive)
             {
-                throw new UnauthorizedAccessException(ex.Message);
+                throw new InvalidOperationException("This account has been disabled. Please contact your administrator.");
             }
+
+            var passwordComparisonResult = _passwordHasher.VerifyPassword(loginRequest.Password, user.Password);
+            if (!passwordComparisonResult)
+            {
+                throw new UnauthorizedAccessException("Username or password is incorrect. Please try again!");
+            }
+
+            var token = GenerateJwtToken(user);
+            var userInfo = MapToUserDto(user);
+
+            return new LoginResponse
+            {
+                AccessToken = token,
+                UserInfo = userInfo
+            };
         }
 
-        public Task<bool> VerifyToken(string token)
+        public bool VerifyToken(string token)
         {
             try
             {
                 var tokenHandler = new JwtSecurityTokenHandler();
-                var key = Encoding.ASCII.GetBytes(_configuration["Jwt:Key"]!);
+                var key = Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]!);
 
                 tokenHandler.ValidateToken(token, new TokenValidationParameters
                 {
@@ -104,11 +85,12 @@ namespace AssetManagement.Application.Services
                     ValidateLifetime = true,
                     ClockSkew = TimeSpan.Zero
                 }, out SecurityToken validatedToken);
-                return Task.FromResult(true);
+
+                return true;
             }
             catch
             {
-                return Task.FromResult(false);
+                return false;
             }
         }
 
@@ -119,59 +101,58 @@ namespace AssetManagement.Application.Services
 
         public async Task<ChangePasswordResponse> ChangePasswordAsync(string username, ChangePasswordRequest request)
         {
-            try
+            var user = await _userRepository.GetByUsernameAsync(username);
+
+            if (user == null)
             {
-                var user = await _userRepository.GetByUsernameAsync(username);
-                var hashPassword = _passwordHasher.HashPassword(request.Password);
-
-                if (user == null)
-                {
-                    throw new UnauthorizedAccessException("Invalid username or password");
-                }
-
-                if (hashPassword != user.Password)
-                {
-                    throw new UnauthorizedAccessException("Invalid username or password");
-                }
-
-                var newHashPassword = _passwordHasher.HashPassword(request.NewPassword);
-                if (newHashPassword == user.Password)
-                {
-                    throw new UnauthorizedAccessException("New password must be different from the old password");
-                }
-                user.Password = newHashPassword;
-                user.IsPasswordUpdated = true;
-                _userRepository.Update(user);
-
-                var claims = new[]
-                {
-                    new Claim(ClaimTypes.Name, user.Username),
-                    new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                    new Claim(ClaimTypes.Role, user.Type.ToString())
-                };
-
-                var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]!));
-                var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-                var token = new JwtSecurityToken(
-                    issuer: _configuration["Jwt:Issuer"],
-                    audience: _configuration["Jwt:Audience"],
-                    claims: claims,
-                    expires: DateTime.UtcNow.AddHours(1),
-                    signingCredentials: creds
-                );
-
-                var userInfo = MapToUserDto(user);
-
-                return new ChangePasswordResponse
-                {
-                    AccessToken = new JwtSecurityTokenHandler().WriteToken(token),
-                    UserInfo = userInfo
-                };
+                throw new UnauthorizedAccessException("Invalid username or password");
             }
-            catch (Exception ex)
+
+            if (!_passwordHasher.VerifyPassword(request.Password, user.Password))
             {
-                throw new UnauthorizedAccessException(ex.Message);
+                throw new UnauthorizedAccessException("Invalid username or password");
             }
+
+            if (_passwordHasher.VerifyPassword(request.NewPassword, user.Password))
+            {
+                throw new InvalidOperationException("New password must be different from the old password");
+            }
+
+            user.Password = _passwordHasher.HashPassword(request.NewPassword);
+            user.IsPasswordUpdated = true;
+            _userRepository.Update(user);
+
+            var token = GenerateJwtToken(user);
+            var userInfo = MapToUserDto(user);
+
+            return new ChangePasswordResponse
+            {
+                AccessToken = token,
+                UserInfo = userInfo
+            };
+        }
+
+        private string GenerateJwtToken(User user)
+        {
+            var claims = new[]
+            {
+                new Claim(ClaimTypes.Name, user.Username),
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new Claim(ClaimTypes.Role, user.Type.ToString())
+            };
+
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]!));
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+            var expirationMinutes = _configuration.GetValue<int>("Jwt:TokenExpirationInMinutes", 60);
+            var token = new JwtSecurityToken(
+                issuer: _configuration["Jwt:Issuer"],
+                audience: _configuration["Jwt:Audience"],
+                claims: claims,
+                expires: DateTime.UtcNow.AddMinutes(expirationMinutes),
+                signingCredentials: creds
+            );
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
         }
     }
 }
