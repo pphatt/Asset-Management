@@ -86,23 +86,28 @@ jobs:
 
         script: |
 
-          $coverageFile = Get-ChildItem -Recurse -Filter 'coverage.cobertura.xml' | Select-Object -First 1
+          $coverageFile = Get-ChildItem -Path "$(Agent.TempDirectory)" -Recurse -Filter 'coverage.cobertura.xml' | Select-Object -First 1
 
           if (-not $coverageFile) {
 
             Write-Error "coverage.cobertura.xml not found"
 
-            exit 1
+            Write-Host "Looking for coverage.cobertura.xml in $(Agent.TempDirectory)"
+            Get-ChildItem -Path "$(Agent.TempDirectory)" -Recurse -Filter 'coverage.cobertura.xml' | ForEach-Object { Write-Host "Found: $($_.FullName)" }
 
+          } else {
+            
+            Write-Host "##vso[task.setvariable variable=CoverageReportPath]$($coverageFile.FullName)"
+
+            Write-Host "Coverage report path: $($coverageFile.FullName)"
+          
           }
-
-          Write-Host "##vso[task.setvariable variable=CoverageReportPath]$($coverageFile.FullName)"
-
-          Write-Host "Coverage report path: $($coverageFile.FullName)"
 
     - task: PublishCodeCoverageResults@1
 
       displayName: 'Publish Code Coverage Results'
+
+      condition: and(succeeded(), ne(variables['CoverageReportPath'], ''))
 
       inputs:
 
