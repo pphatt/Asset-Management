@@ -12,14 +12,6 @@ public class UserRepository : GenericRepository<User>, IUserRepository
     {
         this.context = context;
     }
-    public async Task<User> GetByUsernameAsync(string username)
-    {
-        var user = await context.Users
-            .FirstOrDefaultAsync(u => u.Username == username);
-        if (user == null)
-        {
-            throw new KeyNotFoundException("User not found");
-        }
-        return user;
-    }
+    public async Task<User?> GetByUsernameAsync(string username) =>
+    await context.Users.FirstOrDefaultAsync(u => u.Username == username);
 }

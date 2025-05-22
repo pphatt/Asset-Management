@@ -43,18 +43,18 @@ namespace AssetManagement.Application.Services
             var user = await _userRepository.GetByUsernameAsync(loginRequest.Username);
             if (user == null)
             {
-                throw new UnauthorizedAccessException("Invalid username");
+                throw new UnauthorizedAccessException("Username or password is incorrect. Please try again");
             }
 
             if (!user.IsActive)
             {
-                throw new InvalidOperationException("This account has been disabled. Please contact your administrator.");
+                throw new InvalidOperationException("Your account is disabled. Please contact with IT Team");
             }
 
             var passwordComparisonResult = _passwordHasher.VerifyPassword(loginRequest.Password, user.Password);
             if (!passwordComparisonResult)
             {
-                throw new UnauthorizedAccessException("Username or password is incorrect. Please try again!");
+                throw new UnauthorizedAccessException("Username or password is incorrect. Please try again");
             }
 
             var token = GenerateJwtToken(user);
