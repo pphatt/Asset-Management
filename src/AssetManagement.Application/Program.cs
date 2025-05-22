@@ -12,7 +12,6 @@ using AssetManagement.Data.Helpers.Hashing;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Register services
 builder.Services.AddControllers();
 builder.Services.AddSpaStaticFiles(cfg => cfg.RootPath = "FrontEnd/build");
 builder.Services.AddOpenApi();

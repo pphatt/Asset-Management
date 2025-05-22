@@ -54,6 +54,8 @@ namespace AssetManagement.Domain.Extensions
                             "username" => order == "desc" ? query.OrderByDescending(u => u.Username) : query.OrderBy(u => u.Username),
                             "joined" => order == "desc" ? query.OrderByDescending(u => u.JoinedDate) : query.OrderBy(u => u.JoinedDate),
                             "type" => order == "desc" ? query.OrderByDescending(u => u.Type) : query.OrderBy(u => u.Type),
+                            "created" => order == "desc" ? query.OrderByDescending(u => u.CreatedDate) : query.OrderBy(u => u.CreatedDate),
+                            "updated" => order == "desc" ? query.OrderByDescending(u => u.LastModifiedDate) : query.OrderBy(u => u.LastModifiedDate),
                             _ => query.OrderBy(u => u.Id),
                         };
                     }
@@ -67,6 +69,8 @@ namespace AssetManagement.Domain.Extensions
                             "username" => order == "desc" ? orderedQuery.ThenByDescending(u => u.Username) : orderedQuery.ThenBy(u => u.Username),
                             "joined" => order == "desc" ? orderedQuery.ThenByDescending(u => u.JoinedDate) : orderedQuery.ThenBy(u => u.JoinedDate),
                             "type" => order == "desc" ? orderedQuery.ThenByDescending(u => u.Type) : orderedQuery.ThenBy(u => u.Type),
+                            "created" => order == "desc" ? orderedQuery.ThenByDescending(u => u.CreatedDate) : orderedQuery.ThenBy(u => u.CreatedDate),
+                            "updated" => order == "desc" ? orderedQuery.ThenByDescending(u => u.LastModifiedDate) : orderedQuery.ThenBy(u => u.LastModifiedDate),
                             _ => orderedQuery.ThenBy(u => u.Id),
                         };
                     }

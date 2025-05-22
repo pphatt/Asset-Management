@@ -8,8 +8,8 @@ public class BaseEntity
 
     public Guid? CreatedBy { get; set; }
     public DateTime CreatedDate { get; set; }
-    public Guid? LastModificatedBy { get; set; }
-    public DateTime LastModificatedDate { get; set; }
+    public Guid? LastModifiedBy { get; set; }
+    public DateTime LastModifiedDate { get; set; }
 
     // For soft delete
     public Guid? DeletedBy { get; set; }

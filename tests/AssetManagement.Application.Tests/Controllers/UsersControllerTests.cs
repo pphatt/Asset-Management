@@ -2,6 +2,8 @@ using System.Security.Claims;
 using AssetManagement.Application.Services.Interfaces;
 using AssetManagement.Contracts.Common.Pagination;
 using AssetManagement.Contracts.DTOs;
+using AssetManagement.Contracts.DTOs.Response;
+using AssetManagement.Contracts.DTOs.Resquest;
 using AssetManagement.Contracts.Parameters;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -59,6 +61,59 @@ namespace AssetManagement.Application.Controllers.Tests
             // Act & Assert
             await Assert.ThrowsAsync<InvalidOperationException>(
                 () => _controller.Get(new UserQueryParameters()));
+        }
+        
+        [Fact]
+        public async Task Create_ReturnsCreatedUser_WhenValidInput()
+        {
+            // Arrange
+            var adminId = _controller.User.FindFirst(ClaimTypes.NameIdentifier)?.Value!;
+
+            var requestDto = new CreateUserRequestDto
+            {
+                FirstName = "Test",
+                LastName = "User",
+                DateOfBirth = new DateTime(2000, 1, 1).ToString("yyyy-MM-dd"),
+                JoinedDate = DateTimeOffset.UtcNow.ToString("yyyy-MM-dd"),
+                Gender = Contracts.Enums.GenderDtoEnum.Male,
+                Type = Contracts.Enums.UserTypeDtoEnum.Staff
+            };
+
+            var responseDto = new CreateUserResponseDto
+            {
+                StaffCode = "SD0001",
+                Username = "testuser",
+                FullName = "User Test",
+                Location = Contracts.Enums.LocationDtoEnum.HCM
+            };
+
+            _userServiceMock
+                .Setup(s => s.CreateUserAsync(adminId, requestDto))
+                .ReturnsAsync(responseDto);
+
+            // Act
+            var result = await _controller.Create(requestDto);
+
+            // Assert
+            var createdResult = Assert.IsType<ObjectResult>(result.Result);
+            Assert.Equal(StatusCodes.Status201Created, createdResult.StatusCode);
+
+            var apiResponse = Assert.IsType<ApiResponse<CreateUserResponseDto>>(createdResult.Value);
+            Assert.True(apiResponse.Success);
+            Assert.Equal("Successfully created a new user", apiResponse.Message);
+            Assert.Equal(responseDto, apiResponse.Data);
+        }
+
+        [Fact]
+        public async Task Create_ThrowsUnauthorizedAccess_WhenMissingUserId()
+        {
+            // Arrange: remove claims
+            _controller.ControllerContext.HttpContext.User = new ClaimsPrincipal();
+
+            // Act & Assert
+            await Assert.ThrowsAsync<UnauthorizedAccessException>(() =>
+                _controller.Create(new CreateUserRequestDto()));
+            
         }
     }
 }

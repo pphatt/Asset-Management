@@ -20,9 +20,10 @@ export interface ICreateUserRequest {
   lastName: string;
   dateOfBirth: string; // Format: YYYY-MM-DD
   joinedDate: string; // Format: YYYY-MM-DD
-  gender: "Male" | "Female";
-  type: IUserType;
-  location?: string; // Will be set to current admin's location by default
+  gender: number;
+  type: number;
+  // gender: "Male" | "Female";
+  // type: IUserType;
 }
 
 export interface IUpdateUserRequest {

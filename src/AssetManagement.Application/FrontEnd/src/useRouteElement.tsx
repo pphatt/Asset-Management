@@ -5,6 +5,7 @@ import { Navigate, Outlet, RouteObject, useRoutes } from 'react-router-dom';
 import LoginLayout from './layouts/LoginLayout';
 import MainLayout from './layouts/MainLayout';
 import Home from './pages/Home';
+import UserForm from './components/user/UserForm';
 
 function ProtectedRoute() {
   const { isAuthenticated } = useContext(AppContext);
@@ -20,7 +21,6 @@ function RejectedRoute() {
 
 const Login = lazy(() => import('./pages/Login'));
 const Asset = lazy(() => import('./pages/Asset'));
-
 const User = lazy(() => import('./pages/User'));
 
 export default function useRouteElements() {
@@ -55,6 +55,14 @@ const ProtectedRoutes: RouteObject[] = [
         element: (
           <MainLayout>
             <User />
+          </MainLayout>
+        ),
+      },
+      {
+        path: path.userCreate,
+        element: (
+          <MainLayout>
+            <UserForm />
           </MainLayout>
         ),
       },

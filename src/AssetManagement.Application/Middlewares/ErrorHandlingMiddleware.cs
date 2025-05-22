@@ -70,24 +70,47 @@ public class ErrorHandlingMiddleware
         ApiResponse<object> response;
 
         if (exception is AppException ex)
+        {
             response = ApiResponseExtensions.ToErrorResponse<object>(ex.Message,
                 [$"{ex.ErrorCode}: {ex.Message}"]);
+        }
         else if (exception is KeyNotFoundException exKnf)
+        {
             response = ApiResponseExtensions.ToNotFoundResponse<object>(exKnf.Message);
+        }
+        else if (exception is AggregateFieldValidationException aggEx)
+        {
+            response = ApiResponseExtensions.ToBadRequestResponse<object>(
+                "Validation failed",
+                aggEx.Errors.Select(e => $"{e.Field}: {e.Message}").ToList()
+            );
+
+            var json = JsonSerializer.Serialize(response, new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            });
+
+            context.Response.StatusCode = StatusCodes.Status400BadRequest;
+            await context.Response.WriteAsync(json);
+            return;
+        }
         else
+        {
             response = ApiResponseExtensions.ToErrorResponse<object>(
                 "An unexpected error occurred",
                 [exception.Message]);
+        }
 
         _logger.LogError(exception, "Exception occurred: {Message}", exception.Message);
 
-        var json = JsonSerializer.Serialize(response, new JsonSerializerOptions
+        var defaultJson = JsonSerializer.Serialize(response, new JsonSerializerOptions
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase
         });
 
-        await context.Response.WriteAsync(json);
+        await context.Response.WriteAsync(defaultJson);
     }
+
 
     /// <summary>
     /// Determines the appropriate HTTP status code based on the provided exception.

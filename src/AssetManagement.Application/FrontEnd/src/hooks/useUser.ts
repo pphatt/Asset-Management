@@ -1,10 +1,17 @@
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback } from 'react';
 import userApi from '../apis/user.api';
 import { getUserApiField, STORAGE_KEYS, UserField } from '../constants/user-params';
 import { ICreateUserRequest, IUpdateUserRequest, IUserParams } from '../types/user.type';
+import { toast } from 'react-toastify';
+import { useNavigate } from 'react-router-dom';
+import useUserFilterState from './useUserFilterState';
 
 export function useUser() {
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const [_, setQueryParams] = useUserFilterState();
+
   /**
    * Get the current admin's location
    * @returns {string} The current admin's location
@@ -99,19 +106,22 @@ export function useUser() {
    * @technique {useMutation} -> Mutate the new user from the API
    */
   function useCreateUser() {
-    const adminLocation = getCurrentAdminLocation();
-
     return useMutation({
-      mutationFn: async (userData: ICreateUserRequest) => {
-        const dataWithLocation: ICreateUserRequest = {
-          ...userData,
-          location: userData.location || adminLocation,
-        };
-        const response = await userApi.createUser(dataWithLocation);
-        if (response.success && response.data) {
-          return response.data;
-        }
-        throw new Error(response.message || 'Failed to create user');
+      mutationFn: async (userData: ICreateUserRequest) => userApi.createUser(userData),
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['users'] });
+        setQueryParams((prev) => ({
+          ...prev,
+          // currently keep this as a fixed string (TODO: refactor this)
+          sortBy: 'created:desc',
+          pageNumber: 1,
+        }))
+        toast.success("User created successfully");
+        navigate('/user');
+      },
+      onError: (err: any) => {
+        const errMsg = err.response?.data?.errors;
+        toast.error(errMsg?.[0] || "Error creating user");
       },
     });
   }

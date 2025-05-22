@@ -1,5 +1,6 @@
 using AssetManagement.Contracts.Common.Pagination;
 using AssetManagement.Contracts.DTOs;
+using AssetManagement.Contracts.DTOs.Response;
 using AssetManagement.Contracts.DTOs.Resquest;
 using AssetManagement.Contracts.Parameters;
 
@@ -27,5 +28,10 @@ namespace AssetManagement.Application.Services.Interfaces
         /// <param name="userId">Data to disable user</param>
         /// <returns></returns>
         Task<string> DeleteUser(Guid deletedBy, string staffCode);
+
+        // <summary>
+        // Creates a new user with the provided details
+        // </summary>
+        Task<CreateUserResponseDto> CreateUserAsync(string adminUserId, CreateUserRequestDto requestDto);
     }
 }

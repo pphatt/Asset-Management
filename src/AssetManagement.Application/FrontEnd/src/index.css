@@ -89,6 +89,10 @@ body {
   .text-quaternary {
     color: var(--quaternary);
   }
+
+  .accent-primary {
+    accent-color: var(--primary);
+  }
 }
 
 @layer base {

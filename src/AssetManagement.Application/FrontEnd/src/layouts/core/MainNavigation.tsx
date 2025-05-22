@@ -18,7 +18,7 @@ export default function MainNavigation() {
       </div>
 
       <nav className="mt-4 flex flex-col gap-[0.1rem]">
-        {navigationItems.map((item, index) => (
+        {navigationItems.filter(item => item.showInNav).map((item, index) => (
           <Link
             key={index}
             to={item.path}

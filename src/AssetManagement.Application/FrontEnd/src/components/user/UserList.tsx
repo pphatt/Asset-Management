@@ -13,6 +13,8 @@ import DisableUserPopup from "./DisableUserPopup";
 import Pagination from "./Pagination";
 import UserTable from "./UserTable";
 import UserTypeDropdown from "./UserTypeDropdown";
+import { useNavigate } from 'react-router-dom';
+import path from '@/constants/path';
 
 const UserList: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -34,6 +36,7 @@ const UserList: React.FC = () => {
     refetch: refetchUsers,
   } = useUsersList(queryParams);
   const { mutate: deleteUserMutation, isPending: isDeleting } = useDeleteUser();
+  const navigate = useNavigate();
 
   /**
    * Handle search
@@ -119,7 +122,8 @@ const UserList: React.FC = () => {
    * @technique UseCallback
    */
   const handleCreateNewUser = useCallback(() => {
-    console.log("Create new user");
+    console.log('Create new user');
+    navigate(path.userCreate);
   }, []);
 
   /**
