@@ -1,17 +1,27 @@
-import React, { useCallback, useRef, useState } from 'react';
-import { getUserApiField, USER_TYPES, UserField, UserType } from '../../constants/user-params';
-import { useUser } from '../../hooks/useUser';
-import useUserFilterState from '../../hooks/useUserFilterState';
-import ActiveFilters from './ActiveFilters';
-import Pagination from './Pagination';
-import UserTable from './UserTable';
-import UserTypeDropdown from './UserTypeDropdown';
+import React, { useCallback, useRef, useState } from "react";
+import {
+  getUserApiField,
+  USER_TYPES,
+  UserField,
+  UserType,
+} from "../../constants/user-params";
+import { useUser } from "../../hooks/useUser";
+import useUserFilterState from "../../hooks/useUserFilterState";
+import { User } from "../../types/user.type";
+import ActiveFilters from "./ActiveFilters";
+import DisableUserPopup from "./DisableUserPopup";
+import Pagination from "./Pagination";
+import UserTable from "./UserTable";
+import UserTypeDropdown from "./UserTypeDropdown";
 
 const UserList: React.FC = () => {
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState<UserType>(USER_TYPES.ALL);
   const [showTypeDropdown, setShowTypeDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const [confirmDeleteModal, setConfirmDeleteModal] = useState(false);
+  const [userToDelete, setUserToDelete] = useState<string | null>(null);
+  const [targetUser, setTargetUser] = useState<User | null>(null);
 
   const [queryParams, setQueryParams] = useUserFilterState();
 
@@ -69,11 +79,12 @@ const UserList: React.FC = () => {
   const handleSort = useCallback(
     (key: string) => {
       setQueryParams((prev) => {
-        const currentSortParts = prev.sortBy?.split(':') || [];
+        const currentSortParts = prev.sortBy?.split(":") || [];
         const currentKey = currentSortParts[0];
-        const currentDirection = currentSortParts[1] || 'asc';
+        const currentDirection = currentSortParts[1] || "asc";
         const apiParamKey = getUserApiField(key as UserField);
-        const newDirection = currentKey === key && currentDirection === 'asc' ? 'desc' : 'asc';
+        const newDirection =
+          currentKey === key && currentDirection === "asc" ? "desc" : "asc";
         return {
           ...prev,
           sortBy: `${key}:${newDirection}`,
@@ -108,7 +119,7 @@ const UserList: React.FC = () => {
    * @technique UseCallback
    */
   const handleCreateNewUser = useCallback(() => {
-    console.log('Create new user');
+    console.log("Create new user");
   }, []);
 
   /**
@@ -119,8 +130,32 @@ const UserList: React.FC = () => {
    * @technique UseCallback
    */
   const handleEditUser = useCallback((staffCode: string) => {
-    console.log('Edit user', staffCode);
+    console.log("Edit user", staffCode);
   }, []);
+
+  /**
+   * Open delete confirmation modal
+   * @param staffCode - The staff code of the user to delete
+   * @returns void
+   * @description Open the delete confirmation modal
+   * @technique UseCallback
+   */
+  const handleDeleteUser = useCallback(
+    (staffCode: string) => {
+      setUserToDelete(staffCode);
+      // Find the user in the current list
+      if (usersData?.items) {
+        const user = usersData.items.find(
+          (user) => user.staffCode === staffCode
+        );
+        if (user) {
+          setTargetUser(user as User);
+        }
+      }
+      setConfirmDeleteModal(true);
+    },
+    [usersData?.items]
+  );
 
   /**
    * Delete user
@@ -129,18 +164,30 @@ const UserList: React.FC = () => {
    * @description Delete a user and refetch the users list
    * @technique UseCallback
    */
-  const handleDeleteUser = useCallback(
-    (staffCode: string) => {
-      if (window.confirm('Are you sure you want to delete this user?')) {
-        deleteUserMutation(staffCode, {
-          onSuccess: () => {
-            refetchUsers();
-          },
-        });
-      }
-    },
-    [deleteUserMutation, refetchUsers]
-  );
+  const confirmDeleteUser = useCallback(() => {
+    if (userToDelete) {
+      deleteUserMutation(userToDelete, {
+        onSuccess: () => {
+          refetchUsers();
+          setConfirmDeleteModal(false);
+          setUserToDelete(null);
+          setTargetUser(null);
+        },
+      });
+    }
+  }, [userToDelete, deleteUserMutation, refetchUsers]);
+
+  /**
+   * Close delete confirmation modal
+   * @returns void
+   * @description Close the delete confirmation modal
+   * @technique UseCallback
+   */
+  const closeDeleteModal = useCallback(() => {
+    setConfirmDeleteModal(false);
+    setUserToDelete(null);
+    setTargetUser(null);
+  }, []);
 
   /**
    * Clear filter type
@@ -157,12 +204,12 @@ const UserList: React.FC = () => {
    * @technique UseCallback
    */
   const handleClearSearch = () => {
-    setSearchTerm('');
-    setQueryParams((prev) => ({ ...prev, searchTerm: '' }));
+    setSearchTerm("");
+    setQueryParams((prev) => ({ ...prev, searchTerm: "" }));
   };
 
   return (
-    <div>
+    <div className="relative user-list-container">
       {/* Filter and search */}
       <div className="flex justify-between mb-5">
         <UserTypeDropdown
@@ -179,7 +226,7 @@ const UserList: React.FC = () => {
               placeholder="Search"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+              onKeyDown={(e) => e.key === "Enter" && handleSearch()}
               className="w-[200px] h-[34px] text-sm py-1.5 px-2 border border-tertiary rounded"
             />
             <button
@@ -224,15 +271,22 @@ const UserList: React.FC = () => {
       {isErrorUsers && (
         <div className="bg-red-100 text-red-700 p-3 mb-4 rounded border border-red-300">
           <p className="font-semibold">Error loading users:</p>
-          <p>{errorUsers instanceof Error ? errorUsers.message : 'Unknown error occurred'}</p>
-          <button className="text-sm text-red-600 underline mt-1" onClick={() => refetchUsers()}>
+          <p>
+            {errorUsers instanceof Error
+              ? errorUsers.message
+              : "Unknown error occurred"}
+          </p>
+          <button
+            className="text-sm text-red-600 underline mt-1"
+            onClick={() => refetchUsers()}
+          >
             Try again
           </button>
         </div>
       )}
 
       {/* Table */}
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto relative">
         <UserTable
           users={usersData?.items}
           isLoading={isLoadingUsers}
@@ -242,8 +296,17 @@ const UserList: React.FC = () => {
           onDelete={handleDeleteUser}
           isDeleting={isDeleting}
         />
-      </div>
 
+        {/* Disable User Popup */}
+        {confirmDeleteModal && targetUser && (
+          <DisableUserPopup
+            isOpen={true}
+            onClose={closeDeleteModal}
+            onConfirm={confirmDeleteUser}
+            targetUser={targetUser}
+          />
+        )}
+      </div>
       {/* Pagination */}
       {!isLoadingUsers && usersData && usersData.paginationMetadata && (
         <Pagination

@@ -1,5 +1,5 @@
-import { IUser } from '../../types/user.type';
-import TableSkeleton from '../common/TableSkeleton';
+import { IUser } from "../../types/user.type";
+import TableSkeleton from "../common/TableSkeleton";
 
 const UserTable: React.FC<{
   users: IUser[] | undefined;
@@ -12,15 +12,15 @@ const UserTable: React.FC<{
 }> = ({ users, isLoading, sortBy, onSort, onEdit, onDelete, isDeleting }) => {
   const getFullName = (user: IUser) => `${user.firstName} ${user.lastName}`;
   const columns = [
-    { key: 'staffCode', label: 'Staff Code', sortable: true },
-    { key: 'fullName', label: 'Full Name', sortable: true },
-    { key: 'username', label: 'Username', sortable: true },
-    { key: 'joinedDate', label: 'Joined Date', sortable: true },
-    { key: 'type', label: 'Type', sortable: true },
+    { key: "staffCode", label: "Staff Code", sortable: true },
+    { key: "fullName", label: "Full Name", sortable: true },
+    { key: "username", label: "Username", sortable: true },
+    { key: "joinedDate", label: "Joined Date", sortable: true },
+    { key: "type", label: "Type", sortable: true },
   ];
   if (isLoading) return <TableSkeleton rows={5} columns={6} />;
   return (
-    <table className="w-full text-sm border-collapse border-spacing-0">
+    <table className="w-full text-sm border-collapse border-spacing-0 user-table-container">
       <thead>
         <tr className="text-quaternary text-sm font-semibold">
           {columns.map((col) => (
@@ -28,16 +28,16 @@ const UserTable: React.FC<{
               key={col.key}
               className={`text-left relative py-2 after:absolute after:bottom-0 after:left-0 after:w-[calc(100%-20px)] after:h-[2px] ${
                 sortBy?.startsWith(`${col.key}:`)
-                  ? 'after:bg-gray-600 font-semibold'
-                  : 'after:bg-gray-400 font-medium'
-              } ${col.sortable ? 'cursor-pointer' : ''}`}
+                  ? "after:bg-gray-600 font-semibold"
+                  : "after:bg-gray-400 font-medium"
+              } ${col.sortable ? "cursor-pointer" : ""}`}
               onClick={col.sortable ? () => onSort(col.key) : undefined}
             >
               {col.label}
               {col.sortable && (
                 <svg
                   className={`inline-block ml-1 w-3 h-3 ${
-                    sortBy?.startsWith(`${col.key}:`) ? 'text-primary' : ''
+                    sortBy?.startsWith(`${col.key}:`) ? "text-primary" : ""
                   }`}
                   viewBox="0 0 24 24"
                   fill="none"
@@ -72,7 +72,7 @@ const UserTable: React.FC<{
                 {user.username}
               </td>
               <td className="py-2 relative w-[100px] after:absolute after:bottom-0 after:left-0 after:w-[calc(100%-20px)] after:h-[1px] after:bg-gray-300">
-                {new Date(user.joinedDate).toLocaleDateString('en-GB')}
+                {new Date(user.joinedDate).toLocaleDateString("en-GB")}
               </td>
               <td className="py-2 relative w-[80px] after:absolute after:bottom-0 after:left-0 after:w-[calc(100%-20px)] after:h-[1px] after:bg-gray-300">
                 {user.type}
@@ -105,6 +105,7 @@ const UserTable: React.FC<{
                     className="text-primary hover:text-red-700"
                     onClick={() => onDelete(user.staffCode)}
                     disabled={isDeleting}
+                    data-user-delete-btn={user.staffCode}
                   >
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
                       <path

@@ -1,60 +1,143 @@
 variables:
+
   - name: BuildParameters.RestoreBuildProjects
+
     value: '**/*.csproj'
+
   - name: BuildParameters.TestProjects
+
     value: '**/*[Tt]ests/*.csproj'
+
   - name: BuildConfiguration
+
     value: 'Release'
 
 trigger:
+
   branches:
+
     include:
+
       - main
+
   batch: true
 
 name: $(date:yyyyMMdd)$(rev:.r)
 
 jobs:
+
 - job: BuildAndTest
+
   displayName: Build, Test, and Publish Job
+
   pool:
+
     vmImage: 'windows-latest'
 
   steps:
+
     - checkout: self
+
       fetchDepth: 1
 
     - task: DotNetCoreCLI@2
+
       displayName: Restore
+
       inputs:
+
         command: 'restore'
+
         projects: '$(BuildParameters.RestoreBuildProjects)'
 
     - task: DotNetCoreCLI@2
+
       displayName: Build
+
       inputs:
+
         projects: '$(BuildParameters.RestoreBuildProjects)'
+
         arguments: '--configuration $(BuildConfiguration)'
 
     - task: DotNetCoreCLI@2
-      displayName: Test
+
+      displayName: Test with Code Coverage
+
       inputs:
+
         command: 'test'
+
         projects: '$(BuildParameters.TestProjects)'
-        arguments: '--configuration $(BuildConfiguration)'
+
+        arguments: '--configuration $(BuildConfiguration) --collect "XPlat Code Coverage"'
+
+        publishTestResults: true
+
+    - task: PowerShell@2
+
+      name: FindCoverage
+
+      displayName: 'Find Coverage Report Path'
+
+      inputs:
+
+        targetType: 'inline'
+
+        script: |
+
+          $coverageFile = Get-ChildItem -Recurse -Filter 'coverage.cobertura.xml' | Select-Object -First 1
+
+          if (-not $coverageFile) {
+
+            Write-Error "coverage.cobertura.xml not found"
+
+            exit 1
+
+          }
+
+          Write-Host "##vso[task.setvariable variable=CoverageReportPath]$($coverageFile.FullName)"
+
+          Write-Host "Coverage report path: $($coverageFile.FullName)"
+
+    - task: PublishCodeCoverageResults@1
+
+      displayName: 'Publish Code Coverage Results'
+
+      inputs:
+
+        codeCoverageTool: 'Cobertura'
+
+        summaryFileLocation: '$(CoverageReportPath)'
+
+        reportDirectory: '$(Build.SourcesDirectory)'
+
 
     - task: DotNetCoreCLI@2
+
       displayName: Publish
+
       inputs:
+
         command: 'publish'
+
         publishWebProjects: true
+
         projects: '$(BuildParameters.RestoreBuildProjects)'
+
         arguments: '--configuration $(BuildConfiguration) --output $(build.artifactstagingdirectory)'
+
         zipAfterPublish: true
 
     - task: PublishBuildArtifacts@1
+
       displayName: Publish Artifact
+
       condition: succeededOrFailed()
+
       inputs:
+
         PathtoPublish: '$(build.artifactstagingdirectory)'
+
         TargetPath: '\\my\share\$(Build.DefinitionName)\$(Build.BuildNumber)'
+ 

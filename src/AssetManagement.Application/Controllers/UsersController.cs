@@ -1,10 +1,11 @@
-using System.Security.Claims;
 using AssetManagement.Application.Services.Interfaces;
 using AssetManagement.Contracts.Common.Pagination;
 using AssetManagement.Contracts.DTOs;
+using AssetManagement.Contracts.DTOs.Resquest;
 using AssetManagement.Contracts.Parameters;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace AssetManagement.Application.Controllers
 {
@@ -37,5 +38,36 @@ namespace AssetManagement.Application.Controllers
                 Data = pagedData,
             };
         }
+
+        [HttpPatch("{userId}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<ActionResult<ApiResponse<Guid>>> UpdateUser(Guid userId, [FromBody] UpdateUserRequest request)
+        {
+            var updatedUser = await _userService.UpdateUserAsync(userId, request);
+
+            return new ApiResponse<Guid>
+            {
+                Success = true,
+                Message = "Successfully updated user.",
+                Data = updatedUser,
+            };
+        }
+
+        [HttpDelete("{staffCode}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<ActionResult<ApiResponse<string>>> DeleteUser(string staffCode)
+        {
+            var deletedBy = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? null;
+
+            var deleteUser = await _userService.DeleteUser(Guid.Parse(deletedBy!), staffCode);
+
+            return new ApiResponse<string>
+            {
+                Success = true,
+                Message = "Successfully deleted user.",
+                Data = deleteUser,
+            };
+        }
+
     }
 }
