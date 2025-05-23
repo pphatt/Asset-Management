@@ -12,34 +12,42 @@ public class UserRepository : GenericRepository<User>, IUserRepository
     {
         this.context = context;
     }
+
     public async Task<User?> GetByUsernameAsync(string username)
     {
         var user = await context.Users
             .FirstOrDefaultAsync(u => u.Username == username);
         return user;
     }
-    
+
+    public async Task<User?> GetByStaffCodeAsync(string staffCode)
+    {
+        var user = await context.Users
+            .FirstOrDefaultAsync(u => u.StaffCode == staffCode);
+        return user;
+    }
+
     public async Task<IEnumerable<string>> GetAllUsernamesAsync()
     {
         var userNames = await context.Users
             .Select(u => u.Username)
             .ToListAsync();
-        
+
         if (userNames == null)
             throw new KeyNotFoundException("User not found");
-        
+
         return userNames;
     }
-    
+
     public async Task<IEnumerable<string>> GetStaffCodesAsync()
     {
-       var staffCodes = await context.Users
-            .Select(u => u.StaffCode)
-            .ToListAsync();
-       
+        var staffCodes = await context.Users
+             .Select(u => u.StaffCode)
+             .ToListAsync();
+
         if (staffCodes == null)
             throw new KeyNotFoundException("Staff Code not found");
-        
+
         return staffCodes;
     }
 }

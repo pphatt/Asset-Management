@@ -2,6 +2,7 @@ import {
   ICreateUserRequest,
   IUpdateUserRequest,
   IUser,
+  IUserDetails,
   IUserParams,
   IUserType,
 } from '../types/user.type';
@@ -23,7 +24,7 @@ const userApi = {
     return data;
   },
 
-  getUserByStaffCode: async (staffCode: string): Promise<HttpResponse<IUser>> => {
+  getUserByStaffCode: async (staffCode: string): Promise<HttpResponse<IUserDetails>> => {
     const { data } = await http.get(`/users/${staffCode}`);
     return data;
   },

@@ -1,4 +1,4 @@
-namespace AssetManagement.Contracts.DTOs.Response;
+namespace AssetManagement.Contracts.DTOs.Responses;
 
 public class ChangePasswordResponse
 {

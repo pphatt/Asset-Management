@@ -1,4 +1,4 @@
-namespace AssetManagement.Contracts.DTOs.Resquest;
+namespace AssetManagement.Contracts.DTOs.Requests;
 
 public class ChangePasswordRequest
 {

@@ -4,8 +4,6 @@ using AssetManagement.Domain.Extensions;
 using AssetManagement.Application.Services.Interfaces;
 using AssetManagement.Contracts.Common.Pagination;
 using AssetManagement.Contracts.DTOs;
-using AssetManagement.Contracts.DTOs.Response;
-using AssetManagement.Contracts.DTOs.Resquest;
 using AssetManagement.Contracts.Enums;
 using AssetManagement.Contracts.Exceptions;
 using AssetManagement.Contracts.Parameters;
@@ -14,6 +12,8 @@ using AssetManagement.Data.Helpers.Users;
 using AssetManagement.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 using AssetManagement.Application.Extensions;
+using AssetManagement.Contracts.DTOs.Responses;
+using AssetManagement.Contracts.DTOs.Requests;
 
 namespace AssetManagement.Application.Services
 {
@@ -245,13 +245,14 @@ namespace AssetManagement.Application.Services
                 throw new ArgumentException("User is under 18. Please select a different date.");
             }
 
-            if(request.JoinedDate != null && 
+            if (request.JoinedDate != null &&
                 (request.JoinedDate.Value.Year < (request.DateOfBirth?.Year ?? user.DateOfBirth!.Value.Year + 18)))
             {
 
                 throw new ArgumentException("User under the age of 18 may not join company. Please select a different date");
 
-            } else if(request.JoinedDate != null && (request.JoinedDate.Value.DayOfWeek == DayOfWeek.Saturday 
+            }
+            else if (request.JoinedDate != null && (request.JoinedDate.Value.DayOfWeek == DayOfWeek.Saturday
                 || request.JoinedDate.Value.DayOfWeek == DayOfWeek.Sunday))
             {
                 throw new ArgumentException("Joined date is Saturday or Sunday. Please select a different date");
@@ -281,7 +282,7 @@ namespace AssetManagement.Application.Services
                 .AsNoTracking()
                 .FirstOrDefaultAsync(u => u.StaffCode == staffCode)
                 ?? throw new KeyNotFoundException($"Cannot find user with code {staffCode}");
-            
+
             // Update state user to disable
             user.DeletedBy = deletedBy;
             user.DeletedDate = DateTime.UtcNow;
@@ -291,6 +292,33 @@ namespace AssetManagement.Application.Services
             _userRepository.Update(user);
 
             return staffCode;
+        }
+
+        public async Task<UserDetailsDto> GetByStaffCodeAsync(string staffCode)
+        {
+            if (string.IsNullOrWhiteSpace(staffCode))
+            {
+                throw new ArgumentException("Staff code cannot be empty or null", nameof(staffCode));
+            }
+
+            var user = await _userRepository.GetByStaffCodeAsync(staffCode);
+            if (user is null)
+            {
+                throw new KeyNotFoundException($"Cannot find user with staff code {staffCode}");
+            }
+
+            return new UserDetailsDto
+            {
+                StaffCode = user.StaffCode,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Username = user.Username,
+                DateOfBirth = user.DateOfBirth?.ToString("dd/MM/yyyy"),
+                JoinedDate = user.JoinedDate.ToString("dd/MM/yyyy"),
+                Gender = (int)user.Gender,
+                Type = (int)user.Type,
+                Location = (int)user.Location,
+            };
         }
     }
 }

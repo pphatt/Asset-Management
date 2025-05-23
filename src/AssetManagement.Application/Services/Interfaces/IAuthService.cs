@@ -1,5 +1,5 @@
-using AssetManagement.Contracts.DTOs.Response;
-using AssetManagement.Contracts.DTOs.Resquest;
+using AssetManagement.Contracts.DTOs.Requests;
+using AssetManagement.Contracts.DTOs.Responses;
 
 namespace AssetManagement.Application.Services.Interfaces;
 

@@ -1,5 +1,5 @@
-using AssetManagement.Contracts.DTOs.Resquest;
 using AssetManagement.Application.Services;
+using AssetManagement.Contracts.DTOs.Requests;
 using AssetManagement.Contracts.Enums;
 using AssetManagement.Contracts.Exceptions;
 using AssetManagement.Contracts.Parameters;
@@ -896,5 +896,143 @@ namespace AssetManagement.Application.Tests.Services
 
 
         #endregion
+
+        [Fact]
+        public async Task GetByStaffCodeAsync_ValidStaffCode_ReturnsUserDetails()
+        {
+            // Arrange
+            var staffCode = "SD0001";
+            var user = new User
+            {
+                StaffCode = staffCode,
+                FirstName = "John",
+                LastName = "Doe",
+                Username = "johndoe",
+                Password = "Pa$$w0rd",
+                DateOfBirth = new DateTime(1990, 1, 1),
+                JoinedDate = DateTimeOffset.Parse("2023-01-15"),
+                Type = UserTypeEnum.Staff,
+                Location = LocationEnum.HCM
+            };
+
+            _mockUserRepository.Setup(r => r.GetByStaffCodeAsync(staffCode)).ReturnsAsync(user);
+
+            // Act
+            var result = await _userService.GetByStaffCodeAsync(staffCode);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(staffCode, result.StaffCode);
+            Assert.Equal("John", result.FirstName);
+            Assert.Equal("Doe", result.LastName);
+            Assert.Equal("johndoe", result.Username);
+            Assert.Equal("01/01/1990", result.DateOfBirth);
+            Assert.Equal("15/01/2023", result.JoinedDate);
+            Assert.Equal((int)UserTypeEnum.Staff, result.Type);
+            Assert.Equal((int)LocationEnum.HCM, result.Location);
+        }
+
+        [Fact]
+        public async Task GetByStaffCodeAsync_InvalidStaffCode_ThrowsKeyNotFoundException()
+        {
+            // Arrange
+            var staffCode = "InvalidCode";
+
+            _mockUserRepository.Setup(r => r.GetByStaffCodeAsync(staffCode))
+                .ReturnsAsync((User?)null);
+
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<KeyNotFoundException>(
+                () => _userService.GetByStaffCodeAsync(staffCode));
+
+            Assert.Contains(staffCode, exception.Message);
+        }
+
+        [Fact]
+        public async Task GetByStaffCodeAsync_EmptyStaffCode_ThrowsArgumentException()
+        {
+            // Arrange
+            string emptyStaffCode = string.Empty;
+
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<ArgumentException>(
+                () => _userService.GetByStaffCodeAsync(emptyStaffCode));
+            
+            Assert.Contains("Staff code cannot be empty", exception.Message);
+            Assert.Equal("staffCode", exception.ParamName);
+        }
+        
+        [Fact]
+        public async Task GetByStaffCodeAsync_NullStaffCode_ThrowsArgumentException()
+        {
+            // Arrange
+            string? nullStaffCode = null;
+
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<ArgumentException>(
+                () => _userService.GetByStaffCodeAsync(nullStaffCode!));
+            
+            Assert.Contains("Staff code cannot be empty", exception.Message);
+            Assert.Equal("staffCode", exception.ParamName);
+        }
+        
+        [Fact]
+        public async Task GetByStaffCodeAsync_UserWithNullDateOfBirth_ReturnsUserDetailsWithNullDateOfBirth()
+        {
+            // Arrange
+            var staffCode = "SD0001";
+            var user = new User
+            {
+                StaffCode = staffCode,
+                FirstName = "John",
+                LastName = "Doe",
+                Username = "johndoe",
+                Password = "Pa$$w0rd",
+                DateOfBirth = null, // Null date of birth
+                JoinedDate = DateTimeOffset.Parse("2023-01-15"),
+                Type = UserTypeEnum.Staff,
+                Location = LocationEnum.HCM
+            };
+
+            _mockUserRepository.Setup(r => r.GetByStaffCodeAsync(staffCode)).ReturnsAsync(user);
+
+            // Act
+            var result = await _userService.GetByStaffCodeAsync(staffCode);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(staffCode, result.StaffCode);
+            Assert.Null(result.DateOfBirth); // Date of birth should be null
+        }
+        
+        [Fact]
+        public async Task GetByStaffCodeAsync_UserWithEmptyName_ReturnsUserDetailsWithEmptyName()
+        {
+            // Arrange
+            var staffCode = "SD0001";
+            var user = new User
+            {
+                StaffCode = staffCode,
+                FirstName = "", // Empty first name
+                LastName = "", // Empty last name
+                Username = "johndoe",
+                Password = "Pa$$w0rd",
+                DateOfBirth = new DateTime(1990, 1, 1),
+                JoinedDate = DateTimeOffset.Parse("2023-01-15"),
+                Type = UserTypeEnum.Staff,
+                Location = LocationEnum.HCM
+            };
+
+            _mockUserRepository.Setup(r => r.GetByStaffCodeAsync(staffCode)).ReturnsAsync(user);
+
+            // Act
+            var result = await _userService.GetByStaffCodeAsync(staffCode);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(staffCode, result.StaffCode);
+            Assert.Equal("", result.FirstName);
+            Assert.Equal("", result.LastName);
+        }
     }
 }

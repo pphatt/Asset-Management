@@ -1,13 +1,8 @@
-import React, { useCallback, useRef, useState } from "react";
-import {
-  getUserApiField,
-  USER_TYPES,
-  UserField,
-  UserType,
-} from "../../constants/user-params";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { getUserApiField, USER_TYPES, UserField, UserType } from "../../constants/user-params";
 import { useUser } from "../../hooks/useUser";
 import useUserFilterState from "../../hooks/useUserFilterState";
-import { User } from "../../types/user.type";
+import { IUserDetails, User } from "../../types/user.type";
 import ActiveFilters from "./ActiveFilters";
 import DisableUserPopup from "./DisableUserPopup";
 import Pagination from "./Pagination";
@@ -15,19 +10,26 @@ import UserTable from "./UserTable";
 import UserTypeDropdown from "./UserTypeDropdown";
 import { useNavigate } from 'react-router-dom';
 import path from '@/constants/path';
+import UserDetailsPopup from "./UserDetailsPopup";
 
 const UserList: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState<UserType>(USER_TYPES.ALL);
   const [showTypeDropdown, setShowTypeDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  // View user details
+  const [selectedStaffCode, setSelectedStaffCode] = useState<string>('');
+  const [selectedUser, setSelectedUser] = useState<IUserDetails | null>(null);
+  const [isDetailsPopupOpen, setIsDetailsPopupOpen] = useState(false);
+
+  // Disable user
   const [confirmDeleteModal, setConfirmDeleteModal] = useState(false);
   const [userToDelete, setUserToDelete] = useState<string | null>(null);
   const [targetUser, setTargetUser] = useState<User | null>(null);
 
+  const navigate = useNavigate();
   const [queryParams, setQueryParams] = useUserFilterState();
-
-  const { useUsersList, useDeleteUser } = useUser();
+  const { useUsersList, useDeleteUser, useUserByStaffCode } = useUser();
   const {
     data: usersData,
     isLoading: isLoadingUsers,
@@ -36,7 +38,7 @@ const UserList: React.FC = () => {
     refetch: refetchUsers,
   } = useUsersList(queryParams);
   const { mutate: deleteUserMutation, isPending: isDeleting } = useDeleteUser();
-  const navigate = useNavigate();
+  const { data: fetchedUserDetails, isError: isUserDetailsError, error: userDetailsError } = useUserByStaffCode(selectedStaffCode);
 
   /**
    * Handle search
@@ -69,7 +71,7 @@ const UserList: React.FC = () => {
         userType: type,
       }));
     },
-    [setQueryParams]
+    [setQueryParams],
   );
 
   /**
@@ -95,7 +97,7 @@ const UserList: React.FC = () => {
         };
       });
     },
-    [setQueryParams]
+    [setQueryParams],
   );
 
   /**
@@ -112,7 +114,14 @@ const UserList: React.FC = () => {
         pageNumber: page,
       }));
     },
-    [setQueryParams]
+    [setQueryParams],
+  );
+
+  const handleViewUserDetails = useCallback(
+    (staffCode: string) => {
+      setSelectedStaffCode(staffCode);
+    },
+    [],
   );
 
   /**
@@ -212,6 +221,36 @@ const UserList: React.FC = () => {
     setQueryParams((prev) => ({ ...prev, searchTerm: "" }));
   };
 
+  useEffect(() => {
+    if (fetchedUserDetails && selectedStaffCode) {
+      const userDetails: IUserDetails = {
+        staffCode: fetchedUserDetails.staffCode,
+        firstName: fetchedUserDetails.firstName,
+        lastName: fetchedUserDetails.lastName,
+        username: fetchedUserDetails.username,
+        dateOfBirth: fetchedUserDetails.dateOfBirth || "",
+        gender: fetchedUserDetails.gender,
+        joinedDate: fetchedUserDetails.joinedDate,
+        type: fetchedUserDetails.type,
+        location: fetchedUserDetails.location,
+      };
+
+      setSelectedUser(userDetails);
+      setIsDetailsPopupOpen(true);
+
+      // Reset the selectedStaffCode to prevent re-fetching
+      setSelectedStaffCode('');
+    }
+  }, [fetchedUserDetails, selectedStaffCode]);
+
+  // Handle API errors
+  useEffect(() => {
+    if (isUserDetailsError && selectedStaffCode) {
+      console.error('Error fetching user details:', userDetailsError);
+      setSelectedStaffCode(''); // Reset on error
+    }
+  }, [isUserDetailsError, userDetailsError, selectedStaffCode]);
+
   return (
     <div className="relative user-list-container">
       {/* Filter and search */}
@@ -298,6 +337,7 @@ const UserList: React.FC = () => {
           onSort={handleSort}
           onEdit={handleEditUser}
           onDelete={handleDeleteUser}
+          onViewDetails={handleViewUserDetails}
           isDeleting={isDeleting}
         />
 
@@ -311,6 +351,7 @@ const UserList: React.FC = () => {
           />
         )}
       </div>
+
       {/* Pagination */}
       {!isLoadingUsers && usersData && usersData.paginationMetadata && (
         <Pagination
@@ -322,6 +363,7 @@ const UserList: React.FC = () => {
           isLoading={isLoadingUsers}
         />
       )}
+      <UserDetailsPopup isOpen={isDetailsPopupOpen} user={selectedUser} onClose={() => setIsDetailsPopupOpen(false)} />
     </div>
   );
 };

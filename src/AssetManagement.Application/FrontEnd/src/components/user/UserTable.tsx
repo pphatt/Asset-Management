@@ -8,8 +8,9 @@ const UserTable: React.FC<{
   onSort: (key: string) => void;
   onEdit: (staffCode: string) => void;
   onDelete: (staffCode: string) => void;
+  onViewDetails: (staffCode: string) => void;
   isDeleting: boolean;
-}> = ({ users, isLoading, sortBy, onSort, onEdit, onDelete, isDeleting }) => {
+}> = ({ users, isLoading, sortBy, onSort, onEdit, onDelete, onViewDetails, isDeleting }) => {
   const getFullName = (user: IUser) => `${user.firstName} ${user.lastName}`;
   const columns = [
     { key: "staffCode", label: "Staff Code", sortable: true },
@@ -18,7 +19,9 @@ const UserTable: React.FC<{
     { key: "joinedDate", label: "Joined Date", sortable: true },
     { key: "type", label: "Type", sortable: true },
   ];
+
   if (isLoading) return <TableSkeleton rows={5} columns={6} />;
+
   return (
     <table className="w-full text-sm border-collapse border-spacing-0 user-table-container">
       <thead>
@@ -27,18 +30,14 @@ const UserTable: React.FC<{
             <th
               key={col.key}
               className={`text-left relative py-2 after:absolute after:bottom-0 after:left-0 after:w-[calc(100%-20px)] after:h-[2px] ${
-                sortBy?.startsWith(`${col.key}:`)
-                  ? "after:bg-gray-600 font-semibold"
-                  : "after:bg-gray-400 font-medium"
+                sortBy?.startsWith(`${col.key}:`) ? "after:bg-gray-600 font-semibold" : "after:bg-gray-400 font-medium"
               } ${col.sortable ? "cursor-pointer" : ""}`}
               onClick={col.sortable ? () => onSort(col.key) : undefined}
             >
               {col.label}
               {col.sortable && (
                 <svg
-                  className={`inline-block ml-1 w-3 h-3 ${
-                    sortBy?.startsWith(`${col.key}:`) ? "text-primary" : ""
-                  }`}
+                  className={`inline-block ml-1 w-3 h-3 ${sortBy?.startsWith(`${col.key}:`) ? "text-primary" : ""}`}
                   viewBox="0 0 24 24"
                   fill="none"
                 >
@@ -61,7 +60,13 @@ const UserTable: React.FC<{
       <tbody>
         {users && users.length > 0 ? (
           users.map((user) => (
-            <tr key={user.staffCode}>
+            <tr
+              key={user.staffCode}
+              onClick={() => {
+                onViewDetails(user.staffCode);
+              }}
+              className="cursor-pointer hover:bg-gray-50"
+            >
               <td className="py-2 relative w-[100px] after:absolute after:bottom-0 after:left-0 after:w-[calc(100%-20px)] after:h-[1px] after:bg-gray-300">
                 {user.staffCode}
               </td>
@@ -81,7 +86,10 @@ const UserTable: React.FC<{
                 <div className="flex items-center justify-center space-x-4">
                   <button
                     className="text-quaternary hover:text-gray-700"
-                    onClick={() => onEdit(user.staffCode)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onEdit(user.staffCode);
+                    }}
                     disabled={isDeleting}
                   >
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
@@ -103,7 +111,10 @@ const UserTable: React.FC<{
                   </button>
                   <button
                     className="text-primary hover:text-red-700"
-                    onClick={() => onDelete(user.staffCode)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onDelete(user.staffCode);
+                    }}
                     disabled={isDeleting}
                     data-user-delete-btn={user.staffCode}
                   >

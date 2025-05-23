@@ -1,6 +1,6 @@
 ﻿using AssetManagement.Contracts.Enums;
 
-namespace AssetManagement.Contracts.DTOs.Response;
+namespace AssetManagement.Contracts.DTOs.Responses;
 
 public class CreateUserResponseDto
 {

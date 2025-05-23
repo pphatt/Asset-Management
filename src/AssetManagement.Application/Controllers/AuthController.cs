@@ -2,9 +2,9 @@ using Microsoft.AspNetCore.Mvc;
 using AssetManagement.Application.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using AssetManagement.Application.Services.Interfaces;
-using AssetManagement.Contracts.DTOs.Resquest;
-using AssetManagement.Contracts.DTOs.Response;
 using AssetManagement.Contracts.DTOs;
+using AssetManagement.Contracts.DTOs.Responses;
+using AssetManagement.Contracts.DTOs.Requests;
 
 namespace AssetManagement.Application.Controllers;
 

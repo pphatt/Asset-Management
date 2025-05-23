@@ -2,8 +2,8 @@ using System.Security.Claims;
 using AssetManagement.Application.Services.Interfaces;
 using AssetManagement.Contracts.Common.Pagination;
 using AssetManagement.Contracts.DTOs;
-using AssetManagement.Contracts.DTOs.Response;
-using AssetManagement.Contracts.DTOs.Resquest;
+using AssetManagement.Contracts.DTOs.Requests;
+using AssetManagement.Contracts.DTOs.Responses;
 using AssetManagement.Contracts.Parameters;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -113,7 +113,135 @@ namespace AssetManagement.Application.Controllers.Tests
             // Act & Assert
             await Assert.ThrowsAsync<UnauthorizedAccessException>(() =>
                 _controller.Create(new CreateUserRequestDto()));
-            
+        }
+
+        [Fact]
+        public async Task GetByStaffCode_ValidStaffCode_ReturnsUser()
+        {
+            // Arrange
+            var staffCode = "SD0001";
+            var userDto = new UserDetailsDto
+            {
+                StaffCode = staffCode,
+                FirstName = "John",
+                LastName = "Doe",
+                Username = "johndoe",
+                DateOfBirth = "01/01/1990",
+                JoinedDate = "15/01/2023",
+                Type = 1,
+                Location = 1
+            };
+
+            // Act
+            _userServiceMock.Setup(s => s.GetByStaffCodeAsync(staffCode)).ReturnsAsync(userDto);
+            var actionResult = await _controller.GetByStaffCode(staffCode);
+            var result = Assert.IsType<ActionResult<ApiResponse<UserDetailsDto>>>(actionResult);
+            var okObjectResult = Assert.IsType<OkObjectResult>(result.Result);
+            var response = Assert.IsType<ApiResponse<UserDetailsDto>>(okObjectResult.Value);
+
+            // Assert
+            Assert.NotNull(response);
+            Assert.True(response.Success);
+            Assert.Equal(userDto, response.Data);
+        }
+
+        [Fact]
+        public async Task GetByStaffCode_InvalidStaffCode_ReturnsNotFound()
+        {
+            // Arrange
+            var staffCode = "InvalidCode";
+            _userServiceMock.Setup(s => s.GetByStaffCodeAsync(staffCode))
+                .ThrowsAsync(new KeyNotFoundException($"Cannot find user with staff code {staffCode}"));
+
+            // Act
+            var actionResult = await _controller.GetByStaffCode(staffCode);
+            var result = Assert.IsType<ActionResult<ApiResponse<UserDetailsDto>>>(actionResult);
+            var notFoundResult = Assert.IsType<NotFoundObjectResult>(result.Result);
+            var response = Assert.IsType<ApiResponse<UserDetailsDto>>(notFoundResult.Value);
+
+            // Assert
+            Assert.NotNull(response);
+            Assert.False(response.Success);
+            Assert.Contains(staffCode, response.Message);
+        }
+
+        [Fact]
+        public async Task GetByStaffCode_EmptyStaffCode_ReturnsBadRequest()
+        {
+            // Arrange
+            var staffCode = string.Empty;
+
+            // Act
+            var actionResult = await _controller.GetByStaffCode(staffCode);
+            var result = Assert.IsType<ActionResult<ApiResponse<UserDetailsDto>>>(actionResult);
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result.Result);
+            var response = Assert.IsType<ApiResponse<UserDetailsDto>>(badRequestResult.Value);
+
+            // Assert
+            Assert.NotNull(response);
+            Assert.False(response.Success);
+            Assert.Contains("Staff code cannot be empty", response.Message);
+        }
+
+        [Fact]
+        public async Task GetByStaffCode_NullStaffCode_ReturnsBadRequest()
+        {
+            // Arrange
+            string? staffCode = null;
+
+            // Act
+            var actionResult = await _controller.GetByStaffCode(staffCode!);
+            var result = Assert.IsType<ActionResult<ApiResponse<UserDetailsDto>>>(actionResult);
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result.Result);
+            var response = Assert.IsType<ApiResponse<UserDetailsDto>>(badRequestResult.Value);
+
+            // Assert
+            Assert.NotNull(response);
+            Assert.False(response.Success);
+            Assert.Contains("Staff code cannot be empty", response.Message);
+        }
+
+        [Fact]
+        public async Task GetByStaffCode_ServiceThrowsArgumentException_ReturnsBadRequest()
+        {
+            // Arrange
+            var staffCode = "SD0001";
+            var errorMessage = "Invalid staff code format";
+            _userServiceMock.Setup(s => s.GetByStaffCodeAsync(staffCode))
+                .ThrowsAsync(new ArgumentException(errorMessage));
+
+            // Act
+            var actionResult = await _controller.GetByStaffCode(staffCode);
+            var result = Assert.IsType<ActionResult<ApiResponse<UserDetailsDto>>>(actionResult);
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result.Result);
+            var response = Assert.IsType<ApiResponse<UserDetailsDto>>(badRequestResult.Value);
+
+            // Assert
+            Assert.NotNull(response);
+            Assert.False(response.Success);
+            Assert.Contains(errorMessage, response.Message);
+        }
+
+        [Fact]
+        public async Task GetByStaffCode_ServiceThrowsGenericException_ReturnsErrorResponse()
+        {
+            // Arrange
+            var staffCode = "SD0001";
+            var errorMessage = "Database connection failed";
+            _userServiceMock.Setup(s => s.GetByStaffCodeAsync(staffCode))
+                .ThrowsAsync(new Exception(errorMessage));
+
+            // Act
+            var actionResult = await _controller.GetByStaffCode(staffCode);
+            var result = Assert.IsType<ActionResult<ApiResponse<UserDetailsDto>>>(actionResult);
+            var statusCodeResult = Assert.IsType<ObjectResult>(result.Result);
+            var response = Assert.IsType<ApiResponse<UserDetailsDto>>(statusCodeResult.Value);
+
+            // Assert
+            Assert.NotNull(response);
+            Assert.False(response.Success);
+            Assert.Equal(StatusCodes.Status500InternalServerError, statusCodeResult.StatusCode);
+            Assert.Contains(errorMessage, response.Message);
         }
     }
 }

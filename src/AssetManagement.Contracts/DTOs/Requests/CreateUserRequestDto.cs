@@ -1,6 +1,6 @@
 ﻿using AssetManagement.Contracts.Enums;
 
-namespace AssetManagement.Contracts.DTOs.Resquest;
+namespace AssetManagement.Contracts.DTOs.Requests;
 
 public class CreateUserRequestDto
 {
