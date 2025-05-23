@@ -29,13 +29,9 @@ namespace AssetManagement.Data.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("AssetCode")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("CategoryId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("CategoryId1")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid?>("CreatedBy")
@@ -56,21 +52,19 @@ namespace AssetManagement.Data.Migrations
                     b.Property<bool?>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<Guid?>("LastModificatedBy")
+                    b.Property<Guid?>("LastModifiedBy")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("LastModificatedDate")
+                    b.Property<DateTime>("LastModifiedDate")
                         .HasColumnType("datetime2");
 
                     b.Property<int>("Location")
                         .HasColumnType("int");
 
                     b.Property<string>("Name")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Specification")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("State")
@@ -79,8 +73,6 @@ namespace AssetManagement.Data.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("CategoryId");
-
-                    b.HasIndex("CategoryId1");
 
                     b.ToTable("Assets");
 
@@ -92,7 +84,7 @@ namespace AssetManagement.Data.Migrations
                             CategoryId = new Guid("123e4567-e89b-12d3-a456-426614174005"),
                             CreatedDate = new DateTime(2025, 5, 21, 0, 0, 0, 0, DateTimeKind.Utc),
                             InstallDate = new DateTimeOffset(new DateTime(2023, 5, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
-                            LastModificatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            LastModifiedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Location = 1,
                             Name = "Dell XPS 13",
                             Specification = "Intel i7, 16GB RAM, 512GB SSD",
@@ -105,7 +97,7 @@ namespace AssetManagement.Data.Migrations
                             CategoryId = new Guid("123e4567-e89b-12d3-a456-426614174005"),
                             CreatedDate = new DateTime(2025, 5, 21, 0, 0, 0, 0, DateTimeKind.Utc),
                             InstallDate = new DateTimeOffset(new DateTime(2024, 5, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
-                            LastModificatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            LastModifiedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Location = 2,
                             Name = "MacBook Pro 14",
                             Specification = "M1 Pro, 32GB RAM, 1TB SSD",
@@ -118,7 +110,7 @@ namespace AssetManagement.Data.Migrations
                             CategoryId = new Guid("123e4567-e89b-12d3-a456-426614174007"),
                             CreatedDate = new DateTime(2025, 5, 21, 0, 0, 0, 0, DateTimeKind.Utc),
                             InstallDate = new DateTimeOffset(new DateTime(2022, 5, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
-                            LastModificatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            LastModifiedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Location = 1,
                             Name = "Dell UltraSharp 27",
                             Specification = "27-inch, 4K, IPS Panel",
@@ -131,7 +123,7 @@ namespace AssetManagement.Data.Migrations
                             CategoryId = new Guid("123e4567-e89b-12d3-a456-426614174007"),
                             CreatedDate = new DateTime(2025, 5, 21, 0, 0, 0, 0, DateTimeKind.Utc),
                             InstallDate = new DateTimeOffset(new DateTime(2023, 5, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
-                            LastModificatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            LastModifiedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Location = 1,
                             Name = "LG 32GN600",
                             Specification = "32-inch, QHD, 144Hz",
@@ -144,7 +136,7 @@ namespace AssetManagement.Data.Migrations
                             CategoryId = new Guid("123e4567-e89b-12d3-a456-426614174003"),
                             CreatedDate = new DateTime(2025, 5, 21, 0, 0, 0, 0, DateTimeKind.Utc),
                             InstallDate = new DateTimeOffset(new DateTime(2023, 11, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
-                            LastModificatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            LastModifiedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Location = 2,
                             Name = "iPad Pro 12.9",
                             Specification = "M2 Chip, 256GB, Wi-Fi",
@@ -157,7 +149,7 @@ namespace AssetManagement.Data.Migrations
                             CategoryId = new Guid("123e4567-e89b-12d3-a456-426614174003"),
                             CreatedDate = new DateTime(2025, 5, 21, 0, 0, 0, 0, DateTimeKind.Utc),
                             InstallDate = new DateTimeOffset(new DateTime(2024, 11, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
-                            LastModificatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            LastModifiedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Location = 3,
                             Name = "iPad Air 5",
                             Specification = "M1 Chip, 64GB, Wi-Fi",
@@ -170,7 +162,7 @@ namespace AssetManagement.Data.Migrations
                             CategoryId = new Guid("123e4567-e89b-12d3-a456-426614174004"),
                             CreatedDate = new DateTime(2025, 5, 21, 0, 0, 0, 0, DateTimeKind.Utc),
                             InstallDate = new DateTimeOffset(new DateTime(2024, 5, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
-                            LastModificatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            LastModifiedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Location = 1,
                             Name = "iPhone 14 Pro",
                             Specification = "256GB, Black, 5G",
@@ -183,7 +175,7 @@ namespace AssetManagement.Data.Migrations
                             CategoryId = new Guid("123e4567-e89b-12d3-a456-426614174001"),
                             CreatedDate = new DateTime(2025, 5, 21, 0, 0, 0, 0, DateTimeKind.Utc),
                             InstallDate = new DateTimeOffset(new DateTime(2024, 5, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
-                            LastModificatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            LastModifiedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Location = 2,
                             Name = "Logitech MX Master 3",
                             Specification = "Wireless, 4000 DPI, Ergonomic",
@@ -196,7 +188,7 @@ namespace AssetManagement.Data.Migrations
                             CategoryId = new Guid("123e4567-e89b-12d3-a456-426614174002"),
                             CreatedDate = new DateTime(2025, 5, 21, 0, 0, 0, 0, DateTimeKind.Utc),
                             InstallDate = new DateTimeOffset(new DateTime(2024, 9, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
-                            LastModificatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            LastModifiedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Location = 1,
                             Name = "Sony WH-1000XM5",
                             Specification = "Wireless, Noise-Cancelling, 30hr Battery",
@@ -209,7 +201,7 @@ namespace AssetManagement.Data.Migrations
                             CategoryId = new Guid("123e4567-e89b-12d3-a456-426614174008"),
                             CreatedDate = new DateTime(2025, 5, 21, 0, 0, 0, 0, DateTimeKind.Utc),
                             InstallDate = new DateTimeOffset(new DateTime(2020, 5, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
-                            LastModificatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            LastModifiedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Location = 3,
                             Name = "HP EliteDesk 800",
                             Specification = "Intel i5, 8GB RAM, 1TB HDD",
@@ -222,7 +214,7 @@ namespace AssetManagement.Data.Migrations
                             CategoryId = new Guid("123e4567-e89b-12d3-a456-426614174009"),
                             CreatedDate = new DateTime(2025, 5, 21, 0, 0, 0, 0, DateTimeKind.Utc),
                             InstallDate = new DateTimeOffset(new DateTime(2024, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
-                            LastModificatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            LastModifiedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Location = 2,
                             Name = "Samsung Galaxy Tab S8",
                             Specification = "Snapdragon 8, 128GB, 11-inch",
@@ -235,7 +227,7 @@ namespace AssetManagement.Data.Migrations
                             CategoryId = new Guid("123e4567-e89b-12d3-a456-426614174006"),
                             CreatedDate = new DateTime(2025, 5, 21, 0, 0, 0, 0, DateTimeKind.Utc),
                             InstallDate = new DateTimeOffset(new DateTime(2025, 1, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
-                            LastModificatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            LastModifiedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Location = 3,
                             Name = "Samsung Galaxy S23",
                             Specification = "256GB, 5G, Snapdragon 8 Gen 2",
@@ -287,7 +279,7 @@ namespace AssetManagement.Data.Migrations
                         {
                             Id = new Guid("123e4567-e89b-12d3-a456-426614174001"),
                             CreatedDate = new DateTime(2025, 5, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            LastModificatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            LastModifiedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Name = "Bluetooth Mouse",
                             Slug = "Bluetooth Mouse"
                         },
@@ -295,7 +287,7 @@ namespace AssetManagement.Data.Migrations
                         {
                             Id = new Guid("123e4567-e89b-12d3-a456-426614174002"),
                             CreatedDate = new DateTime(2025, 5, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            LastModificatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            LastModifiedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Name = "Headset",
                             Slug = "Headset"
                         },
@@ -303,7 +295,7 @@ namespace AssetManagement.Data.Migrations
                         {
                             Id = new Guid("123e4567-e89b-12d3-a456-426614174003"),
                             CreatedDate = new DateTime(2025, 5, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            LastModificatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            LastModifiedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Name = "Ipad",
                             Slug = "Ipad"
                         },
@@ -311,7 +303,7 @@ namespace AssetManagement.Data.Migrations
                         {
                             Id = new Guid("123e4567-e89b-12d3-a456-426614174004"),
                             CreatedDate = new DateTime(2025, 5, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            LastModificatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            LastModifiedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Name = "Iphone",
                             Slug = "Iphone"
                         },
@@ -319,7 +311,7 @@ namespace AssetManagement.Data.Migrations
                         {
                             Id = new Guid("123e4567-e89b-12d3-a456-426614174005"),
                             CreatedDate = new DateTime(2025, 5, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            LastModificatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            LastModifiedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Name = "Laptop",
                             Slug = "Laptop"
                         },
@@ -327,7 +319,7 @@ namespace AssetManagement.Data.Migrations
                         {
                             Id = new Guid("123e4567-e89b-12d3-a456-426614174006"),
                             CreatedDate = new DateTime(2025, 5, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            LastModificatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            LastModifiedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Name = "Mobile",
                             Slug = "Mobile"
                         },
@@ -335,7 +327,7 @@ namespace AssetManagement.Data.Migrations
                         {
                             Id = new Guid("123e4567-e89b-12d3-a456-426614174007"),
                             CreatedDate = new DateTime(2025, 5, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            LastModificatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            LastModifiedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Name = "Monitor",
                             Slug = "Monitor"
                         },
@@ -343,7 +335,7 @@ namespace AssetManagement.Data.Migrations
                         {
                             Id = new Guid("123e4567-e89b-12d3-a456-426614174008"),
                             CreatedDate = new DateTime(2025, 5, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            LastModificatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            LastModifiedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Name = "Personal Computer",
                             Slug = "Personal Computer"
                         },
@@ -351,7 +343,7 @@ namespace AssetManagement.Data.Migrations
                         {
                             Id = new Guid("123e4567-e89b-12d3-a456-426614174009"),
                             CreatedDate = new DateTime(2025, 5, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            LastModificatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            LastModifiedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Name = "Tablet",
                             Slug = "Tablet"
                         });
@@ -975,14 +967,10 @@ namespace AssetManagement.Data.Migrations
             modelBuilder.Entity("AssetManagement.Domain.Entities.Asset", b =>
                 {
                     b.HasOne("AssetManagement.Domain.Entities.Category", "Category")
-                        .WithMany()
+                        .WithMany("Assets")
                         .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
-
-                    b.HasOne("AssetManagement.Domain.Entities.Category", null)
-                        .WithMany("Assets")
-                        .HasForeignKey("CategoryId1");
 
                     b.Navigation("Category");
                 });

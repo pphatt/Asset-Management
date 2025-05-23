@@ -180,7 +180,7 @@ public class AssetConfiguration : IEntityTypeConfiguration<Asset>
 
         // Define relationships and constraints
         builder.HasOne(a => a.Category)
-               .WithMany()
+               .WithMany(c => c.Assets)
                .HasForeignKey(a => a.CategoryId)
                .OnDelete(DeleteBehavior.Restrict);
     }

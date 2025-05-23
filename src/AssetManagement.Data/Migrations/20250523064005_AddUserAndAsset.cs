@@ -8,16 +8,18 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace AssetManagement.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class Initial : Migration
+    public partial class AddUserAndAsset : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Assets",
+                name: "Categories",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Slug = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     LastModifiedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
@@ -28,7 +30,7 @@ namespace AssetManagement.Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Assets", x => x.Id);
+                    table.PrimaryKey("PK_Categories", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -59,6 +61,53 @@ namespace AssetManagement.Data.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Users", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Assets",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    AssetCode = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    State = table.Column<int>(type: "int", nullable: false),
+                    InstallDate = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    Location = table.Column<int>(type: "int", nullable: false),
+                    Specification = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CategoryId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LastModifiedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    DeletedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    DeletedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Assets", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Assets_Categories_CategoryId",
+                        column: x => x.CategoryId,
+                        principalTable: "Categories",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.InsertData(
+                table: "Categories",
+                columns: new[] { "Id", "CreatedBy", "CreatedDate", "DeletedBy", "DeletedDate", "IsDeleted", "LastModifiedBy", "LastModifiedDate", "Name", "Slug" },
+                values: new object[,]
+                {
+                    { new Guid("123e4567-e89b-12d3-a456-426614174001"), null, new DateTime(2025, 5, 1, 0, 0, 0, 0, DateTimeKind.Utc), null, null, null, null, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "Bluetooth Mouse", "Bluetooth Mouse" },
+                    { new Guid("123e4567-e89b-12d3-a456-426614174002"), null, new DateTime(2025, 5, 1, 0, 0, 0, 0, DateTimeKind.Utc), null, null, null, null, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "Headset", "Headset" },
+                    { new Guid("123e4567-e89b-12d3-a456-426614174003"), null, new DateTime(2025, 5, 1, 0, 0, 0, 0, DateTimeKind.Utc), null, null, null, null, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "Ipad", "Ipad" },
+                    { new Guid("123e4567-e89b-12d3-a456-426614174004"), null, new DateTime(2025, 5, 1, 0, 0, 0, 0, DateTimeKind.Utc), null, null, null, null, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "Iphone", "Iphone" },
+                    { new Guid("123e4567-e89b-12d3-a456-426614174005"), null, new DateTime(2025, 5, 1, 0, 0, 0, 0, DateTimeKind.Utc), null, null, null, null, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "Laptop", "Laptop" },
+                    { new Guid("123e4567-e89b-12d3-a456-426614174006"), null, new DateTime(2025, 5, 1, 0, 0, 0, 0, DateTimeKind.Utc), null, null, null, null, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "Mobile", "Mobile" },
+                    { new Guid("123e4567-e89b-12d3-a456-426614174007"), null, new DateTime(2025, 5, 1, 0, 0, 0, 0, DateTimeKind.Utc), null, null, null, null, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "Monitor", "Monitor" },
+                    { new Guid("123e4567-e89b-12d3-a456-426614174008"), null, new DateTime(2025, 5, 1, 0, 0, 0, 0, DateTimeKind.Utc), null, null, null, null, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "Personal Computer", "Personal Computer" },
+                    { new Guid("123e4567-e89b-12d3-a456-426614174009"), null, new DateTime(2025, 5, 1, 0, 0, 0, 0, DateTimeKind.Utc), null, null, null, null, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "Tablet", "Tablet" }
                 });
 
             migrationBuilder.InsertData(
@@ -97,6 +146,30 @@ namespace AssetManagement.Data.Migrations
                     { new Guid("edf1b40d-c5e2-410b-859e-ec29a5d95292"), null, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), new DateTime(1991, 4, 12, 0, 0, 0, 0, DateTimeKind.Unspecified), null, null, "Binh", 1, true, null, true, new DateTimeOffset(new DateTime(2022, 3, 10, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 7, 0, 0, 0)), null, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "Tran", 2, "UG9KspzI+vFB6XbUYNTk5THtu1iPQruEIU0jEPFNrlzrBs/kgX/Ol0E/HXyjJrcV", "SD0016", 2, "binhtran" },
                     { new Guid("f74f2293-213d-41f3-b146-7dd4acb5499c"), null, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), new DateTime(1988, 6, 9, 0, 0, 0, 0, DateTimeKind.Unspecified), null, null, "Lan", 2, false, null, true, new DateTimeOffset(new DateTime(2017, 4, 10, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 7, 0, 0, 0)), null, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "Nguyen", 1, "UG9KspzI+vFB6XbUYNTk5THtu1iPQruEIU0jEPFNrlzrBs/kgX/Ol0E/HXyjJrcV", "SD0014", 2, "lannguyen" }
                 });
+
+            migrationBuilder.InsertData(
+                table: "Assets",
+                columns: new[] { "Id", "AssetCode", "CategoryId", "CreatedBy", "CreatedDate", "DeletedBy", "DeletedDate", "InstallDate", "IsDeleted", "LastModifiedBy", "LastModifiedDate", "Location", "Name", "Specification", "State" },
+                values: new object[,]
+                {
+                    { new Guid("223e4567-e89b-12d3-a456-426614174001"), "LAP-001", new Guid("123e4567-e89b-12d3-a456-426614174005"), null, new DateTime(2025, 5, 21, 0, 0, 0, 0, DateTimeKind.Utc), null, null, new DateTimeOffset(new DateTime(2023, 5, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, null, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 1, "Dell XPS 13", "Intel i7, 16GB RAM, 512GB SSD", 1 },
+                    { new Guid("223e4567-e89b-12d3-a456-426614174002"), "LAP-002", new Guid("123e4567-e89b-12d3-a456-426614174005"), null, new DateTime(2025, 5, 21, 0, 0, 0, 0, DateTimeKind.Utc), null, null, new DateTimeOffset(new DateTime(2024, 5, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, null, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 2, "MacBook Pro 14", "M1 Pro, 32GB RAM, 1TB SSD", 1 },
+                    { new Guid("223e4567-e89b-12d3-a456-426614174003"), "MON-001", new Guid("123e4567-e89b-12d3-a456-426614174007"), null, new DateTime(2025, 5, 21, 0, 0, 0, 0, DateTimeKind.Utc), null, null, new DateTimeOffset(new DateTime(2022, 5, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, null, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 1, "Dell UltraSharp 27", "27-inch, 4K, IPS Panel", 1 },
+                    { new Guid("223e4567-e89b-12d3-a456-426614174004"), "MON-002", new Guid("123e4567-e89b-12d3-a456-426614174007"), null, new DateTime(2025, 5, 21, 0, 0, 0, 0, DateTimeKind.Utc), null, null, new DateTimeOffset(new DateTime(2023, 5, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, null, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 1, "LG 32GN600", "32-inch, QHD, 144Hz", 1 },
+                    { new Guid("223e4567-e89b-12d3-a456-426614174005"), "IPD-001", new Guid("123e4567-e89b-12d3-a456-426614174003"), null, new DateTime(2025, 5, 21, 0, 0, 0, 0, DateTimeKind.Utc), null, null, new DateTimeOffset(new DateTime(2023, 11, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, null, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 2, "iPad Pro 12.9", "M2 Chip, 256GB, Wi-Fi", 1 },
+                    { new Guid("223e4567-e89b-12d3-a456-426614174006"), "IPD-002", new Guid("123e4567-e89b-12d3-a456-426614174003"), null, new DateTime(2025, 5, 21, 0, 0, 0, 0, DateTimeKind.Utc), null, null, new DateTimeOffset(new DateTime(2024, 11, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, null, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 3, "iPad Air 5", "M1 Chip, 64GB, Wi-Fi", 1 },
+                    { new Guid("223e4567-e89b-12d3-a456-426614174007"), "IPH-001", new Guid("123e4567-e89b-12d3-a456-426614174004"), null, new DateTime(2025, 5, 21, 0, 0, 0, 0, DateTimeKind.Utc), null, null, new DateTimeOffset(new DateTime(2024, 5, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, null, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 1, "iPhone 14 Pro", "256GB, Black, 5G", 1 },
+                    { new Guid("223e4567-e89b-12d3-a456-426614174008"), "MOU-001", new Guid("123e4567-e89b-12d3-a456-426614174001"), null, new DateTime(2025, 5, 21, 0, 0, 0, 0, DateTimeKind.Utc), null, null, new DateTimeOffset(new DateTime(2024, 5, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, null, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 2, "Logitech MX Master 3", "Wireless, 4000 DPI, Ergonomic", 1 },
+                    { new Guid("223e4567-e89b-12d3-a456-426614174009"), "HST-001", new Guid("123e4567-e89b-12d3-a456-426614174002"), null, new DateTime(2025, 5, 21, 0, 0, 0, 0, DateTimeKind.Utc), null, null, new DateTimeOffset(new DateTime(2024, 9, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, null, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 1, "Sony WH-1000XM5", "Wireless, Noise-Cancelling, 30hr Battery", 1 },
+                    { new Guid("223e4567-e89b-12d3-a456-426614174010"), "PC-001", new Guid("123e4567-e89b-12d3-a456-426614174008"), null, new DateTime(2025, 5, 21, 0, 0, 0, 0, DateTimeKind.Utc), null, null, new DateTimeOffset(new DateTime(2020, 5, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, null, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 3, "HP EliteDesk 800", "Intel i5, 8GB RAM, 1TB HDD", 1 },
+                    { new Guid("223e4567-e89b-12d3-a456-426614174011"), "TAB-001", new Guid("123e4567-e89b-12d3-a456-426614174009"), null, new DateTime(2025, 5, 21, 0, 0, 0, 0, DateTimeKind.Utc), null, null, new DateTimeOffset(new DateTime(2024, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, null, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 2, "Samsung Galaxy Tab S8", "Snapdragon 8, 128GB, 11-inch", 1 },
+                    { new Guid("223e4567-e89b-12d3-a456-426614174012"), "MOB-001", new Guid("123e4567-e89b-12d3-a456-426614174006"), null, new DateTime(2025, 5, 21, 0, 0, 0, 0, DateTimeKind.Utc), null, null, new DateTimeOffset(new DateTime(2025, 1, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, null, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 3, "Samsung Galaxy S23", "256GB, 5G, Snapdragon 8 Gen 2", 1 }
+                });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Assets_CategoryId",
+                table: "Assets",
+                column: "CategoryId");
         }
 
         /// <inheritdoc />
@@ -107,6 +180,9 @@ namespace AssetManagement.Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "Users");
+
+            migrationBuilder.DropTable(
+                name: "Categories");
         }
     }
 }
