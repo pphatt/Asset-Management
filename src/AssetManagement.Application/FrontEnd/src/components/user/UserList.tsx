@@ -1,19 +1,19 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
-import { getUserApiField, USER_TYPES, UserField, UserType } from "../../constants/user-params";
-import { useUser } from "../../hooks/useUser";
-import useUserFilterState from "../../hooks/useUserFilterState";
-import { IUserDetails, User } from "../../types/user.type";
-import ActiveFilters from "./ActiveFilters";
-import DisableUserPopup from "./DisableUserPopup";
-import Pagination from "./Pagination";
-import UserTable from "./UserTable";
-import UserTypeDropdown from "./UserTypeDropdown";
-import { useNavigate } from 'react-router-dom';
 import path from '@/constants/path';
-import UserDetailsPopup from "./UserDetailsPopup";
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { USER_TYPES, UserType } from '../../constants/user-params';
+import { useUser } from '../../hooks/useUser';
+import useUserFilterState from '../../hooks/useUserFilterState';
+import { IUserDetails, User } from '../../types/user.type';
+import ActiveFilters from './ActiveFilters';
+import DisableUserPopup from './DisableUserPopup';
+import Pagination from './Pagination';
+import UserDetailsPopup from './UserDetailsPopup';
+import UserTable from './UserTable';
+import UserTypeDropdown from './UserTypeDropdown';
 
 const UserList: React.FC = () => {
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState<UserType>(USER_TYPES.ALL);
   const [showTypeDropdown, setShowTypeDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -38,7 +38,11 @@ const UserList: React.FC = () => {
     refetch: refetchUsers,
   } = useUsersList(queryParams);
   const { mutate: deleteUserMutation, isPending: isDeleting } = useDeleteUser();
-  const { data: fetchedUserDetails, isError: isUserDetailsError, error: userDetailsError } = useUserByStaffCode(selectedStaffCode);
+  const {
+    data: fetchedUserDetails,
+    isError: isUserDetailsError,
+    error: userDetailsError,
+  } = useUserByStaffCode(selectedStaffCode);
 
   /**
    * Handle search
@@ -71,7 +75,7 @@ const UserList: React.FC = () => {
         userType: type,
       }));
     },
-    [setQueryParams],
+    [setQueryParams]
   );
 
   /**
@@ -84,20 +88,17 @@ const UserList: React.FC = () => {
   const handleSort = useCallback(
     (key: string) => {
       setQueryParams((prev) => {
-        const currentSortParts = prev.sortBy?.split(":") || [];
+        const currentSortParts = prev.sortBy?.split(':') || [];
         const currentKey = currentSortParts[0];
-        const currentDirection = currentSortParts[1] || "asc";
-        const apiParamKey = getUserApiField(key as UserField);
-        const newDirection =
-          currentKey === key && currentDirection === "asc" ? "desc" : "asc";
+        const currentDirection = currentSortParts[1] || 'asc';
+        const newDirection = currentKey === key && currentDirection === 'asc' ? 'desc' : 'asc';
         return {
           ...prev,
           sortBy: `${key}:${newDirection}`,
-          _apiSortBy: `${apiParamKey}:${newDirection}`,
         };
       });
     },
-    [setQueryParams],
+    [setQueryParams]
   );
 
   /**
@@ -114,15 +115,12 @@ const UserList: React.FC = () => {
         pageNumber: page,
       }));
     },
-    [setQueryParams],
+    [setQueryParams]
   );
 
-  const handleViewUserDetails = useCallback(
-    (staffCode: string) => {
-      setSelectedStaffCode(staffCode);
-    },
-    [],
-  );
+  const handleViewUserDetails = useCallback((staffCode: string) => {
+    setSelectedStaffCode(staffCode);
+  }, []);
 
   /**
    * Create new user
@@ -143,7 +141,7 @@ const UserList: React.FC = () => {
    * @technique UseCallback
    */
   const handleEditUser = useCallback((staffCode: string) => {
-    console.log("Edit user", staffCode);
+    console.log('Edit user', staffCode);
   }, []);
 
   /**
@@ -158,9 +156,7 @@ const UserList: React.FC = () => {
       setUserToDelete(staffCode);
       // Find the user in the current list
       if (usersData?.items) {
-        const user = usersData.items.find(
-          (user) => user.staffCode === staffCode
-        );
+        const user = usersData.items.find((user) => user.staffCode === staffCode);
         if (user) {
           setTargetUser(user as User);
         }
@@ -217,8 +213,8 @@ const UserList: React.FC = () => {
    * @technique UseCallback
    */
   const handleClearSearch = () => {
-    setSearchTerm("");
-    setQueryParams((prev) => ({ ...prev, searchTerm: "" }));
+    setSearchTerm('');
+    setQueryParams((prev) => ({ ...prev, searchTerm: '' }));
   };
 
   useEffect(() => {
@@ -228,7 +224,7 @@ const UserList: React.FC = () => {
         firstName: fetchedUserDetails.firstName,
         lastName: fetchedUserDetails.lastName,
         username: fetchedUserDetails.username,
-        dateOfBirth: fetchedUserDetails.dateOfBirth || "",
+        dateOfBirth: fetchedUserDetails.dateOfBirth || '',
         gender: fetchedUserDetails.gender,
         joinedDate: fetchedUserDetails.joinedDate,
         type: fetchedUserDetails.type,
@@ -263,18 +259,20 @@ const UserList: React.FC = () => {
           dropdownRef={dropdownRef as React.RefObject<HTMLDivElement>}
         />
         <div className="flex items-center">
-          <div className="relative">
+          {' '}
+          <div className="flex items-center justify-between">
             <input
               type="text"
-              placeholder="Search"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-              className="w-[200px] h-[34px] text-sm py-1.5 px-2 border border-tertiary rounded"
+              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+              className="w-[200px] h-[34px] text-sm py-1.5 px-2 border border-quaternary rounded-l bg-white"
             />
             <button
-              className="absolute inset-y-0 right-0 flex items-center pr-2"
+              type="button"
               onClick={handleSearch}
+              className="flex items-center justify-center h-[34px] w-[34px] border border-l-0 border-quaternary rounded-r bg-white hover:bg-gray-50"
+              aria-label="Search Button"
             >
               <svg
                 width="16"
@@ -282,11 +280,11 @@ const UserList: React.FC = () => {
                 viewBox="0 0 24 24"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
+                stroke="black"
+                strokeWidth="2"
               >
                 <path
                   d="M21 21L15 15M17 10C17 13.866 13.866 17 10 17C6.13401 17 3 13.866 3 10C3 6.13401 6.13401 3 10 3C13.866 3 17 6.13401 17 10Z"
-                  stroke="currentColor"
-                  strokeWidth="2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
                 />
@@ -314,15 +312,8 @@ const UserList: React.FC = () => {
       {isErrorUsers && (
         <div className="bg-red-100 text-red-700 p-3 mb-4 rounded border border-red-300">
           <p className="font-semibold">Error loading users:</p>
-          <p>
-            {errorUsers instanceof Error
-              ? errorUsers.message
-              : "Unknown error occurred"}
-          </p>
-          <button
-            className="text-sm text-red-600 underline mt-1"
-            onClick={() => refetchUsers()}
-          >
+          <p>{errorUsers instanceof Error ? errorUsers.message : 'Unknown error occurred'}</p>
+          <button className="text-sm text-red-600 underline mt-1" onClick={() => refetchUsers()}>
             Try again
           </button>
         </div>
@@ -363,7 +354,11 @@ const UserList: React.FC = () => {
           isLoading={isLoadingUsers}
         />
       )}
-      <UserDetailsPopup isOpen={isDetailsPopupOpen} user={selectedUser} onClose={() => setIsDetailsPopupOpen(false)} />
+      <UserDetailsPopup
+        isOpen={isDetailsPopupOpen}
+        user={selectedUser}
+        onClose={() => setIsDetailsPopupOpen(false)}
+      />
     </div>
   );
 };

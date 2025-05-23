@@ -56,15 +56,19 @@ const Pagination: React.FC<PaginationProps> = ({
   return (
     <div className="flex justify-end mt-4">
       <div className="flex items-center space-x-1">
+        {' '}
         <button
           aria-label="Previous page"
-          className="px-3 py-1 border border-tertiary rounded-sm hover:bg-tertiary text-xs mr-1"
+          className={`px-3 py-1 border border-tertiary rounded-sm ${
+            !hasPreviousPage || currentPage <= 1 || isLoading
+              ? 'opacity-50 cursor-not-allowed'
+              : 'hover:bg-tertiary text-primary'
+          } text-xs mr-1`}
           onClick={() => onPageChange(currentPage - 1)}
-          disabled={!hasPreviousPage || isLoading}
+          disabled={!hasPreviousPage || currentPage <= 1 || isLoading}
         >
           Previous
         </button>
-
         {getPageNumbers().map((page, index) =>
           typeof page === 'number' ? (
             <button
@@ -83,13 +87,16 @@ const Pagination: React.FC<PaginationProps> = ({
               {page}
             </span>
           )
-        )}
-
+        )}{' '}
         <button
           aria-label="Next page"
-          className="px-3 py-1 border border-tertiary rounded-sm hover:bg-tertiary text-xs"
+          className={`px-3 py-1 border border-tertiary rounded-sm ${
+            !hasNextPage || currentPage >= totalPages || isLoading
+              ? 'opacity-50 cursor-not-allowed'
+              : 'hover:bg-tertiary text-primary'
+          } text-xs`}
           onClick={() => onPageChange(currentPage + 1)}
-          disabled={!hasNextPage || isLoading}
+          disabled={!hasNextPage || currentPage >= totalPages || isLoading}
         >
           Next
         </button>

@@ -10,47 +10,60 @@ const UserTypeDropdown: React.FC<{
 }> = ({ filterType, setFilterType, show, setShow, dropdownRef }) => {
   useClickOutside(dropdownRef, () => setShow(false));
 
-  const getFilterTypeDisplayName = () => {
-    const option = USER_TYPE_OPTIONS.find((opt) => opt.value === filterType);
-    return option ? option.label : 'Type';
-  };
+  // Không cần hàm này nữa vì chúng ta sẽ hiển thị trực tiếp "Type" làm placeholder
 
   return (
     <div className="relative" ref={dropdownRef}>
-      <button
-        type="button"
-        onClick={() => setShow(!show)}
-        className="flex items-center justify-between w-[120px] h-[34px] text-sm py-1.5 px-2 border border-tertiary rounded bg-white hover:bg-gray-50"
-      >
-        <span className="truncate">{getFilterTypeDisplayName()}</span>
-        <div className="flex items-center">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="mr-1">
+      {' '}
+      <div className="flex items-center justify-between w-[120px]">
+        <input
+          type="text"
+          readOnly
+          placeholder="Type"
+          className="w-full h-[34px] text-sm py-1.5 px-2 border border-quaternary rounded-l bg-white cursor-pointer"
+          onClick={() => setShow(!show)}
+        />
+        <button
+          type="button"
+          onClick={() => setShow(!show)}
+          className="flex items-center justify-center h-[34px] w-[34px] border border-l-0 border-quaternary rounded-r bg-white hover:bg-gray-50"
+        >
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            stroke="black"
+            strokeWidth="2"
+          >
             <path
               d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"
-              stroke="currentColor"
-              strokeWidth="2"
               strokeLinecap="round"
               strokeLinejoin="round"
             />
           </svg>
-        </div>
-      </button>
+        </button>
+      </div>
       {show && (
         <div className="absolute top-full left-0 mt-1 w-[140px] bg-white border border-gray-200 rounded shadow-lg z-50">
           <div className="py-1">
             {USER_TYPE_OPTIONS.map((option) => (
-              <button
+              <label
                 key={option.value}
-                className={`w-full text-left px-3 py-2 text-sm ${
-                  filterType === option.value ? 'bg-gray-100 font-medium' : 'hover:bg-gray-50'
-                }`}
-                onClick={() => {
-                  setFilterType(option.value);
-                  setShow(false);
-                }}
+                className="flex items-center w-full px-3 py-2 text-sm hover:bg-gray-50 cursor-pointer"
               >
+                <input
+                  type="checkbox"
+                  className="mr-2 h-4 w-4 accent-red-600"
+                  checked={filterType === option.value}
+                  onChange={() => {
+                    setFilterType(option.value);
+                    // Don't close the dropdown when option is clicked
+                  }}
+                />
                 {option.label}
-              </button>
+              </label>
             ))}
           </div>
         </div>

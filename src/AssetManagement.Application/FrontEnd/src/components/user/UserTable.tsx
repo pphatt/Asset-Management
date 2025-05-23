@@ -1,5 +1,5 @@
-import { IUser } from "../../types/user.type";
-import TableSkeleton from "../common/TableSkeleton";
+import { IUser } from '../../types/user.type';
+import TableSkeleton from '../common/TableSkeleton';
 
 const UserTable: React.FC<{
   users: IUser[] | undefined;
@@ -13,11 +13,11 @@ const UserTable: React.FC<{
 }> = ({ users, isLoading, sortBy, onSort, onEdit, onDelete, onViewDetails, isDeleting }) => {
   const getFullName = (user: IUser) => `${user.firstName} ${user.lastName}`;
   const columns = [
-    { key: "staffCode", label: "Staff Code", sortable: true },
-    { key: "fullName", label: "Full Name", sortable: true },
-    { key: "username", label: "Username", sortable: true },
-    { key: "joinedDate", label: "Joined Date", sortable: true },
-    { key: "type", label: "Type", sortable: true },
+    { key: 'staffCode', label: 'Staff Code', sortable: true },
+    { key: 'fullName', label: 'Full Name', sortable: true },
+    { key: 'username', label: 'Username', sortable: false }, // Username không được sortable
+    { key: 'joinedDate', label: 'Joined Date', sortable: true },
+    { key: 'type', label: 'Type', sortable: true },
   ];
 
   if (isLoading) return <TableSkeleton rows={5} columns={6} />;
@@ -30,24 +30,38 @@ const UserTable: React.FC<{
             <th
               key={col.key}
               className={`text-left relative py-2 after:absolute after:bottom-0 after:left-0 after:w-[calc(100%-20px)] after:h-[2px] ${
-                sortBy?.startsWith(`${col.key}:`) ? "after:bg-gray-600 font-semibold" : "after:bg-gray-400 font-medium"
-              } ${col.sortable ? "cursor-pointer" : ""}`}
+                sortBy?.startsWith(`${col.key}:`)
+                  ? 'after:bg-gray-600 font-semibold'
+                  : 'after:bg-gray-400 font-medium'
+              } ${col.sortable ? 'cursor-pointer' : ''}`}
               onClick={col.sortable ? () => onSort(col.key) : undefined}
             >
-              {col.label}
+              {col.label}{' '}
               {col.sortable && (
                 <svg
-                  className={`inline-block ml-1 w-3 h-3 ${sortBy?.startsWith(`${col.key}:`) ? "text-primary" : ""}`}
+                  className={`inline-block ml-1 w-3 h-3 ${
+                    sortBy?.startsWith(`${col.key}:`) ? 'text-primary' : ''
+                  }`}
                   viewBox="0 0 24 24"
                   fill="none"
                 >
-                  <path
-                    d="M6 9L12 15L18 9"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
+                  {sortBy?.startsWith(`${col.key}:`) && sortBy?.endsWith(':desc') ? (
+                    <path
+                      d="M18 15L12 9L6 15"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  ) : (
+                    <path
+                      d="M6 9L12 15L18 9"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  )}
                 </svg>
               )}
             </th>
@@ -77,7 +91,7 @@ const UserTable: React.FC<{
                 {user.username}
               </td>
               <td className="py-2 relative w-[100px] after:absolute after:bottom-0 after:left-0 after:w-[calc(100%-20px)] after:h-[1px] after:bg-gray-300">
-                {new Date(user.joinedDate).toLocaleDateString("en-GB")}
+                {new Date(user.joinedDate).toLocaleDateString('en-GB')}
               </td>
               <td className="py-2 relative w-[80px] after:absolute after:bottom-0 after:left-0 after:w-[calc(100%-20px)] after:h-[1px] after:bg-gray-300">
                 {user.type}
