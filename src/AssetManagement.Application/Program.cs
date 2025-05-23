@@ -21,6 +21,8 @@ builder.Services.AddAuthConfig(builder.Configuration);
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
+builder.Services.AddScoped<IAssetRepository, AssetRepository>();
+builder.Services.AddScoped<IAssetService, AssetService>();
 builder.Services.AddTransient<DataSeeder>();
 
 var app = builder.Build();

@@ -28,6 +28,227 @@ namespace AssetManagement.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("AssetCode")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("CategoryId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("CategoryId1")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("DeletedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTimeOffset>("InstallDate")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<bool?>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid?>("LastModificatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("LastModificatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Location")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Specification")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("State")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CategoryId");
+
+                    b.HasIndex("CategoryId1");
+
+                    b.ToTable("Assets");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("223e4567-e89b-12d3-a456-426614174001"),
+                            AssetCode = "LAP-001",
+                            CategoryId = new Guid("123e4567-e89b-12d3-a456-426614174005"),
+                            CreatedDate = new DateTime(2025, 5, 21, 0, 0, 0, 0, DateTimeKind.Utc),
+                            InstallDate = new DateTimeOffset(new DateTime(2023, 5, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            LastModificatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Location = 1,
+                            Name = "Dell XPS 13",
+                            Specification = "Intel i7, 16GB RAM, 512GB SSD",
+                            State = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("223e4567-e89b-12d3-a456-426614174002"),
+                            AssetCode = "LAP-002",
+                            CategoryId = new Guid("123e4567-e89b-12d3-a456-426614174005"),
+                            CreatedDate = new DateTime(2025, 5, 21, 0, 0, 0, 0, DateTimeKind.Utc),
+                            InstallDate = new DateTimeOffset(new DateTime(2024, 5, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            LastModificatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Location = 2,
+                            Name = "MacBook Pro 14",
+                            Specification = "M1 Pro, 32GB RAM, 1TB SSD",
+                            State = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("223e4567-e89b-12d3-a456-426614174003"),
+                            AssetCode = "MON-001",
+                            CategoryId = new Guid("123e4567-e89b-12d3-a456-426614174007"),
+                            CreatedDate = new DateTime(2025, 5, 21, 0, 0, 0, 0, DateTimeKind.Utc),
+                            InstallDate = new DateTimeOffset(new DateTime(2022, 5, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            LastModificatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Location = 1,
+                            Name = "Dell UltraSharp 27",
+                            Specification = "27-inch, 4K, IPS Panel",
+                            State = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("223e4567-e89b-12d3-a456-426614174004"),
+                            AssetCode = "MON-002",
+                            CategoryId = new Guid("123e4567-e89b-12d3-a456-426614174007"),
+                            CreatedDate = new DateTime(2025, 5, 21, 0, 0, 0, 0, DateTimeKind.Utc),
+                            InstallDate = new DateTimeOffset(new DateTime(2023, 5, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            LastModificatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Location = 1,
+                            Name = "LG 32GN600",
+                            Specification = "32-inch, QHD, 144Hz",
+                            State = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("223e4567-e89b-12d3-a456-426614174005"),
+                            AssetCode = "IPD-001",
+                            CategoryId = new Guid("123e4567-e89b-12d3-a456-426614174003"),
+                            CreatedDate = new DateTime(2025, 5, 21, 0, 0, 0, 0, DateTimeKind.Utc),
+                            InstallDate = new DateTimeOffset(new DateTime(2023, 11, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            LastModificatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Location = 2,
+                            Name = "iPad Pro 12.9",
+                            Specification = "M2 Chip, 256GB, Wi-Fi",
+                            State = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("223e4567-e89b-12d3-a456-426614174006"),
+                            AssetCode = "IPD-002",
+                            CategoryId = new Guid("123e4567-e89b-12d3-a456-426614174003"),
+                            CreatedDate = new DateTime(2025, 5, 21, 0, 0, 0, 0, DateTimeKind.Utc),
+                            InstallDate = new DateTimeOffset(new DateTime(2024, 11, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            LastModificatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Location = 3,
+                            Name = "iPad Air 5",
+                            Specification = "M1 Chip, 64GB, Wi-Fi",
+                            State = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("223e4567-e89b-12d3-a456-426614174007"),
+                            AssetCode = "IPH-001",
+                            CategoryId = new Guid("123e4567-e89b-12d3-a456-426614174004"),
+                            CreatedDate = new DateTime(2025, 5, 21, 0, 0, 0, 0, DateTimeKind.Utc),
+                            InstallDate = new DateTimeOffset(new DateTime(2024, 5, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            LastModificatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Location = 1,
+                            Name = "iPhone 14 Pro",
+                            Specification = "256GB, Black, 5G",
+                            State = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("223e4567-e89b-12d3-a456-426614174008"),
+                            AssetCode = "MOU-001",
+                            CategoryId = new Guid("123e4567-e89b-12d3-a456-426614174001"),
+                            CreatedDate = new DateTime(2025, 5, 21, 0, 0, 0, 0, DateTimeKind.Utc),
+                            InstallDate = new DateTimeOffset(new DateTime(2024, 5, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            LastModificatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Location = 2,
+                            Name = "Logitech MX Master 3",
+                            Specification = "Wireless, 4000 DPI, Ergonomic",
+                            State = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("223e4567-e89b-12d3-a456-426614174009"),
+                            AssetCode = "HST-001",
+                            CategoryId = new Guid("123e4567-e89b-12d3-a456-426614174002"),
+                            CreatedDate = new DateTime(2025, 5, 21, 0, 0, 0, 0, DateTimeKind.Utc),
+                            InstallDate = new DateTimeOffset(new DateTime(2024, 9, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            LastModificatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Location = 1,
+                            Name = "Sony WH-1000XM5",
+                            Specification = "Wireless, Noise-Cancelling, 30hr Battery",
+                            State = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("223e4567-e89b-12d3-a456-426614174010"),
+                            AssetCode = "PC-001",
+                            CategoryId = new Guid("123e4567-e89b-12d3-a456-426614174008"),
+                            CreatedDate = new DateTime(2025, 5, 21, 0, 0, 0, 0, DateTimeKind.Utc),
+                            InstallDate = new DateTimeOffset(new DateTime(2020, 5, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            LastModificatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Location = 3,
+                            Name = "HP EliteDesk 800",
+                            Specification = "Intel i5, 8GB RAM, 1TB HDD",
+                            State = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("223e4567-e89b-12d3-a456-426614174011"),
+                            AssetCode = "TAB-001",
+                            CategoryId = new Guid("123e4567-e89b-12d3-a456-426614174009"),
+                            CreatedDate = new DateTime(2025, 5, 21, 0, 0, 0, 0, DateTimeKind.Utc),
+                            InstallDate = new DateTimeOffset(new DateTime(2024, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            LastModificatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Location = 2,
+                            Name = "Samsung Galaxy Tab S8",
+                            Specification = "Snapdragon 8, 128GB, 11-inch",
+                            State = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("223e4567-e89b-12d3-a456-426614174012"),
+                            AssetCode = "MOB-001",
+                            CategoryId = new Guid("123e4567-e89b-12d3-a456-426614174006"),
+                            CreatedDate = new DateTime(2025, 5, 21, 0, 0, 0, 0, DateTimeKind.Utc),
+                            InstallDate = new DateTimeOffset(new DateTime(2025, 1, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            LastModificatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Location = 3,
+                            Name = "Samsung Galaxy S23",
+                            Specification = "256GB, 5G, Snapdragon 8 Gen 2",
+                            State = 1
+                        });
+                });
+
+            modelBuilder.Entity("AssetManagement.Domain.Entities.Category", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<Guid?>("CreatedBy")
                         .HasColumnType("uniqueidentifier");
 
@@ -49,9 +270,91 @@ namespace AssetManagement.Data.Migrations
                     b.Property<DateTime>("LastModifiedDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Slug")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.HasKey("Id");
 
-                    b.ToTable("Assets");
+                    b.ToTable("Categories");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("123e4567-e89b-12d3-a456-426614174001"),
+                            CreatedDate = new DateTime(2025, 5, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            LastModificatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Name = "Bluetooth Mouse",
+                            Slug = "Bluetooth Mouse"
+                        },
+                        new
+                        {
+                            Id = new Guid("123e4567-e89b-12d3-a456-426614174002"),
+                            CreatedDate = new DateTime(2025, 5, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            LastModificatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Name = "Headset",
+                            Slug = "Headset"
+                        },
+                        new
+                        {
+                            Id = new Guid("123e4567-e89b-12d3-a456-426614174003"),
+                            CreatedDate = new DateTime(2025, 5, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            LastModificatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Name = "Ipad",
+                            Slug = "Ipad"
+                        },
+                        new
+                        {
+                            Id = new Guid("123e4567-e89b-12d3-a456-426614174004"),
+                            CreatedDate = new DateTime(2025, 5, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            LastModificatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Name = "Iphone",
+                            Slug = "Iphone"
+                        },
+                        new
+                        {
+                            Id = new Guid("123e4567-e89b-12d3-a456-426614174005"),
+                            CreatedDate = new DateTime(2025, 5, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            LastModificatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Name = "Laptop",
+                            Slug = "Laptop"
+                        },
+                        new
+                        {
+                            Id = new Guid("123e4567-e89b-12d3-a456-426614174006"),
+                            CreatedDate = new DateTime(2025, 5, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            LastModificatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Name = "Mobile",
+                            Slug = "Mobile"
+                        },
+                        new
+                        {
+                            Id = new Guid("123e4567-e89b-12d3-a456-426614174007"),
+                            CreatedDate = new DateTime(2025, 5, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            LastModificatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Name = "Monitor",
+                            Slug = "Monitor"
+                        },
+                        new
+                        {
+                            Id = new Guid("123e4567-e89b-12d3-a456-426614174008"),
+                            CreatedDate = new DateTime(2025, 5, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            LastModificatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Name = "Personal Computer",
+                            Slug = "Personal Computer"
+                        },
+                        new
+                        {
+                            Id = new Guid("123e4567-e89b-12d3-a456-426614174009"),
+                            CreatedDate = new DateTime(2025, 5, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            LastModificatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Name = "Tablet",
+                            Slug = "Tablet"
+                        });
                 });
 
             modelBuilder.Entity("AssetManagement.Domain.Entities.User", b =>
@@ -667,6 +970,26 @@ namespace AssetManagement.Data.Migrations
                             Type = 2,
                             Username = "tienvu"
                         });
+                });
+
+            modelBuilder.Entity("AssetManagement.Domain.Entities.Asset", b =>
+                {
+                    b.HasOne("AssetManagement.Domain.Entities.Category", "Category")
+                        .WithMany()
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("AssetManagement.Domain.Entities.Category", null)
+                        .WithMany("Assets")
+                        .HasForeignKey("CategoryId1");
+
+                    b.Navigation("Category");
+                });
+
+            modelBuilder.Entity("AssetManagement.Domain.Entities.Category", b =>
+                {
+                    b.Navigation("Assets");
                 });
 #pragma warning restore 612, 618
         }

@@ -49,6 +49,7 @@ export function useUser() {
           apiParams.sortBy = apiParams._apiSortBy;
           delete apiParams._apiSortBy;
         }
+        console.log('apiParams', apiParams);
         const response = await userApi.getUsers(apiParams);
         if (response.success && response.data) {
           return response.data;

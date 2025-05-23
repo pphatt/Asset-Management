@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using AssetManagement.Application.Controllers;
 using AssetManagement.Application.Services.Interfaces;
 using AssetManagement.Contracts.Common.Pagination;
 using AssetManagement.Contracts.DTOs;
@@ -9,7 +10,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 
-namespace AssetManagement.Application.Controllers.Tests
+namespace AssetManagement.Application.Tests.Controllers
 {
     public class UsersControllerTests
     {

@@ -13,10 +13,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Enums\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\AssetManagement.Contracts\AssetManagement.Contracts.csproj" />
   </ItemGroup>
 

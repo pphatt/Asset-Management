@@ -37,6 +37,7 @@ export const USER_TYPE_OPTIONS = [
 export const STORAGE_KEYS = {
   CURRENT_USER: 'currentUser',
   USER_FILTER_STATE: 'userFilterState',
+  ASSET_FILTER_STATE: 'assetFilterState',
 };
 
 export const PAGINATION = {
