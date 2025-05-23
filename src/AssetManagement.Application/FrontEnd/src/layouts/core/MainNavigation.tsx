@@ -1,10 +1,13 @@
 import NashtechLogo from '@/assets/nashtech-logo';
-import { navigationItems } from '@/constants/menu';
+import { useAppContext } from '@/hooks/use-app-context';
 import { Link, useLocation } from 'react-router-dom';
+import { adminNavigationItems, staffNavigationItems } from '@/constants/menu';
 
 export default function MainNavigation() {
   const location = useLocation();
   const currentPath = location.pathname;
+  const { profile } = useAppContext();
+  const navigationItems = profile?.type === "Admin" ? adminNavigationItems : staffNavigationItems;
 
   return (
     <div className="h-screen w-[25%]">

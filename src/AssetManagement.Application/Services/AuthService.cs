@@ -108,7 +108,7 @@ namespace AssetManagement.Application.Services
                 throw new UnauthorizedAccessException("Invalid username or password");
             }
 
-            if (!_passwordHasher.VerifyPassword(request.Password, user.Password))
+            if (!string.IsNullOrEmpty(request.Password) && !_passwordHasher.VerifyPassword(request.Password, user.Password))
             {
                 throw new UnauthorizedAccessException("Invalid username or password");
             }

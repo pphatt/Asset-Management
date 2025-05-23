@@ -6,7 +6,7 @@ interface NavigationItem {
     showInNav: boolean;
 }
 
-export const navigationItems: NavigationItem[] = [
+export const adminNavigationItems: NavigationItem[] = [
     { title: "Home", path: path.home, showInNav: true },
     { title: "Manage User", path: path.user, showInNav: true },
     { title: "Manage Asset", path: path.asset, showInNav: true },
@@ -14,4 +14,8 @@ export const navigationItems: NavigationItem[] = [
     { title: "Request for Returning", path: path.request, showInNav: true },
     { title: "Report", path: path.report, showInNav: true },
     { title: "Manage User > Create New User", path: path.userCreate, showInNav: false },
+];
+
+export const staffNavigationItems: NavigationItem[] = [
+    { title: "Home", path: path.home, showInNav: true }
 ];

@@ -1,5 +1,4 @@
-// import * as React from "react";
-import styles from "@/pages/FirstChangePassword/styles.module.css";
+import styles from "@/pages/UpdatePassword/styles.module.css";
 import {
   Card,
   CardContent,
@@ -21,11 +20,9 @@ import { setCookie } from "@/utils/auth.ts";
 import { useAppContext } from "@/hooks/use-app-context.tsx";
 import { Button } from "@/components/ui/button.tsx";
 
-type FormData = Pick<Schema, "newPassword" | "password" | "confirmPassword">;
+type FormData = Pick<Schema, "newPassword">;
 const passwordSchema = schema.pick([
-  "newPassword",
-  "password",
-  "confirmPassword",
+  "newPassword"
 ]);
 
 type JWTPayload = {
@@ -33,13 +30,6 @@ type JWTPayload = {
 } & JwtPayload;
 
 export default function FirstChangePassword() {
-  // React.useEffect(() => {
-  //   const body = document.getElementsByTagName("body")[0];
-  //   body.style.overflowY = "hidden";
-  //   return () => {
-  //     body.style.overflowY = "auto"; // Cleanup on unmount
-  //   };
-  // }, []);
 
   const {
     handleSubmit,
@@ -49,7 +39,7 @@ export default function FirstChangePassword() {
   } = useForm({
     mode: "all",
     resolver: yupResolver(passwordSchema),
-    defaultValues: { newPassword: "", password: "", confirmPassword: "" },
+    defaultValues: { newPassword: "" },
   });
 
   const { setIsAuthenticated, setProfile } = useAppContext();
@@ -63,9 +53,9 @@ export default function FirstChangePassword() {
   });
 
   const onSubmit = (data: FormData) => {
-    const { newPassword, password } = data;
+    const { newPassword } = data;
     mutate(
-      { newPassword, password },
+      { newPassword },
       {
         onSuccess(info) {
           const user = data && info?.data?.userInfo;
@@ -110,7 +100,7 @@ export default function FirstChangePassword() {
 
   return (
     <div className="fixed inset-0 flex items-center justify-center z-[100] backdrop-blur-[3px]">
-      <Card className="gap-0 p-0 border-0 rounded-[8px] shadow-none w-[600px]">
+      <Card className="gap-0 p-0 border-0 rounded-[8px] shadow-none">
         <CardHeader className={styles["card-header"]}>
           <CardTitle
             className={`text-lg tracking-tight ${styles["card-title"]}`}
@@ -120,49 +110,12 @@ export default function FirstChangePassword() {
         </CardHeader>
 
         <CardContent className={styles["card-content"]}>
-          <p className="text-sm text-gray-600 mb-4">
-            This is the first time you logged in. You have to change your
+          <p className="text-[1rem] text-gray-600 mb-4">
+            This is the first time you logged in. <br /> You have to change your
             password to continue.
           </p>
 
           <form className="relative" onSubmit={handleSubmit(onSubmit)}>
-            <div className={styles["form-row"]}>
-              <Label htmlFor={"password"} className={styles["form-label"]}>
-                Old password
-              </Label>
-
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  width: "100%",
-                }}
-              >
-                <Controller
-                  control={control}
-                  name="password"
-                  render={({ field }) => (
-                    <PasswordInput
-                      id={"password"}
-                      className={`${styles["form-input"]}`}
-                      {...field}
-                    />
-                  )}
-                />
-
-                <div
-                  style={{
-                    width: "222px",
-                    height: "20px",
-                    marginTop: "calc(var(--spacing) * 2)",
-                  }}
-                  className="mt-2 text-sm font-medium text-red-500"
-                >
-                  {errors?.password?.message}
-                </div>
-              </div>
-            </div>
-
             <div className={styles["form-row"]}>
               <Label htmlFor={"password"} className={styles["form-label"]}>
                 New password
@@ -189,50 +142,11 @@ export default function FirstChangePassword() {
 
                 <div
                   style={{
-                    width: "222px",
-                    height: "20px",
                     marginTop: "calc(var(--spacing) * 2)",
                   }}
                   className="mt-2 text-sm font-medium text-red-500"
                 >
                   {errors?.newPassword?.message}
-                </div>
-              </div>
-            </div>
-
-            <div className={styles["form-row"]}>
-              <Label htmlFor={"password"} className={styles["form-label"]}>
-                Confirm password
-              </Label>
-
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  width: "100%",
-                }}
-              >
-                <Controller
-                  control={control}
-                  name="confirmPassword"
-                  render={({ field }) => (
-                    <PasswordInput
-                      id={"password"}
-                      className={`${styles["form-input"]}`}
-                      {...field}
-                    />
-                  )}
-                />
-
-                <div
-                  style={{
-                    width: "222px",
-                    height: "20px",
-                    marginTop: "calc(var(--spacing) * 2)",
-                  }}
-                  className="mt-2 text-sm font-medium text-red-500"
-                >
-                  {errors?.confirmPassword?.message}
                 </div>
               </div>
             </div>
@@ -243,9 +157,7 @@ export default function FirstChangePassword() {
                 className={styles["login-btn"]}
                 disabled={
                   Object.keys(errors).length > 0 ||
-                  !getValues("password") ||
                   !getValues("newPassword") ||
-                  !getValues("confirmPassword") ||
                   isLoading
                 }
               >

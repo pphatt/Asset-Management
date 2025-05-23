@@ -24,7 +24,7 @@ export const schema = yup.object({
   newPassword: yup
     .string()
     .required("New Password is required")
-    .matches(PASSWORD_REG, "New Password Format Error"),
+    .min(12, "New Password Format Error")
 });
 
 export type Schema = yup.InferType<typeof schema>;

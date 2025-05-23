@@ -22,7 +22,8 @@
     border-bottom-left-radius: 8px;
     border-bottom-right-radius: 8px;
     border: 1px solid black;
-    border-top: none; /* Avoid double border with header */
+    border-top: none;
+    /* Avoid double border with header */
     padding: 20px 30px 30px;
 }
 
@@ -34,8 +35,9 @@
 
 .form-label {
     color: #1f2937;
-    width: 210px;
-    font-size: 16px;
+    width: 170px;
+    margin-top: 0.8rem;
+    font-size: 1rem;
 }
 
 .input-wrapper {
@@ -45,8 +47,7 @@
     flex: 1;
 }
 
-.form-input {
-}
+.form-input {}
 
 .form-input:focus {
     border-color: #D90D1E;
@@ -61,17 +62,20 @@
 }
 
 .icon-check {
-    color: #22c55e; /* Green for checkmark */
+    color: #22c55e;
+    /* Green for checkmark */
     font-size: 14px;
 }
 
 .icon-cross {
-    color: #ef4444; /* Red for cross */
+    color: #ef4444;
+    /* Red for cross */
     font-size: 14px;
 }
 
 .icon-eye {
-    color: #6b7280; /* Gray for eye icon */
+    color: #6b7280;
+    /* Gray for eye icon */
     font-size: 16px;
     cursor: pointer;
 }
@@ -84,7 +88,6 @@
     display: flex;
     justify-content: flex-end;
     align-items: center;
-    margin-top: 20px;
 }
 
 .login-btn {
@@ -100,5 +103,6 @@
 }
 
 .login-btn:hover {
-    background-color: #b91c1c; /* Darker red on hover */
+    background-color: #b91c1c;
+    /* Darker red on hover */
 }

@@ -6,7 +6,7 @@ export type LoginRequest = {
 };
 
 export type PasswordUpdateRequest = {
-  password: string;
+  password?: string;
   newPassword: string;
 };
 

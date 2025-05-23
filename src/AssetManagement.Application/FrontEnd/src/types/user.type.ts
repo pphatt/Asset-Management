@@ -69,7 +69,8 @@ export interface IUserParams {
   pageSize?: number;
   location?: string;
 }
-type Role = "Staff" | "Admin";
+
+export type Role = "Staff" | "Admin";
 
 export interface User {
   staffCode: string;

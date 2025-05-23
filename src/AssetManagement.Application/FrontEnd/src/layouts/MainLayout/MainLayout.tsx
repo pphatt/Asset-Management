@@ -2,7 +2,7 @@ import { AppContext } from "@/context/app.context";
 import MainHeader from "../core/MainHeader";
 import MainNavigation from "../core/MainNavigation";
 import { useContext } from "react";
-import FirstChangePassword from "@/pages/FirstChangePassword";
+import FirstChangePassword from "@/pages/UpdatePassword/FirstChangePassword";
 interface Props {
   children?: React.ReactNode;
 }
