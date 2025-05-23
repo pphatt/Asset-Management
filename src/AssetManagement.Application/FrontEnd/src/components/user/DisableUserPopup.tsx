@@ -33,17 +33,17 @@ const DisableUserPopup: React.FC<DisableUserPopupProps> = ({
       <div
         className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 bg-white border border-black shadow-xl rounded-md"
         style={{
-          width: "400px",
+          width: "500px",
           boxShadow: "0 2px 8px rgba(0, 0, 0, 0.15)",
         }}
       >
         {/* Header section with darker grey background */}
-        <div className="py-3 px-6 border-b border-gray-300 bg-gray-300 rounded-t-md">
+        <div className="py-3 px-10 border-b border-gray-300 bg-gray-300 rounded-t-md">
           <h2 className="text-xl font-semibold text-primary">Are you sure?</h2>
         </div>
 
         {/* Message section */}
-        <div className="px-6 py-4">
+        <div className="px-10 py-5">
           <p className="mb-6">Do you want to disable this user?</p>
           <div className="flex gap-4">
             <button
@@ -59,7 +59,7 @@ const DisableUserPopup: React.FC<DisableUserPopupProps> = ({
             </button>
             <button
               onClick={onClose}
-              className="border border-gray-300 py-2 px-4 rounded hover:bg-gray-100 focus:outline-none"
+              className="border border-gray-300 py-2 px-4 rounded hover:bg-gray-100 focus:outline-none text-gray-400"
             >
               Cancel
             </button>
