@@ -1,6 +1,6 @@
 import { adminNavigationItems, staffNavigationItems } from "@/constants/menu";
 import { useAppContext } from "@/hooks/use-app-context";
-import { useLocation } from "react-router-dom";
+import { matchPath, useLocation } from "react-router-dom";
 
 export default function MainHeader() {
     const location = useLocation();
@@ -9,7 +9,7 @@ export default function MainHeader() {
     const navigationItems = profile?.type === "Admin" ? adminNavigationItems : staffNavigationItems;
 
     const getHeaderTitle = () => {
-        return navigationItems.find((item) => item.path === currentPath)?.title
+        return navigationItems.find((item) => matchPath({ path: item.path, end: true }, currentPath))?.title;
     };
 
     return (

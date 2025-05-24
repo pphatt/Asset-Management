@@ -25,8 +25,9 @@ export default function MainNavigation() {
           <Link
             key={index}
             to={item.path}
-            className={`font-bold block px-4 py-4 transition-colors ${currentPath === item.path ? 'bg-primary text-white' : 'text-quaternary bg-gray-200'
-              }`}
+            className={`font-bold block px-4 py-4 transition-colors
+              ${currentPath === item.path ? 'bg-primary text-white' : 'text-quaternary bg-gray-200'
+            }`}
           >
             {item.title}
           </Link>

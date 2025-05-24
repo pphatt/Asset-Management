@@ -142,6 +142,7 @@ const UserList: React.FC = () => {
    */
   const handleEditUser = useCallback((staffCode: string) => {
     console.log('Edit user', staffCode);
+    navigate(path.userEdit.replace(':staffCode', staffCode));
   }, []);
 
   /**

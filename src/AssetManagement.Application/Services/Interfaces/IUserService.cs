@@ -21,16 +21,17 @@ namespace AssetManagement.Application.Services.Interfaces
         /// <summary>
         /// Updates the user information based on the provided user ID and request data
         /// </summary>
-        /// <param name="userId">Id of user perform this action</param>
+        /// <param name="adminId">Id of the admin performs this action</param>
+        /// <param name="staffCode">Staff code of the user to be updated</param>
         /// <param name="request">Data to update user</param>
         /// <returns></returns>
-        Task<Guid> UpdateUserAsync(Guid userId, UpdateUserRequest request);
+        Task<string> UpdateUserAsync(string adminId, string staffCode, UpdateUserRequestDto request);
 
         /// <summary>
         /// Deletes a user based on the provided user ID
         /// </summary>
-        /// <param name="deletedBy">Id of user perform this action</param>
-        /// <param name="userId">Data to disable user</param>
+        /// <param name="deletedBy">Guid of the admin performs this action</param>
+        /// <param name="staffCode">Staff code of the user to be deleted</param>
         /// <returns></returns>
         Task<string> DeleteUser(Guid deletedBy, string staffCode);
 

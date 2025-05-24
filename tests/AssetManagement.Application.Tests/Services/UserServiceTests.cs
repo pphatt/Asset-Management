@@ -9,6 +9,7 @@ using AssetManagement.Domain.Enums;
 using AssetManagement.Domain.Repositories;
 using MockQueryable;
 using Moq;
+using static AssetManagement.Contracts.Exceptions.ApiExceptionTypes;
 
 namespace AssetManagement.Application.Tests.Services
 {
@@ -290,7 +291,7 @@ namespace AssetManagement.Application.Tests.Services
             var expectedField = string.IsNullOrEmpty(firstName) ? "FirstName" : "LastName";
             Assert.Contains(exception.Errors, e => e.Field == expectedField);
         }
-        
+
         #endregion
 
         #region CreateUserAsync Tests - Date of Birth Validation
@@ -605,7 +606,7 @@ namespace AssetManagement.Application.Tests.Services
 
             _mockUserRepository.Setup(r => r.GetByIdAsync(It.IsAny<Guid>()))
                 .ReturnsAsync(adminUser);
-            
+
             _mockUserRepository.Setup(r => r.GetAllUsernamesAsync())
                 .ReturnsAsync(new List<string>());
 
@@ -732,116 +733,394 @@ namespace AssetManagement.Application.Tests.Services
             _mockUserRepository.Verify(r => r.Add(It.IsAny<User>()), Times.Once);
         }
 
-        private User CreateSampleUser(Guid userId)
+        private User CreateSampleUser(string staffCode = "SD0001")
         {
             return new User
             {
-                Id = userId,
+                Id = Guid.NewGuid(),
+                StaffCode = staffCode,
+                FirstName = "John",
+                LastName = "Doe",
+                Username = "testuser",
+                Password = "hashedPassword",
                 DateOfBirth = new DateTime(2000, 1, 1),
-                JoinedDate = new DateTime(2020, 1, 1),
+                JoinedDate = new DateTimeOffset(2020, 1, 6, 0, 0, 0, TimeSpan.Zero), // Monday
                 Type = UserTypeEnum.Admin,
                 Gender = GenderEnum.Male,
+                Location = LocationEnum.HCM,
                 IsActive = true,
-                Password = "Pa$$w0rd",
-                Username = "testuser",
+                CreatedBy = Guid.NewGuid(),
+                CreatedDate = DateTime.UtcNow.AddDays(-30)
             };
         }
 
         [Fact]
-        public async Task UpdateUserAsync_ShouldThrow_KeyNotFoundException_WhenUserNotFound()
+        public async Task UpdateUserAsync_ShouldThrow_NotFoundException_WhenUserNotFound()
         {
             // Arrange
-            var userId = Guid.NewGuid();
+            var adminUserId = Guid.NewGuid().ToString();
+            var staffCode = "SD9999";
             var mockRepo = new Mock<IUserRepository>();
-            mockRepo.Setup(x => x.GetByIdAsync(userId)).ReturnsAsync((User)null!);
+            mockRepo.Setup(x => x.GetByStaffCodeAsync(staffCode)).ReturnsAsync((User)null!);
 
             var service = new UserService(mockRepo.Object, _passwordHasherMock.Object);
 
-            // Act & Assert
-            await Assert.ThrowsAsync<KeyNotFoundException>(() => service.UpdateUserAsync(userId, new UpdateUserRequest()));
-        }
-
-
-        [Fact]
-        public async Task UpdateUserAsync_ShouldThrow_ArgumentException_WhenUserUnder18()
-        {
-            var userId = Guid.NewGuid();
-            var mockRepo = new Mock<IUserRepository>();
-            var user = CreateSampleUser(userId);
-
-            mockRepo.Setup(x => x.GetByIdAsync(userId)).ReturnsAsync(user);
-            var service = new UserService(mockRepo.Object, _passwordHasherMock.Object);
-
-            var request = new UpdateUserRequest
+            var dto = new UpdateUserRequestDto
             {
-                DateOfBirth = DateTime.UtcNow.AddYears(-17) // under 18
+                DateOfBirth = "2000-01-01"
             };
 
             // Act & Assert
-            await Assert.ThrowsAsync<ArgumentException>(() => service.UpdateUserAsync(userId, request));
+            await Assert.ThrowsAsync<NotFoundException>(() => service.UpdateUserAsync(adminUserId, staffCode, dto));
         }
 
         [Fact]
-        public async Task UpdateUserAsync_ShouldThrow_WhenJoinedDateBefore18()
+        public async Task UpdateUserAsync_ShouldThrow_InvalidOperationException_WhenUserInactive()
         {
-            var userId = Guid.NewGuid();
-            var mockRepo = new Mock<IUserRepository>();
-            var user = CreateSampleUser(userId);
+            // Arrange
+            var adminUserId = Guid.NewGuid().ToString();
+            var staffCode = "SD0001";
+            var user = CreateSampleUser(staffCode);
+            user.IsActive = false;
 
-            mockRepo.Setup(x => x.GetByIdAsync(userId)).ReturnsAsync(user);
+            var mockRepo = new Mock<IUserRepository>();
+            mockRepo.Setup(x => x.GetByStaffCodeAsync(staffCode)).ReturnsAsync(user);
+
             var service = new UserService(mockRepo.Object, _passwordHasherMock.Object);
 
-            var request = new UpdateUserRequest
+            var dto = new UpdateUserRequestDto
             {
-                DateOfBirth = new DateTime(2010, 1, 1),
-                JoinedDate = new DateTime(2025, 1, 1) // before 18th birthday
+                DateOfBirth = "2000-01-01"
             };
 
             // Act & Assert
-            await Assert.ThrowsAsync<ArgumentException>(() => service.UpdateUserAsync(userId, request));
+            await Assert.ThrowsAsync<InvalidOperationException>(() => service.UpdateUserAsync(adminUserId, staffCode, dto));
         }
 
         [Fact]
-        public async Task UpdateUserAsync_ShouldThrow_WhenJoinedDateIsWeekend()
+        public async Task UpdateUserAsync_ShouldThrow_AggregateFieldValidationException_WhenUserUnder18()
         {
-            var userId = Guid.NewGuid();
-            var mockRepo = new Mock<IUserRepository>();
-            var user = CreateSampleUser(userId);
+            // Arrange
+            var adminUserId = Guid.NewGuid().ToString();
+            var staffCode = "SD0001";
+            var user = CreateSampleUser(staffCode);
 
-            mockRepo.Setup(x => x.GetByIdAsync(userId)).ReturnsAsync(user);
+            var mockRepo = new Mock<IUserRepository>();
+            mockRepo.Setup(x => x.GetByStaffCodeAsync(staffCode)).ReturnsAsync(user);
+
             var service = new UserService(mockRepo.Object, _passwordHasherMock.Object);
 
-            var request = new UpdateUserRequest
+            var dto = new UpdateUserRequestDto
             {
-                JoinedDate = new DateTime(2025, 5, 17) // Saturday
+                DateOfBirth = DateTime.UtcNow.AddYears(-17).ToString("yyyy-MM-dd") // under 18
             };
 
             // Act & Assert
-            await Assert.ThrowsAsync<ArgumentException>(() => service.UpdateUserAsync(userId, request));
+            var exception = await Assert.ThrowsAsync<AggregateFieldValidationException>(() => service.UpdateUserAsync(adminUserId, staffCode, dto));
+
+            Assert.Contains(exception.Errors, e => e.Field == "DateOfBirth" &&
+                e.Message == "User is under 18. Please select a different date");
         }
 
         [Fact]
-        public async Task UpdateUserAsync_ShouldUpdateSuccessfully()
+        public async Task UpdateUserAsync_ShouldThrow_AggregateFieldValidationException_WhenJoinedDateBefore18()
         {
-            var userId = Guid.NewGuid();
-            var user = CreateSampleUser(userId);
+            // Arrange
+            var adminUserId = Guid.NewGuid().ToString();
+            var staffCode = "SD0001";
+            var user = CreateSampleUser(staffCode);
+            user.DateOfBirth = new DateTime(2010, 1, 1);
 
             var mockRepo = new Mock<IUserRepository>();
-            mockRepo.Setup(x => x.GetByIdAsync(userId)).ReturnsAsync(user);
+            mockRepo.Setup(x => x.GetByStaffCodeAsync(staffCode)).ReturnsAsync(user);
+
             var service = new UserService(mockRepo.Object, _passwordHasherMock.Object);
 
-            var request = new UpdateUserRequest
+            var dto = new UpdateUserRequestDto
             {
-                DateOfBirth = new DateTime(2000, 1, 1),
-                JoinedDate = new DateTime(2021, 1, 4), // Monday
-                Type = "Admin",
-                Gender = "Male"
+                JoinedDate = "2025-01-01" // before 18th birthday (person born in 2010)
             };
 
-            var result = await service.UpdateUserAsync(userId, request);
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<AggregateFieldValidationException>(() => service.UpdateUserAsync(adminUserId, staffCode, dto));
 
-            Assert.Equal(userId, result);
-            mockRepo.Verify(r => r.Update(It.IsAny<User>()), Times.Once);
+            Assert.Contains(exception.Errors, e => e.Field == "JoinedDate" &&
+                e.Message == "User under the age of 18 may not join company. Please select a different date");
+        }
+
+        [Fact]
+        public async Task UpdateUserAsync_ShouldThrow_AggregateFieldValidationException_WhenJoinedDateIsWeekend()
+        {
+            // Arrange
+            var adminUserId = Guid.NewGuid().ToString();
+            var staffCode = "SD0001";
+            var user = CreateSampleUser(staffCode);
+
+            var mockRepo = new Mock<IUserRepository>();
+            mockRepo.Setup(x => x.GetByStaffCodeAsync(staffCode)).ReturnsAsync(user);
+
+            var service = new UserService(mockRepo.Object, _passwordHasherMock.Object);
+
+            var dto = new UpdateUserRequestDto
+            {
+                JoinedDate = "2025-05-17" // Saturday
+            };
+
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<AggregateFieldValidationException>(() => service.UpdateUserAsync(adminUserId, staffCode, dto));
+
+            Assert.Contains(exception.Errors, e => e.Field == "JoinedDate" &&
+                e.Message == "Joined date is Saturday or Sunday. Please select a different date");
+        }
+
+        [Fact]
+        public async Task UpdateUserAsync_ShouldThrow_AggregateFieldValidationException_WhenJoinedDateProvidedButDOBIsNull()
+        {
+            // Arrange
+            var adminUserId = Guid.NewGuid().ToString();
+            var staffCode = "SD0001";
+            var user = CreateSampleUser(staffCode);
+            user.DateOfBirth = null; // No DOB
+
+            var mockRepo = new Mock<IUserRepository>();
+            mockRepo.Setup(x => x.GetByStaffCodeAsync(staffCode)).ReturnsAsync(user);
+
+            var service = new UserService(mockRepo.Object, _passwordHasherMock.Object);
+
+            var dto = new UpdateUserRequestDto
+            {
+                JoinedDate = "2025-01-06" // Monday, valid day but DOB is null
+            };
+
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<AggregateFieldValidationException>(() => service.UpdateUserAsync(adminUserId, staffCode, dto));
+
+            Assert.Contains(exception.Errors, e => e.Field == "JoinedDate" &&
+                e.Message == "Please Select Date of Birth");
+        }
+
+        [Fact]
+        public async Task UpdateUserAsync_ShouldThrow_AggregateFieldValidationException_WhenInvalidDateFormat()
+        {
+            // Arrange
+            var adminUserId = Guid.NewGuid().ToString();
+            var staffCode = "SD0001";
+            var user = CreateSampleUser(staffCode);
+
+            var mockRepo = new Mock<IUserRepository>();
+            mockRepo.Setup(x => x.GetByStaffCodeAsync(staffCode)).ReturnsAsync(user);
+
+            var service = new UserService(mockRepo.Object, _passwordHasherMock.Object);
+
+            var dto = new UpdateUserRequestDto
+            {
+                DateOfBirth = "invalid-date",
+                JoinedDate = "also-invalid"
+            };
+
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<AggregateFieldValidationException>(() => service.UpdateUserAsync(adminUserId, staffCode, dto));
+
+            Assert.Contains(exception.Errors, e => e.Field == "DateOfBirth" &&
+                e.Message == "Invalid Date of Birth format");
+            Assert.Contains(exception.Errors, e => e.Field == "JoinedDate" &&
+                e.Message == "Invalid Joined Date format");
+        }
+
+        [Fact]
+        public async Task UpdateUserAsync_ShouldThrow_AggregateFieldValidationException_WhenInvalidEnumValues()
+        {
+            // Arrange
+            var adminUserId = Guid.NewGuid().ToString();
+            var staffCode = "SD0001";
+            var user = CreateSampleUser(staffCode);
+
+            var mockRepo = new Mock<IUserRepository>();
+            mockRepo.Setup(x => x.GetByStaffCodeAsync(staffCode)).ReturnsAsync(user);
+
+            var service = new UserService(mockRepo.Object, _passwordHasherMock.Object);
+
+            var dto = new UpdateUserRequestDto
+            {
+                Type = (UserTypeDtoEnum)999, // Invalid enum value
+                Gender = (GenderDtoEnum)999 // Invalid enum value
+            };
+
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<AggregateFieldValidationException>(() => service.UpdateUserAsync(adminUserId, staffCode, dto));
+
+            Assert.Contains(exception.Errors, e => e.Field == "Type" &&
+                e.Message == "Invalid user type value");
+            Assert.Contains(exception.Errors, e => e.Field == "Gender" &&
+                e.Message == "Invalid gender value");
+        }
+
+        [Fact]
+        public async Task UpdateUserAsync_ShouldUpdateDateOfBirthSuccessfully()
+        {
+            // Arrange
+            var adminUserId = Guid.NewGuid().ToString();
+            var staffCode = "SD0001";
+            var user = CreateSampleUser(staffCode);
+            var originalJoinedDate = user.JoinedDate;
+
+            var mockRepo = new Mock<IUserRepository>();
+            mockRepo.Setup(x => x.GetByStaffCodeAsync(staffCode)).ReturnsAsync(user);
+
+            var service = new UserService(mockRepo.Object, _passwordHasherMock.Object);
+
+            var newDateOfBirth = new DateTime(1995, 6, 15);
+            var dto = new UpdateUserRequestDto
+            {
+                DateOfBirth = newDateOfBirth.ToString("yyyy-MM-dd")
+            };
+
+            // Act
+            var result = await service.UpdateUserAsync(adminUserId, staffCode, dto);
+
+            // Assert
+            Assert.Equal(staffCode, result);
+            Assert.Equal(newDateOfBirth, user.DateOfBirth);
+            Assert.Equal(originalJoinedDate, user.JoinedDate); // Should remain unchanged
+            Assert.Equal(Guid.Parse(adminUserId), user.LastModifiedBy);
+            Assert.True((DateTime.UtcNow - user.LastModifiedDate).TotalSeconds < 5); // Recently updated
+
+            mockRepo.Verify(r => r.Update(user), Times.Once);
+        }
+
+        [Fact]
+        public async Task UpdateUserAsync_ShouldUpdateJoinedDateSuccessfully()
+        {
+            // Arrange
+            var adminUserId = Guid.NewGuid().ToString();
+            var staffCode = "SD0001";
+            var user = CreateSampleUser(staffCode);
+            var originalDateOfBirth = user.DateOfBirth;
+
+            var mockRepo = new Mock<IUserRepository>();
+            mockRepo.Setup(x => x.GetByStaffCodeAsync(staffCode)).ReturnsAsync(user);
+
+            var service = new UserService(mockRepo.Object, _passwordHasherMock.Object);
+
+            var newJoinedDate = new DateTimeOffset(2022, 3, 7, 0, 0, 0, TimeSpan.Zero); // Monday
+            var dto = new UpdateUserRequestDto
+            {
+                JoinedDate = newJoinedDate.ToString("yyyy-MM-dd")
+            };
+
+            // Act
+            var result = await service.UpdateUserAsync(adminUserId, staffCode, dto);
+
+            // Assert
+            Assert.Equal(staffCode, result);
+            Assert.Equal(newJoinedDate.Date, user.JoinedDate.Date);
+            Assert.Equal(originalDateOfBirth, user.DateOfBirth); // Should remain unchanged
+
+            mockRepo.Verify(r => r.Update(user), Times.Once);
+        }
+
+        [Fact]
+        public async Task UpdateUserAsync_ShouldUpdateTypeAndGenderSuccessfully()
+        {
+            // Arrange
+            var adminUserId = Guid.NewGuid().ToString();
+            var staffCode = "SD0001";
+            var user = CreateSampleUser(staffCode);
+            user.Type = UserTypeEnum.Staff;
+            user.Gender = GenderEnum.Female;
+
+            var mockRepo = new Mock<IUserRepository>();
+            mockRepo.Setup(x => x.GetByStaffCodeAsync(staffCode)).ReturnsAsync(user);
+
+            var service = new UserService(mockRepo.Object, _passwordHasherMock.Object);
+
+            var dto = new UpdateUserRequestDto
+            {
+                Type = UserTypeDtoEnum.Admin,
+                Gender = GenderDtoEnum.Male
+            };
+
+            // Act
+            var result = await service.UpdateUserAsync(adminUserId, staffCode, dto);
+
+            // Assert
+            Assert.Equal(staffCode, result);
+            Assert.Equal(UserTypeEnum.Admin, user.Type);
+            Assert.Equal(GenderEnum.Male, user.Gender);
+
+            mockRepo.Verify(r => r.Update(user), Times.Once);
+        }
+
+        [Fact]
+        public async Task UpdateUserAsync_ShouldUpdateMultipleFieldsSuccessfully()
+        {
+            // Arrange
+            var adminUserId = Guid.NewGuid().ToString();
+            var staffCode = "SD0001";
+            var user = CreateSampleUser(staffCode);
+
+            var mockRepo = new Mock<IUserRepository>();
+            mockRepo.Setup(x => x.GetByStaffCodeAsync(staffCode)).ReturnsAsync(user);
+
+            var service = new UserService(mockRepo.Object, _passwordHasherMock.Object);
+
+            var newDateOfBirth = new DateTime(1998, 12, 25);
+            var newJoinedDate = new DateTimeOffset(2021, 5, 10, 0, 0, 0, TimeSpan.Zero); // Monday
+            var dto = new UpdateUserRequestDto
+            {
+                DateOfBirth = newDateOfBirth.ToString("yyyy-MM-dd"),
+                JoinedDate = newJoinedDate.ToString("yyyy-MM-dd"),
+                Type = UserTypeDtoEnum.Staff,
+                Gender = GenderDtoEnum.Female
+            };
+
+            // Act
+            var result = await service.UpdateUserAsync(adminUserId, staffCode, dto);
+
+            // Assert
+            Assert.Equal(staffCode, result);
+            Assert.Equal(newDateOfBirth, user.DateOfBirth);
+            Assert.Equal(newJoinedDate.Date, user.JoinedDate.Date);
+            Assert.Equal(UserTypeEnum.Staff, user.Type);
+            Assert.Equal(GenderEnum.Female, user.Gender);
+
+            mockRepo.Verify(r => r.Update(user), Times.Once);
+        }
+
+        [Fact]
+        public async Task UpdateUserAsync_ShouldNotUpdateFieldsWhenNotProvided()
+        {
+            // Arrange
+            var adminUserId = Guid.NewGuid().ToString();
+            var staffCode = "SD0001";
+            var user = CreateSampleUser(staffCode);
+            var originalDateOfBirth = user.DateOfBirth;
+            var originalJoinedDate = user.JoinedDate;
+            var originalType = user.Type;
+            var originalGender = user.Gender;
+
+            var mockRepo = new Mock<IUserRepository>();
+            mockRepo.Setup(x => x.GetByStaffCodeAsync(staffCode)).ReturnsAsync(user);
+
+            var service = new UserService(mockRepo.Object, _passwordHasherMock.Object);
+
+            var dto = new UpdateUserRequestDto(); // Empty DTO
+
+            // Act
+            var result = await service.UpdateUserAsync(adminUserId, staffCode, dto);
+
+            // Assert
+            Assert.Equal(staffCode, result);
+            Assert.Equal(originalDateOfBirth, user.DateOfBirth);
+            Assert.Equal(originalJoinedDate, user.JoinedDate);
+            Assert.Equal(originalType, user.Type);
+            Assert.Equal(originalGender, user.Gender);
+
+            // Should still update audit fields
+            Assert.Equal(Guid.Parse(adminUserId), user.LastModifiedBy);
+            Assert.True((DateTime.UtcNow - user.LastModifiedDate).TotalSeconds < 5);
+
+            mockRepo.Verify(r => r.Update(user), Times.Once);
         }
 
         [Fact]
@@ -867,10 +1146,9 @@ namespace AssetManagement.Application.Tests.Services
         public async Task DeleteUser_ShouldSetIsActiveFalse_AndCallUpdate()
         {
             // Arrange
-            var userId = Guid.NewGuid();
             var deletedBy = Guid.NewGuid();
-            var user = CreateSampleUser(userId);
-            user.StaffCode = "SD0001"; // Ensure staff code is set
+            var staffCode = "SD0001";
+            var user = CreateSampleUser(staffCode);
 
             // Create a mock queryable that supports async operations
             var usersMock = new List<User> { user }.AsQueryable().BuildMock();
@@ -957,11 +1235,11 @@ namespace AssetManagement.Application.Tests.Services
             // Act & Assert
             var exception = await Assert.ThrowsAsync<ArgumentException>(
                 () => _userService.GetByStaffCodeAsync(emptyStaffCode));
-            
+
             Assert.Contains("Staff code cannot be empty", exception.Message);
             Assert.Equal("staffCode", exception.ParamName);
         }
-        
+
         [Fact]
         public async Task GetByStaffCodeAsync_NullStaffCode_ThrowsArgumentException()
         {
@@ -971,11 +1249,11 @@ namespace AssetManagement.Application.Tests.Services
             // Act & Assert
             var exception = await Assert.ThrowsAsync<ArgumentException>(
                 () => _userService.GetByStaffCodeAsync(nullStaffCode!));
-            
+
             Assert.Contains("Staff code cannot be empty", exception.Message);
             Assert.Equal("staffCode", exception.ParamName);
         }
-        
+
         [Fact]
         public async Task GetByStaffCodeAsync_UserWithNullDateOfBirth_ReturnsUserDetailsWithNullDateOfBirth()
         {
@@ -1004,7 +1282,7 @@ namespace AssetManagement.Application.Tests.Services
             Assert.Equal(staffCode, result.StaffCode);
             Assert.Null(result.DateOfBirth); // Date of birth should be null
         }
-        
+
         [Fact]
         public async Task GetByStaffCodeAsync_UserWithEmptyName_ReturnsUserDetailsWithEmptyName()
         {

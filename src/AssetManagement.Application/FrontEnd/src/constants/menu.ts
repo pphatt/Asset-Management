@@ -14,6 +14,7 @@ export const adminNavigationItems: NavigationItem[] = [
     { title: "Request for Returning", path: path.request, showInNav: true },
     { title: "Report", path: path.report, showInNav: true },
     { title: "Manage User > Create New User", path: path.userCreate, showInNav: false },
+    { title: "Manage User > Edit User", path: path.userEdit, showInNav: false },
 ];
 
 export const staffNavigationItems: NavigationItem[] = [

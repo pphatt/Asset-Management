@@ -30,7 +30,7 @@ const userApi = {
   },
 
   updateUser: async (staffCode: string, data: IUpdateUserRequest): Promise<HttpResponse<IUser>> => {
-    const { data: responseData } = await http.put(`/users/${staffCode}`, data);
+    const { data: responseData } = await http.patch(`/users/${staffCode}`, data);
     return responseData;
   },
 

@@ -48,16 +48,15 @@ export interface ICreateUserRequest {
   lastName: string;
   dateOfBirth: string; // Format: YYYY-MM-DD
   joinedDate: string; // Format: YYYY-MM-DD
-  gender: number;
-  type: number;
+  gender: GenderEnum;
+  type: UserTypeEnum;
 }
 
 export interface IUpdateUserRequest {
-  id: number;
   dateOfBirth?: string;
-  gender?: "Male" | "Female";
+  gender?: GenderEnum;
   joinedDate?: string;
-  type?: IUserType;
+  type?: UserTypeEnum;
 }
 
 export interface IUserParams {

@@ -6,6 +6,7 @@ import { ICreateUserRequest, IUpdateUserRequest, IUserParams } from '../types/us
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 import useUserFilterState from './useUserFilterState';
+import path from '@/constants/path';
 
 export function useUser() {
   const navigate = useNavigate();
@@ -110,7 +111,7 @@ export function useUser() {
     return useMutation({
       mutationFn: async (userData: ICreateUserRequest) => userApi.createUser(userData),
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ['users'] });
+        queryClient.invalidateQueries({ queryKey: ['users'], exact: false });
         setQueryParams((prev) => ({
           ...prev,
           // currently keep this as a fixed string (TODO: refactor this)
@@ -118,7 +119,7 @@ export function useUser() {
           pageNumber: 1,
         }))
         toast.success("User created successfully");
-        navigate('/user');
+        navigate(path.user);
       },
       onError: (err: any) => {
         const errMsg = err.response?.data?.errors;
@@ -135,13 +136,23 @@ export function useUser() {
    */
   function useUpdateUser() {
     return useMutation({
-      mutationFn: async ({ staffCode, data }: { staffCode: string; data: IUpdateUserRequest }) => {
-        const response = await userApi.updateUser(staffCode, data);
-        if (response.success && response.data) {
-          return response.data;
-        }
-        throw new Error(response.message || 'Failed to update user');
+      mutationFn: async ({ staffCode, userData }: { staffCode: string; userData: IUpdateUserRequest }) => userApi.updateUser(staffCode, userData),
+      onSuccess: (data) => {
+        const staffCode = data.data;
+        queryClient.invalidateQueries({ queryKey: ['users'], exact: false });
+        queryClient.invalidateQueries({ queryKey: ['user', staffCode] })
+        setQueryParams((prev) => ({
+          ...prev,
+          sortBy: 'updated:desc',
+          pageNumber: 1,
+        }))
+        toast.success("User updated successfully");
+        navigate(path.user);
       },
+      onError: (err: any) => {
+        const errMsg = err.response?.data?.errors;
+        toast.error(errMsg?.[0] || "Error updating user");
+      }
     });
   }
 

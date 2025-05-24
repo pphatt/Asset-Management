@@ -85,17 +85,22 @@ namespace AssetManagement.Application.Controllers
             return this.ToCreatedApiResponse(createdUser, "Successfully created a new user");
         }
 
-        [HttpPatch("{userId}")]
+        [HttpPatch("{staffCode}")]
         [Authorize(Roles = "Admin")]
-        public async Task<ActionResult<ApiResponse<Guid>>> UpdateUser(Guid userId, [FromBody] UpdateUserRequest request)
+        public async Task<ActionResult<ApiResponse<string>>> UpdateUser(string staffCode, [FromBody] UpdateUserRequestDto request)
         {
-            var updatedUser = await _userService.UpdateUserAsync(userId, request);
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-            return new ApiResponse<Guid>
+            if (userId is null)
+                throw new UnauthorizedAccessException("Cannot retrieve user id from claims");
+
+            var updatedUserCode = await _userService.UpdateUserAsync(userId, staffCode, request);
+
+            return new ApiResponse<string>
             {
                 Success = true,
                 Message = "Successfully updated user.",
-                Data = updatedUser,
+                Data = updatedUserCode,
             };
         }
 

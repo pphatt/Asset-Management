@@ -5,7 +5,8 @@ import { Navigate, Outlet, RouteObject, useRoutes } from 'react-router-dom';
 import LoginLayout from './layouts/LoginLayout';
 import MainLayout from './layouts/MainLayout';
 import Home from './pages/Home';
-import UserForm from './components/user/UserForm';
+import CreateUser from './pages/User/CreateUser';
+import EditUser from './pages/User/EditUser';
 
 function ProtectedRoute() {
   const { isAuthenticated } = useContext(AppContext);
@@ -62,7 +63,15 @@ const ProtectedRoutes: RouteObject[] = [
         path: path.userCreate,
         element: (
           <MainLayout>
-            <UserForm />
+            <CreateUser />
+          </MainLayout>
+        ),
+      },
+      {
+        path: path.userEdit,
+        element: (
+          <MainLayout>
+            <EditUser />
           </MainLayout>
         ),
       },
