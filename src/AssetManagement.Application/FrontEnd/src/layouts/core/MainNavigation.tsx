@@ -1,11 +1,9 @@
 import NashtechLogo from '@/assets/nashtech-logo';
 import { useAppContext } from '@/hooks/use-app-context';
-import { Link, useLocation } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import { adminNavigationItems, staffNavigationItems } from '@/constants/menu';
 
 export default function MainNavigation() {
-  const location = useLocation();
-  const currentPath = location.pathname;
   const { profile } = useAppContext();
   const navigationItems = profile?.type === "Admin" ? adminNavigationItems : staffNavigationItems;
 
@@ -22,15 +20,17 @@ export default function MainNavigation() {
 
       <nav className="mt-4 flex flex-col gap-[0.1rem]">
         {navigationItems.filter(item => item.showInNav).map((item, index) => (
-          <Link
+          <NavLink
             key={index}
             to={item.path}
-            className={`font-bold block px-4 py-4 transition-colors
-              ${currentPath === item.path ? 'bg-primary text-white' : 'text-quaternary bg-gray-200'
-            }`}
+            end={false}
+            className={({ isActive }) =>
+              `font-bold block px-4 py-4 transition-colors
+              ${isActive ? "bg-primary text-white" : "text-quaternary bg-gray-200"}
+              `}
           >
             {item.title}
-          </Link>
+          </NavLink>
         ))}
       </nav>
     </div>

@@ -7,11 +7,11 @@ import { useNavigate, useParams } from 'react-router-dom';
 import * as yup from 'yup';
 
 const schema = yup.object().shape({
-    firstName: yup.string().required('First name is required'),
-    lastName: yup.string().required('Last name is required'),
+    firstName: yup.string().required('First name is required').max(30, "First name can't be more than 30 characters long"),
+    lastName: yup.string().required('Last name is required').max(30, "Last name can't be more than 30 characters long"),
     dateOfBirth: yup
         .string()
-        .required('Please select date of birth')
+        .required('Please Select Date of Birth')
         .test('valid-date', 'Invalid date format', value => !isNaN(Date.parse(value)))
         .test('age', 'User is under 18. Please select a different date', value => {
             const dob = new Date(value);
@@ -29,7 +29,7 @@ const schema = yup.object().shape({
         }),
     joinedDate: yup
         .string()
-        .required('Please select joined date')
+        .required('Please Select Joined Date')
         .test('valid-date', 'Invalid date format', value => !isNaN(Date.parse(value)))
         .test('dob-required', 'Please Select Date of Birth', function () {
             // Access dateOfBirth from the same validation context
@@ -237,6 +237,7 @@ export default function UserForm({ mode }: UserFormProps) {
                         <label className="col-span-4 font-medium text-gray-700">Gender</label>
                         <Controller
                             name='gender'
+                            defaultValue={1}
                             control={control}
                             render={({ field }) => (
                                 <div className="col-span-8 flex space-x-6">
