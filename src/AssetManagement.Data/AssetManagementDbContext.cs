@@ -2,10 +2,12 @@
 using AssetManagement.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 
 namespace AssetManagement.Data;
 
+[ExcludeFromCodeCoverage]
 public class AssetManagementDbContext : DbContext
 {
     public AssetManagementDbContext(DbContextOptions<AssetManagementDbContext> options) : base(options) { }

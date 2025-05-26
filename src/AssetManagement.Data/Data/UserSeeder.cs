@@ -1,9 +1,11 @@
 ﻿using AssetManagement.Domain.Entities;
 using AssetManagement.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
+using System.Diagnostics.CodeAnalysis;
 
 namespace AssetManagement.Data.Data
 {
+    [ExcludeFromCodeCoverage]
     public static class UserSeeder
     {
         public static void SeedUsers(this ModelBuilder modelBuilder)

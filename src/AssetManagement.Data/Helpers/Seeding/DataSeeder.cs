@@ -2,9 +2,11 @@ using AssetManagement.Data.Helpers.Hashing;
 using AssetManagement.Domain.Entities;
 using AssetManagement.Domain.Enums;
 using Microsoft.Extensions.Logging;
+using System.Diagnostics.CodeAnalysis;
 
 namespace AssetManagement.Data.Helpers.Seeding
 {
+    [ExcludeFromCodeCoverage]
     public class DataSeeder
     {
         private readonly AssetManagementDbContext _dbContext;
