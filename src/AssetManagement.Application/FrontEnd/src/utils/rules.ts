@@ -1,11 +1,10 @@
-import { PASSWORD_REG } from "@/constants/validate-rules";
 import * as yup from "yup";
 
 function handleConfirmPassword(typeConfirm: string) {
   return yup
     .string()
     .required("Confirm Password is required")
-    .matches(PASSWORD_REG, "Confirm Password Format Error")
+    .min(12, "New Password Format Error")
     .oneOf([yup.ref(`${typeConfirm}`)], "Password not match");
 }
 
@@ -20,7 +19,7 @@ export const schema = yup.object({
   password: yup
     .string()
     .required("Old Password is required")
-    .matches(PASSWORD_REG, "Old Password Format Error"),
+    .min(12, "New Password Format Error"),
   newPassword: yup
     .string()
     .required("New Password is required")

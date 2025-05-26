@@ -1,5 +1,4 @@
 import * as yup from "yup";
-import { PASSWORD_REG } from "@/constants/validate-rules";
 import { Controller, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useAppContext } from "@/hooks/use-app-context.tsx";
@@ -23,7 +22,6 @@ const schema = yup.object().shape({
   password: yup
     .string()
     .required("Password is required")
-    .matches(PASSWORD_REG, "Invalid password format."),
 });
 
 type JWTPayload = {
@@ -34,13 +32,16 @@ export default function Login() {
   const {
     handleSubmit,
     control,
-    getValues,
+    watch,
     formState: { errors },
   } = useForm({
     mode: "all",
     resolver: yupResolver(schema),
     defaultValues: { username: "", password: "" },
   });
+
+  const username = watch("username");
+  const password = watch("password");
 
   const { setIsAuthenticated, setProfile } = useAppContext();
 
@@ -174,8 +175,8 @@ export default function Login() {
               className={styles["login-btn"]}
               disabled={
                 Object.keys(errors).length > 0 ||
-                !getValues("username") ||
-                !getValues("password") ||
+                !username ||
+                !password ||
                 isLoading
               }
             >

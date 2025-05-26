@@ -23,8 +23,8 @@ export const setCookie = (name: string, value: string, durations: number) => {
     'path=/',
     'SameSite=None; Secure',
   ]
-      .filter(Boolean)
-      .join('; ');
+    .filter(Boolean)
+    .join('; ');
 
   document.cookie = cookieString;
 };
@@ -42,8 +42,20 @@ const getCookie = (name: string) => {
 };
 
 export const clearCookieSession = () => {
-  const clearSessionEvent = new Event("clearSession");
-  cookieEventTarget.dispatchEvent(clearSessionEvent);
+  // Get all cookies as a string
+  const cookies = document.cookie.split(';');
+
+  // Iterate through each cookie
+  cookies.forEach((cookie) => {
+    // Extract the cookie name
+    const cookieName = cookie.split('=')[0].trim();
+    // Set the cookie's expiration to a past date to delete it
+    document.cookie = `${cookieName}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
+  });
+
+  // Optionally dispatch an event to notify listeners
+  const event = new Event('cookiesCleared');
+  cookieEventTarget.dispatchEvent(event);
 };
 
 export const getAccessTokenFromCookie = () => getCookie("access_token") || "";

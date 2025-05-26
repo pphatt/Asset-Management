@@ -1,5 +1,3 @@
-// import * as React from "react";
-import styles from "@/pages/FirstChangePassword/styles.module.css";
 import {
     Card,
     CardContent,
@@ -20,6 +18,9 @@ import { jwtDecode, JwtPayload } from "jwt-decode";
 import { setCookie } from "@/utils/auth.ts";
 import { useAppContext } from "@/hooks/use-app-context.tsx";
 import { Button } from "@/components/ui/button.tsx";
+import styles from "@/pages/UpdatePassword/styles.module.css";
+import { X } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 type FormData = Pick<Schema, "newPassword" | "password" | "confirmPassword">;
 const passwordSchema = schema.pick([
@@ -33,13 +34,7 @@ type JWTPayload = {
 } & JwtPayload;
 
 export default function ResetPassword() {
-    // React.useEffect(() => {
-    //   const body = document.getElementsByTagName("body")[0];
-    //   body.style.overflowY = "hidden";
-    //   return () => {
-    //     body.style.overflowY = "auto"; // Cleanup on unmount
-    //   };
-    // }, []);
+    const navigate = useNavigate();
 
     const {
         handleSubmit,
@@ -113,9 +108,10 @@ export default function ResetPassword() {
             <Card className="gap-0 p-0 border-0 rounded-[8px] shadow-none w-[600px]">
                 <CardHeader className={styles["card-header"]}>
                     <CardTitle
-                        className={`text-lg tracking-tight ${styles["card-title"]}`}
+                        className={`flex justify-between items-center text-lg tracking-tight w-full ${styles["card-title"]}`}
                     >
-                        Change password
+                        <span>Change password</span>
+                        <X className="text-black cursor-pointer" size={20} onClick={() => navigate(`${location.pathname}`, { replace: true })} />
                     </CardTitle>
                 </CardHeader>
 

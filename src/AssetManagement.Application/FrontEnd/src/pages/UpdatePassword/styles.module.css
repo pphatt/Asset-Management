@@ -31,11 +31,12 @@
     display: flex;
     align-items: flex-start;
     width: 100%;
+    margin-top: 1rem;
 }
 
 .form-label {
     color: #1f2937;
-    width: 170px;
+    width: 13rem;
     margin-top: 0.8rem;
     font-size: 1rem;
 }

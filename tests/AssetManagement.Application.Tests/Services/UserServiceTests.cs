@@ -291,7 +291,6 @@ namespace AssetManagement.Application.Tests.Services
             var expectedField = string.IsNullOrEmpty(firstName) ? "FirstName" : "LastName";
             Assert.Contains(exception.Errors, e => e.Field == expectedField);
         }
-
         #endregion
 
         #region CreateUserAsync Tests - Date of Birth Validation
@@ -606,7 +605,6 @@ namespace AssetManagement.Application.Tests.Services
 
             _mockUserRepository.Setup(r => r.GetByIdAsync(It.IsAny<Guid>()))
                 .ReturnsAsync(adminUser);
-
             _mockUserRepository.Setup(r => r.GetAllUsernamesAsync())
                 .ReturnsAsync(new List<string>());
 
@@ -1282,7 +1280,6 @@ namespace AssetManagement.Application.Tests.Services
             Assert.Equal(staffCode, result.StaffCode);
             Assert.Null(result.DateOfBirth); // Date of birth should be null
         }
-
         [Fact]
         public async Task GetByStaffCodeAsync_UserWithEmptyName_ReturnsUserDetailsWithEmptyName()
         {

@@ -22,7 +22,8 @@ import { Button } from "@/components/ui/button.tsx";
 
 type FormData = Pick<Schema, "newPassword">;
 const passwordSchema = schema.pick([
-  "newPassword"
+  "newPassword",
+  "confirmPassword",
 ]);
 
 type JWTPayload = {
@@ -39,7 +40,7 @@ export default function FirstChangePassword() {
   } = useForm({
     mode: "all",
     resolver: yupResolver(passwordSchema),
-    defaultValues: { newPassword: "" },
+    defaultValues: { newPassword: "", confirmPassword: "" },
   });
 
   const { setIsAuthenticated, setProfile } = useAppContext();
@@ -147,6 +148,43 @@ export default function FirstChangePassword() {
                   className="mt-2 text-sm font-medium text-red-500"
                 >
                   {errors?.newPassword?.message}
+                </div>
+              </div>
+            </div>
+
+            <div className={styles["form-row"]}>
+              <Label htmlFor={"password"} className={styles["form-label"]}>
+                Confirm password
+              </Label>
+
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  width: "100%",
+                }}
+              >
+                <Controller
+                  control={control}
+                  name="confirmPassword"
+                  render={({ field }) => (
+                    <PasswordInput
+                      id={"password"}
+                      className={`${styles["form-input"]}`}
+                      {...field}
+                    />
+                  )}
+                />
+
+                <div
+                  style={{
+                    width: "222px",
+                    height: "20px",
+                    marginTop: "calc(var(--spacing) * 2)",
+                  }}
+                  className="mt-2 text-sm font-medium text-red-500"
+                >
+                  {errors?.confirmPassword?.message}
                 </div>
               </div>
             </div>
