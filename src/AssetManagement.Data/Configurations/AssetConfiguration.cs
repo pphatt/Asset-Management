@@ -18,24 +18,24 @@ public class AssetConfiguration : IEntityTypeConfiguration<Asset>
             new() 
             {
                 Id = new Guid("223e4567-e89b-12d3-a456-426614174003"),
-                AssetCode = "MON-001",
+                Code = "MON-001",
                 Name = "Dell UltraSharp 27",
                 CategoryId = new Guid("123e4567-e89b-12d3-a456-426614174007"), // Monitor
-                State = AssetStateEnum.Available,
-                InstallDate = new DateTimeOffset(2022, 5, 21, 0, 0, 0, TimeSpan.Zero),
-                Location = LocationEnum.HCM,
+                State = AssetState.Available,
+                InstalledDate = new DateTimeOffset(2022, 5, 21, 0, 0, 0, TimeSpan.Zero),
+                Location = Location.HCM,
                 Specification = "27-inch, 4K, IPS Panel",
                 CreatedDate = new DateTime(2025, 5, 21, 0, 0, 0, DateTimeKind.Utc)
             },
             new() 
             {
                 Id = new Guid("223e4567-e89b-12d3-a456-426614174004"),
-                AssetCode = "MON-002",
+                Code = "MON-002",
                 Name = "LG 32GN600",
                 CategoryId = new Guid("123e4567-e89b-12d3-a456-426614174007"), // Monitor
-                State = AssetStateEnum.Available,
-                InstallDate = new DateTimeOffset(2023, 5, 21, 0, 0, 0, TimeSpan.Zero),
-                Location = LocationEnum.HCM,
+                State = AssetState.Available,
+                InstalledDate = new DateTimeOffset(2023, 5, 21, 0, 0, 0, TimeSpan.Zero),
+                Location = Location.HCM,
                 Specification = "32-inch, QHD, 144Hz",
                 CreatedDate = new DateTime(2025, 5, 21, 0, 0, 0, DateTimeKind.Utc)
             },

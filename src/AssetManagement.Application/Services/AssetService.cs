@@ -5,7 +5,7 @@ using AssetManagement.Contracts.Parameters;
 using AssetManagement.Domain.Entities;
 using AssetManagement.Domain.Enums;
 using AssetManagement.Domain.Extensions;
-using AssetManagement.Domain.Repositories;
+using AssetManagement.Domain.Interfaces.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Extensions;
 
@@ -37,7 +37,7 @@ namespace AssetManagement.Application.Services
                 .Select(u => new AssetDto
                 {
                     Id = u.Id,
-                    AssetCode = u.AssetCode,
+                    Code = u.Code,
                     Name = u.Name,
                     CategoryName = u.Category.Name,
                     State = u.State.GetDisplayName()
@@ -47,7 +47,7 @@ namespace AssetManagement.Application.Services
             return new PagedResult<AssetDto>(items, total, queryParams.PageSize, queryParams.PageNumber);
         }
 
-        public async Task<AssetDetailsDto> GetAssetAsync(Guid id)
+        public async Task<AssetDetailsDto> GetAssetByIdAsync(Guid id)
         {
             var asset = await _assetRepository.GetSingleAsync(
                 x => x.Id == id,
@@ -62,18 +62,18 @@ namespace AssetManagement.Application.Services
 
             var result = new AssetDetailsDto(
                 asset.Id,
-                asset.AssetCode,
+                asset.Code,
                 asset.Name,
-                asset.State == AssetStateEnum.Assigned ? AssetStateEnum.Assigned.GetDisplayName()
-                : asset.State == AssetStateEnum.Available ? AssetStateEnum.Available.GetDisplayName()
-                : asset.State == AssetStateEnum.NotAvailable ? AssetStateEnum.NotAvailable.GetDisplayName()
-                : asset.State == AssetStateEnum.WaitingForRecycling ? AssetStateEnum.WaitingForRecycling.GetDisplayName()
-                : asset.State == AssetStateEnum.Recycled ? AssetStateEnum.Recycled.GetDisplayName() : "",
+                asset.State == AssetState.Assigned ? AssetState.Assigned.GetDisplayName()
+                : asset.State == AssetState.Available ? AssetState.Available.GetDisplayName()
+                : asset.State == AssetState.NotAvailable ? AssetState.NotAvailable.GetDisplayName()
+                : asset.State == AssetState.WaitingForRecycling ? AssetState.WaitingForRecycling.GetDisplayName()
+                : asset.State == AssetState.Recycled ? AssetState.Recycled.GetDisplayName() : "",
                 asset.Category.Name,
-                asset.InstallDate,
-                asset.Location == LocationEnum.HCM ? LocationEnum.HCM.GetDisplayName()
-                : asset.Location == LocationEnum.DN ? LocationEnum.DN.GetDisplayName()
-                : asset.Location == LocationEnum.HN ? LocationEnum.HN.GetDisplayName() : "",
+                asset.InstalledDate,
+                asset.Location == Location.HCM ? Location.HCM.GetDisplayName()
+                : asset.Location == Location.DN ? Location.DN.GetDisplayName()
+                : asset.Location == Location.HN ? Location.HN.GetDisplayName() : "",
                 asset.Specification);
 
             return result;

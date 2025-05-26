@@ -1,6 +1,6 @@
 using System.Linq.Expressions;
 using AssetManagement.Domain.Entities;
-using AssetManagement.Domain.Repositories;
+using AssetManagement.Domain.Interfaces.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 namespace AssetManagement.Data.Repositories;

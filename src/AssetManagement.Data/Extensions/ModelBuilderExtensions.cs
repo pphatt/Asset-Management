@@ -24,9 +24,9 @@ namespace AssetManagement.Data.Extensions
                     IsPasswordUpdated = true,
                     DateOfBirth = new DateTime(1989, 1, 1),
                     JoinedDate = new DateTimeOffset(new DateTime(2016, 1, 10)),
-                    Type = UserTypeEnum.Admin,
-                    Location = LocationEnum.HCM,
-                    Gender = GenderEnum.Male,
+                    Type = UserType.Admin,
+                    Location = Location.HCM,
+                    Gender = Gender.Male,
                     IsActive = true,
                     CreatedDate = fixedCreatedDate
                 },
@@ -41,9 +41,9 @@ namespace AssetManagement.Data.Extensions
                     IsPasswordUpdated = true,
                     DateOfBirth = new DateTime(1992, 5, 15),
                     JoinedDate = new DateTimeOffset(new DateTime(2021, 3, 20)),
-                    Type = UserTypeEnum.Admin,
-                    Location = LocationEnum.DN,
-                    Gender = GenderEnum.Male,
+                    Type = UserType.Admin,
+                    Location = Location.DN,
+                    Gender = Gender.Male,
                     IsActive = true,
                     CreatedDate = fixedCreatedDate
                 }

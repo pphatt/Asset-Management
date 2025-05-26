@@ -12,9 +12,9 @@ namespace AssetManagement.Domain.Entities
         public bool IsPasswordUpdated { get; set; }
         public DateTime? DateOfBirth { get; set; }
         public DateTimeOffset JoinedDate { get; set; }
-        public UserTypeEnum Type { get; set; }
-        public LocationEnum Location { get; set; }
-        public GenderEnum Gender { get; set; }
+        public UserType Type { get; set; }
+        public Location Location { get; set; }
+        public Gender Gender { get; set; }
         public bool IsActive { get; set; } = true;
     }
 }

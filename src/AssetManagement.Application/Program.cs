@@ -1,14 +1,14 @@
-﻿using AssetManagement.Application.Extensions;
-using AssetManagement.Application.Middlewares;
+﻿using AssetManagement.Application.Middlewares;
 using AssetManagement.Application.Services;
 using AssetManagement.Application.Services.Interfaces;
 using AssetManagement.Data;
 using AssetManagement.Data.Helpers.Seeding;
 using AssetManagement.Data.Repositories;
-using AssetManagement.Domain.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 using AssetManagement.Data.Helpers.Hashing;
+using AssetManagement.Application.Configurations;
+using AssetManagement.Domain.Interfaces.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 

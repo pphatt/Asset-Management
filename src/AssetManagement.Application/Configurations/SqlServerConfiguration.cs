@@ -1,11 +1,11 @@
 ﻿using AssetManagement.Data;
 using AssetManagement.Data.Repositories;
-using AssetManagement.Domain.Repositories;
+using AssetManagement.Domain.Interfaces.Repositories;
 using Microsoft.EntityFrameworkCore;
 
-namespace AssetManagement.Application.Extensions;
+namespace AssetManagement.Application.Configurations;
 
-public static class SqlServerConfig
+public static class SqlServerConfiguration
 {
     public static IServiceCollection AddSqlServerConfig(this IServiceCollection services,
         IConfiguration configuration)

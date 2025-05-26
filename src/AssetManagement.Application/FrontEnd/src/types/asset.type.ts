@@ -12,7 +12,7 @@ export type IAssetState =
 
 export interface IAsset {
     id: string;
-    assetCode: string;
+    code: string;
     name: string;
     categoryName: string;
     state: IAssetState;
@@ -37,8 +37,8 @@ export interface IAssetParams {
 export interface IAssetDetails {
     id: string;
     name: string;
-    assetCode: string;
-    installDate: string;
+    code: string;
+    installedDate: string;
     type: UserTypeEnum;
     categoryName: string;
     specification: string;

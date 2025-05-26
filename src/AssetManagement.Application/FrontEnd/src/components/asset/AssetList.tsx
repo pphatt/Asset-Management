@@ -186,8 +186,8 @@ const AssetList: React.FC = () => {
             const assetDetails: IAssetDetails = {
                 id: fetchedAssetDetails.id,
                 name: fetchedAssetDetails.name,
-                assetCode: fetchedAssetDetails.assetCode,
-                installDate: fetchedAssetDetails.installDate,
+                code: fetchedAssetDetails.code,
+                installedDate: fetchedAssetDetails.installedDate,
                 type: fetchedAssetDetails.type,
                 categoryName: fetchedAssetDetails.categoryName,
                 specification: fetchedAssetDetails.specification,

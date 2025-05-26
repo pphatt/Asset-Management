@@ -1,5 +1,5 @@
-using AssetManagement.Application.Extensions;
 using AssetManagement.Application.Services.Interfaces;
+using AssetManagement.Contracts.Common;
 using AssetManagement.Contracts.Common.Pagination;
 using AssetManagement.Contracts.DTOs;
 using AssetManagement.Contracts.Parameters;
@@ -10,18 +10,18 @@ namespace AssetManagement.Application.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class AssetController: ControllerBase
+public class AssetsController: ControllerBase
 {
     private readonly IAssetService _assetService;
 
-    public AssetController(IAssetService assetService)
+    public AssetsController(IAssetService assetService)
     {
         _assetService = assetService;
     }
     
     [HttpGet("")]
     [Authorize(Roles = "Admin, Staff")]
-    public async Task<ActionResult<ApiResponse<PagedResult<AssetDto>>>> GetAssetList([FromQuery] AssetQueryParameters queryParameters)
+    public async Task<ActionResult<ApiResponse<PagedResult<AssetDto>>>> Get([FromQuery] AssetQueryParameters queryParameters)
     {
         var pagedData = await _assetService.GetAssetsAsync(queryParameters);
 
@@ -35,9 +35,9 @@ public class AssetController: ControllerBase
     
     [HttpGet("{id:Guid}")]
     [Authorize(Roles = "Admin, Staff")]
-    public async Task<ApiResponse<AssetDetailsDto>> GetAssetById(Guid id)
+    public async Task<ApiResponse<AssetDetailsDto>> GetById(Guid id)
     {
-        var result = await _assetService.GetAssetAsync(id);
+        var result = await _assetService.GetAssetByIdAsync(id);
         return new ApiResponse<AssetDetailsDto>
         {
             Success = true,

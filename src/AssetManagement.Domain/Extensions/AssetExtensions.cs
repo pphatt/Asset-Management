@@ -13,7 +13,7 @@ public static class AssetExtensions
         string normalizedSearchTerm = searchTerm.Trim().ToLower();
 
         return query.Where(u =>
-            u.AssetCode.Trim().ToLower().Contains(normalizedSearchTerm) ||
+            u.Code.Trim().ToLower().Contains(normalizedSearchTerm) ||
             u.Name.Trim().ToLower().Contains(normalizedSearchTerm));
     }
 
@@ -22,16 +22,16 @@ public static class AssetExtensions
         if (assetStates != null && assetStates.Count > 0 && !assetStates.Contains("All"))
         {
             query = query.Where(asset => assetStates.Contains(asset.State ==
-                AssetStateEnum.Assigned ? "Assigned"
-                : asset.State == AssetStateEnum.Available ? "Available"
-                : asset.State == AssetStateEnum.NotAvailable ? "NotAvailable"
-                : asset.State == AssetStateEnum.WaitingForRecycling ? "WaitingForRecycling"
-                : asset.State == AssetStateEnum.Recycled ? "Recycled" : ""));
+                AssetState.Assigned ? "Assigned"
+                : asset.State == AssetState.Available ? "Available"
+                : asset.State == AssetState.NotAvailable ? "NotAvailable"
+                : asset.State == AssetState.WaitingForRecycling ? "WaitingForRecycling"
+                : asset.State == AssetState.Recycled ? "Recycled" : ""));
         }
 
         if (assetCategories != null && assetCategories.Count > 0)
         {
-            query = query.Where(a => assetCategories.Contains(a.Category.Slug));
+            query = query.Where(a => assetCategories.Contains(a.Category.Name.ToLower()));
         }
 
         return query;
@@ -52,8 +52,8 @@ public static class AssetExtensions
                 {
                     "name" => order == "desc" ? query.OrderByDescending(a => a.Name)
                         : query.OrderBy(a => a.Name),
-                    "code" => order == "desc" ? query.OrderByDescending(a => a.AssetCode)
-                        : query.OrderBy(a => a.AssetCode),
+                    "code" => order == "desc" ? query.OrderByDescending(a => a.Code)
+                        : query.OrderBy(a => a.Code),
                     "state" => order == "desc" ? query.OrderByDescending(a => a.State)
                         : query.OrderBy(a => a.State),
                     "category" => order == "desc" ? query.OrderByDescending(a => a.Category)
@@ -67,8 +67,8 @@ public static class AssetExtensions
                 {
                     "name" => order == "desc" ? orderedQuery.ThenByDescending(a => a.Name)
                         : orderedQuery.ThenBy(a => a.Name),
-                    "code" => order == "desc" ? orderedQuery.ThenByDescending(a => a.AssetCode)
-                        : orderedQuery.ThenBy(a => a.AssetCode),
+                    "code" => order == "desc" ? orderedQuery.ThenByDescending(a => a.Code)
+                        : orderedQuery.ThenBy(a => a.Code),
                     "state" => order == "desc" ? orderedQuery.ThenByDescending(a => a.State)
                         : orderedQuery.ThenBy(a => a.State),
                     "category" => order == "desc" ? orderedQuery.ThenByDescending(a => a.Category)

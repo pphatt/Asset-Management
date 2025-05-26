@@ -16,7 +16,7 @@ namespace AssetManagement.Application.Services.Interfaces
         // <summary>
         // Retrieves a user by their staff code
         // </summary>
-        Task<UserDetailsDto> GetByStaffCodeAsync(string staffCode);
+        Task<UserDetailsDto> GetUserByStaffCodeAsync(string staffCode);
 
         /// <summary>
         /// Updates the user information based on the provided user ID and request data
@@ -33,7 +33,7 @@ namespace AssetManagement.Application.Services.Interfaces
         /// <param name="deletedBy">Guid of the admin performs this action</param>
         /// <param name="staffCode">Staff code of the user to be deleted</param>
         /// <returns></returns>
-        Task<string> DeleteUser(Guid deletedBy, string staffCode);
+        Task<string> DeleteUserAsync(Guid deletedBy, string staffCode);
 
         // <summary>
         // Creates a new user with the provided details

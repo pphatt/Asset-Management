@@ -1,6 +1,6 @@
 ﻿namespace AssetManagement.Contracts.Enums;
 
-public enum LocationDtoEnum
+public enum LocationDto
 {
     HCM = 1,
     DN = 2,

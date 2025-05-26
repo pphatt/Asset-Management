@@ -1,6 +1,6 @@
 using System.Text.Json;
 using AssetManagement.Application.Extensions;
-using AssetManagement.Contracts.DTOs;
+using AssetManagement.Contracts.Common;
 using AssetManagement.Contracts.Exceptions;
 
 namespace AssetManagement.Application.Middlewares;

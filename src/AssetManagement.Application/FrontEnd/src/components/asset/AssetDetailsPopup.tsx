@@ -67,7 +67,7 @@ const AssetDetailsPopup: React.FC<AssetDetailsPopupProps> = ({
             className="grid gap-4"
           >
             <div className="text-gray-600">Asset Code</div>
-            <div>{asset.assetCode}</div>
+            <div>{asset.code}</div>
 
             <div className="text-gray-600">Asset Name</div>
             <div>{asset.name}</div>
@@ -76,7 +76,7 @@ const AssetDetailsPopup: React.FC<AssetDetailsPopupProps> = ({
             <div>{asset.categoryName}</div>
 
             <div className="text-gray-600">Installed Date</div>
-            <div>{formatDate(asset.installDate)}</div>
+            <div>{formatDate(asset.installedDate)}</div>
 
             <div className="text-gray-600">State</div>
             <div>{asset.state}</div>

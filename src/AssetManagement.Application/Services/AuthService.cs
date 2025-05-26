@@ -7,7 +7,7 @@ using AssetManagement.Contracts.DTOs.Requests;
 using AssetManagement.Contracts.DTOs.Responses;
 using AssetManagement.Data.Helpers.Hashing;
 using AssetManagement.Domain.Entities;
-using AssetManagement.Domain.Repositories;
+using AssetManagement.Domain.Interfaces.Repositories;
 using Microsoft.IdentityModel.Tokens;
 
 namespace AssetManagement.Application.Services
@@ -38,7 +38,7 @@ namespace AssetManagement.Application.Services
             };
         }
 
-        public async Task<LoginResponse> LoginAsync(LoginRequest loginRequest)
+        public async Task<LoginResponseDto> LoginAsync(LoginRequestDto loginRequest)
         {
             var user = await _userRepository.GetByUsernameAsync(loginRequest.Username);
             if (user == null)
@@ -60,7 +60,7 @@ namespace AssetManagement.Application.Services
             var token = GenerateJwtToken(user);
             var userInfo = MapToUserDto(user);
 
-            return new LoginResponse
+            return new LoginResponseDto
             {
                 AccessToken = token,
                 UserInfo = userInfo
@@ -99,7 +99,7 @@ namespace AssetManagement.Application.Services
             throw new NotImplementedException();
         }
 
-        public async Task<ChangePasswordResponse> ChangePasswordAsync(string username, ChangePasswordRequest request)
+        public async Task<ChangePasswordResponseDto> ChangePasswordAsync(string username, ChangePasswordRequestDto request)
         {
             var user = await _userRepository.GetByUsernameAsync(username);
 
@@ -125,7 +125,7 @@ namespace AssetManagement.Application.Services
             var token = GenerateJwtToken(user);
             var userInfo = MapToUserDto(user);
 
-            return new ChangePasswordResponse
+            return new ChangePasswordResponseDto
             {
                 AccessToken = token,
                 UserInfo = userInfo

@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using AssetManagement.Application.Controllers;
 using AssetManagement.Application.Services.Interfaces;
+using AssetManagement.Contracts.Common;
 using AssetManagement.Contracts.Common.Pagination;
 using AssetManagement.Contracts.DTOs;
 using AssetManagement.Contracts.DTOs.Requests;
@@ -76,8 +77,8 @@ namespace AssetManagement.Application.Tests.Controllers
                 LastName = "User",
                 DateOfBirth = new DateTime(2000, 1, 1).ToString("yyyy-MM-dd"),
                 JoinedDate = DateTimeOffset.UtcNow.ToString("yyyy-MM-dd"),
-                Gender = Contracts.Enums.GenderDtoEnum.Male,
-                Type = Contracts.Enums.UserTypeDtoEnum.Staff
+                Gender = Contracts.Enums.GenderDto.Male,
+                Type = Contracts.Enums.UserTypeDto.Staff
             };
 
             var responseDto = new CreateUserResponseDto
@@ -85,7 +86,7 @@ namespace AssetManagement.Application.Tests.Controllers
                 StaffCode = "SD0001",
                 Username = "testuser",
                 FullName = "User Test",
-                Location = Contracts.Enums.LocationDtoEnum.HCM
+                Location = Contracts.Enums.LocationDto.HCM
             };
 
             _userServiceMock
@@ -134,7 +135,7 @@ namespace AssetManagement.Application.Tests.Controllers
             };
 
             // Act
-            _userServiceMock.Setup(s => s.GetByStaffCodeAsync(staffCode)).ReturnsAsync(userDto);
+            _userServiceMock.Setup(s => s.GetUserByStaffCodeAsync(staffCode)).ReturnsAsync(userDto);
             var actionResult = await _controller.GetByStaffCode(staffCode);
             var result = Assert.IsType<ActionResult<ApiResponse<UserDetailsDto>>>(actionResult);
             var okObjectResult = Assert.IsType<OkObjectResult>(result.Result);
@@ -151,7 +152,7 @@ namespace AssetManagement.Application.Tests.Controllers
         {
             // Arrange
             var staffCode = "InvalidCode";
-            _userServiceMock.Setup(s => s.GetByStaffCodeAsync(staffCode))
+            _userServiceMock.Setup(s => s.GetUserByStaffCodeAsync(staffCode))
                 .ThrowsAsync(new KeyNotFoundException($"Cannot find user with staff code {staffCode}"));
 
             // Act
@@ -208,7 +209,7 @@ namespace AssetManagement.Application.Tests.Controllers
             // Arrange
             var staffCode = "SD0001";
             var errorMessage = "Invalid staff code format";
-            _userServiceMock.Setup(s => s.GetByStaffCodeAsync(staffCode))
+            _userServiceMock.Setup(s => s.GetUserByStaffCodeAsync(staffCode))
                 .ThrowsAsync(new ArgumentException(errorMessage));
 
             // Act
@@ -229,7 +230,7 @@ namespace AssetManagement.Application.Tests.Controllers
             // Arrange
             var staffCode = "SD0001";
             var errorMessage = "Database connection failed";
-            _userServiceMock.Setup(s => s.GetByStaffCodeAsync(staffCode))
+            _userServiceMock.Setup(s => s.GetUserByStaffCodeAsync(staffCode))
                 .ThrowsAsync(new Exception(errorMessage));
 
             // Act

@@ -1,6 +1,6 @@
 namespace AssetManagement.Domain.Enums;
 
-public enum AssetStateEnum
+public enum AssetState
 {
     Assigned,
     Available,

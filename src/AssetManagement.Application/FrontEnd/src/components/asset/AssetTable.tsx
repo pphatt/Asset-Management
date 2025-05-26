@@ -61,14 +61,14 @@ const AssetTable: React.FC<{
         {assets && assets.length > 0 ? (
           assets.map((asset) => (
             <tr
-              key={asset.assetCode}
+              key={asset.code}
               onClick={() => {
                 onViewDetails(asset.id);
               }}
               className="cursor-pointer hover:bg-gray-50"
             >
               <td className="py-2 relative w-[100px] after:absolute after:bottom-0 after:left-0 after:w-[calc(100%-20px)] after:h-[1px] after:bg-gray-300">
-                {asset.assetCode}
+                {asset.code}
               </td>
               <td className="py-2 relative w-[180px] after:absolute after:bottom-0 after:left-0 after:w-[calc(100%-20px)] after:h-[1px] after:bg-gray-300">
                 {asset.name}

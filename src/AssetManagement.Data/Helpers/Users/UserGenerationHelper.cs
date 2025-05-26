@@ -1,8 +1,4 @@
-﻿using System.Globalization;
-using System.Text;
-using AssetManagement.Domain.Entities;
-
-namespace AssetManagement.Data.Helpers.Users;
+﻿namespace AssetManagement.Data.Helpers.Users;
 
 public static class UserGenerationHelper
 {

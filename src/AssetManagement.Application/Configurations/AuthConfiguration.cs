@@ -5,9 +5,9 @@ using AssetManagement.Data.Helpers.Hashing;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 
-namespace AssetManagement.Application.Extensions;
+namespace AssetManagement.Application.Configurations;
 
-public static class AuthConfig
+public static class AuthConfiguration
 {
     public static IServiceCollection AddAuthConfig(this IServiceCollection services, IConfiguration configuration)
     {

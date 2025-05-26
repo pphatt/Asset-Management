@@ -1,6 +1,6 @@
 ﻿namespace AssetManagement.Domain.Enums;
 
-public enum UserTypeEnum
+public enum UserType
 {
     Admin = 1,
     Staff = 2

@@ -1,6 +1,6 @@
 ﻿namespace AssetManagement.Contracts.Enums;
 
-public enum GenderDtoEnum
+public enum GenderDto
 {
     Male = 1,
     Female = 2

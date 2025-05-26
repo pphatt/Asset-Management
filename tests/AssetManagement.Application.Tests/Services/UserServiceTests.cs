@@ -6,10 +6,10 @@ using AssetManagement.Contracts.Parameters;
 using AssetManagement.Data.Helpers.Hashing;
 using AssetManagement.Domain.Entities;
 using AssetManagement.Domain.Enums;
-using AssetManagement.Domain.Repositories;
 using MockQueryable;
 using Moq;
 using static AssetManagement.Contracts.Exceptions.ApiExceptionTypes;
+using AssetManagement.Domain.Interfaces.Repositories;
 
 namespace AssetManagement.Application.Tests.Services
 {
@@ -36,8 +36,8 @@ namespace AssetManagement.Application.Tests.Services
                 Id = adminUserId,
                 Username = "admin",
                 Password = "Pa$$w0rd",
-                Type = UserTypeEnum.Admin,
-                Location = LocationEnum.HCM
+                Type = UserType.Admin,
+                Location = Location.HCM
             };
 
             var users = new List<User>
@@ -45,13 +45,13 @@ namespace AssetManagement.Application.Tests.Services
                 new User
                 {
                     Id = Guid.NewGuid(), FirstName = "John", LastName = "Doe",
-                    Password = "Pa$$w0rd", StaffCode = "SD0001", Type = UserTypeEnum.Staff, Location = LocationEnum.HCM,
+                    Password = "Pa$$w0rd", StaffCode = "SD0001", Type = UserType.Staff, Location = Location.HCM,
                     JoinedDate = DateTimeOffset.UtcNow, Username = "johndoe"
                 },
                 new User
                 {
                     Id = Guid.NewGuid(), FirstName = "Jane", LastName = "Smith",
-                    Password = "Pa$$w0rd", StaffCode = "SD0002", Type = UserTypeEnum.Admin, Location = LocationEnum.HCM,
+                    Password = "Pa$$w0rd", StaffCode = "SD0002", Type = UserType.Admin, Location = Location.HCM,
                     JoinedDate = DateTimeOffset.UtcNow, Username = "janesmith"
                 },
             }.BuildMock();
@@ -92,9 +92,9 @@ namespace AssetManagement.Application.Tests.Services
         }
 
         [Theory]
-        [InlineData(UserTypeDtoEnum.Admin, UserTypeEnum.Admin)]
-        [InlineData(UserTypeDtoEnum.Staff, UserTypeEnum.Staff)]
-        public void MapUserType_ShouldMapCorrectly(UserTypeDtoEnum input, UserTypeEnum expected)
+        [InlineData(UserTypeDto.Admin, UserType.Admin)]
+        [InlineData(UserTypeDto.Staff, UserType.Staff)]
+        public void MapUserType_ShouldMapCorrectly(UserTypeDto input, UserType expected)
         {
             var result = typeof(UserService).GetMethod("MapUserType",
                     System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static)!
@@ -103,9 +103,9 @@ namespace AssetManagement.Application.Tests.Services
         }
 
         [Theory]
-        [InlineData(GenderDtoEnum.Male, GenderEnum.Male)]
-        [InlineData(GenderDtoEnum.Female, GenderEnum.Female)]
-        public void MapGender_ShouldMapCorrectly(GenderDtoEnum input, GenderEnum expected)
+        [InlineData(GenderDto.Male, Gender.Male)]
+        [InlineData(GenderDto.Female, Gender.Female)]
+        public void MapGender_ShouldMapCorrectly(GenderDto input, Gender expected)
         {
             var result = typeof(UserService).GetMethod("MapGender",
                     System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static)!
@@ -114,10 +114,10 @@ namespace AssetManagement.Application.Tests.Services
         }
 
         [Theory]
-        [InlineData(LocationEnum.HCM, LocationDtoEnum.HCM)]
-        [InlineData(LocationEnum.DN, LocationDtoEnum.DN)]
-        [InlineData(LocationEnum.HN, LocationDtoEnum.HN)]
-        public void MapLocationToDto_ShouldMapCorrectly(LocationEnum input, LocationDtoEnum expected)
+        [InlineData(Location.HCM, LocationDto.HCM)]
+        [InlineData(Location.DN, LocationDto.DN)]
+        [InlineData(Location.HN, LocationDto.HN)]
+        public void MapLocationToDto_ShouldMapCorrectly(Location input, LocationDto expected)
         {
             var result = typeof(UserService).GetMethod("MapLocationToDto",
                     System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static)!
@@ -134,8 +134,8 @@ namespace AssetManagement.Application.Tests.Services
                 LastName = "B",
                 DateOfBirth = "",
                 JoinedDate = DateTime.UtcNow.ToString("o"),
-                Type = UserTypeDtoEnum.Staff,
-                Gender = GenderDtoEnum.Male
+                Type = UserTypeDto.Staff,
+                Gender = GenderDto.Male
             };
 
             var ex = await Assert.ThrowsAsync<AggregateFieldValidationException>(() =>
@@ -153,8 +153,8 @@ namespace AssetManagement.Application.Tests.Services
                 LastName = "B",
                 DateOfBirth = DateTime.UtcNow.AddYears(-17).ToString("yyyy-MM-dd"),
                 JoinedDate = DateTime.UtcNow.ToString("o"),
-                Type = UserTypeDtoEnum.Staff,
-                Gender = GenderDtoEnum.Male
+                Type = UserTypeDto.Staff,
+                Gender = GenderDto.Male
             };
 
             var ex = await Assert.ThrowsAsync<AggregateFieldValidationException>(() =>
@@ -172,8 +172,8 @@ namespace AssetManagement.Application.Tests.Services
                 LastName = "B",
                 DateOfBirth = DateTime.UtcNow.AddYears(-20).ToString("yyyy-MM-dd"),
                 JoinedDate = DateTime.UtcNow.AddYears(-3).ToString("o"),
-                Type = UserTypeDtoEnum.Staff,
-                Gender = GenderDtoEnum.Male
+                Type = UserTypeDto.Staff,
+                Gender = GenderDto.Male
             };
 
             var ex = await Assert.ThrowsAsync<AggregateFieldValidationException>(() =>
@@ -192,8 +192,8 @@ namespace AssetManagement.Application.Tests.Services
                 LastName = "B",
                 DateOfBirth = "2000-01-01",
                 JoinedDate = saturday.ToString("o"),
-                Type = UserTypeDtoEnum.Staff,
-                Gender = GenderDtoEnum.Male
+                Type = UserTypeDto.Staff,
+                Gender = GenderDto.Male
             };
 
             var ex = await Assert.ThrowsAsync<AggregateFieldValidationException>(() =>
@@ -214,7 +214,7 @@ namespace AssetManagement.Application.Tests.Services
                 Id = Guid.Parse(adminId),
                 Username = "admin",
                 Password = "hashed",
-                Location = LocationEnum.HCM
+                Location = Location.HCM
             };
 
             _mockUserRepository
@@ -238,8 +238,8 @@ namespace AssetManagement.Application.Tests.Services
                 LastName = "Vo",
                 DateOfBirth = "2000-01-01",
                 JoinedDate = "2023-05-22T00:00:00",
-                Type = UserTypeDtoEnum.Staff,
-                Gender = GenderDtoEnum.Male
+                Type = UserTypeDto.Staff,
+                Gender = GenderDto.Male
             };
 
             // Act
@@ -250,7 +250,7 @@ namespace AssetManagement.Application.Tests.Services
             Assert.Equal("SD0010", result.StaffCode); // từ SD0009 + 1
             Assert.Equal("vinhv", result.Username); // "Vinh" + "V" (từ "Vo")
             Assert.Equal("Vo Vinh", result.FullName);
-            Assert.Equal(LocationDtoEnum.HCM, result.Location);
+            Assert.Equal(LocationDto.HCM, result.Location);
         }
 
         #region CreateUserAsync Tests - Input Validation
@@ -280,8 +280,8 @@ namespace AssetManagement.Application.Tests.Services
                 LastName = lastName,
                 DateOfBirth = "2000-01-01",
                 JoinedDate = "2023-05-20T00:00:00",
-                Type = UserTypeDtoEnum.Staff,
-                Gender = GenderDtoEnum.Male
+                Type = UserTypeDto.Staff,
+                Gender = GenderDto.Male
             };
 
             // Act & Assert
@@ -310,8 +310,8 @@ namespace AssetManagement.Application.Tests.Services
                 LastName = "Doe",
                 DateOfBirth = dateOfBirth,
                 JoinedDate = "2023-05-20T00:00:00",
-                Type = UserTypeDtoEnum.Staff,
-                Gender = GenderDtoEnum.Male
+                Type = UserTypeDto.Staff,
+                Gender = GenderDto.Male
             };
 
             // Act & Assert
@@ -334,8 +334,8 @@ namespace AssetManagement.Application.Tests.Services
                 LastName = "Doe",
                 DateOfBirth = dateOfBirth,
                 JoinedDate = "2023-05-20T00:00:00",
-                Type = UserTypeDtoEnum.Staff,
-                Gender = GenderDtoEnum.Male
+                Type = UserTypeDto.Staff,
+                Gender = GenderDto.Male
             };
 
             // Act & Assert
@@ -358,8 +358,8 @@ namespace AssetManagement.Application.Tests.Services
                 LastName = "Doe",
                 DateOfBirth = dateOfBirth,
                 JoinedDate = "2023-05-20T00:00:00",
-                Type = UserTypeDtoEnum.Staff,
-                Gender = GenderDtoEnum.Male
+                Type = UserTypeDto.Staff,
+                Gender = GenderDto.Male
             }; // Act & Assert
             var exception = await Assert.ThrowsAsync<AggregateFieldValidationException>(
                 () => _userService.CreateUserAsync(Guid.NewGuid().ToString(), dto));
@@ -386,8 +386,8 @@ namespace AssetManagement.Application.Tests.Services
                 LastName = "Doe",
                 DateOfBirth = "2000-01-01", // 18+ years old
                 JoinedDate = joinedDate,
-                Type = UserTypeDtoEnum.Staff,
-                Gender = GenderDtoEnum.Male
+                Type = UserTypeDto.Staff,
+                Gender = GenderDto.Male
             };
 
             // Act & Assert
@@ -410,8 +410,8 @@ namespace AssetManagement.Application.Tests.Services
                 LastName = "Doe",
                 DateOfBirth = "2000-01-01",
                 JoinedDate = joinedDate,
-                Type = UserTypeDtoEnum.Staff,
-                Gender = GenderDtoEnum.Male
+                Type = UserTypeDto.Staff,
+                Gender = GenderDto.Male
             };
 
             // Act & Assert           
@@ -432,8 +432,8 @@ namespace AssetManagement.Application.Tests.Services
                 LastName = "Doe",
                 DateOfBirth = "2000-06-15", // June 15, 2000
                 JoinedDate = "2018-06-14T00:00:00", // One day before turning 18
-                Type = UserTypeDtoEnum.Staff,
-                Gender = GenderDtoEnum.Male
+                Type = UserTypeDto.Staff,
+                Gender = GenderDto.Male
             }; // Act & Assert
             var exception = await Assert.ThrowsAsync<AggregateFieldValidationException>(
                 () => _userService.CreateUserAsync(Guid.NewGuid().ToString(), dto));
@@ -455,8 +455,8 @@ namespace AssetManagement.Application.Tests.Services
                 LastName = "Doe",
                 DateOfBirth = "2000-01-01",
                 JoinedDate = joinedDate,
-                Type = UserTypeDtoEnum.Staff,
-                Gender = GenderDtoEnum.Male
+                Type = UserTypeDto.Staff,
+                Gender = GenderDto.Male
             };
 
             // Act & Assert            
@@ -483,11 +483,11 @@ namespace AssetManagement.Application.Tests.Services
                 LastName = "Doe",
                 DateOfBirth = "2000-01-01",
                 JoinedDate = "2023-05-22T00:00:00", // Monday
-                Type = (UserTypeDtoEnum)userType,
-                Gender = GenderDtoEnum.Male
+                Type = (UserTypeDto)userType,
+                Gender = GenderDto.Male
             };
 
-            // Act & Assert            
+            // Act & Assert
             var exception = await Assert.ThrowsAsync<AggregateFieldValidationException>(
                 () => _userService.CreateUserAsync(Guid.NewGuid().ToString(), dto));
 
@@ -507,8 +507,8 @@ namespace AssetManagement.Application.Tests.Services
                 LastName = "Doe",
                 DateOfBirth = "2000-01-01",
                 JoinedDate = "2023-05-22T00:00:00", // Monday
-                Type = UserTypeDtoEnum.Staff,
-                Gender = (GenderDtoEnum)gender
+                Type = UserTypeDto.Staff,
+                Gender = (GenderDto)gender
             };
 
             // Act & Assert
@@ -520,8 +520,9 @@ namespace AssetManagement.Application.Tests.Services
 
         #endregion
 
-        #region CreateUserAsync Tests - Admin Location and User Generation        [Fact]
+        #region CreateUserAsync Tests - Admin Location and User Generation
 
+        [Fact]
         public async Task CreateUserAsync_AdminNotFound_ThrowsUnauthorizedAccessException()
         {
             // Arrange
@@ -534,8 +535,8 @@ namespace AssetManagement.Application.Tests.Services
                 LastName = "Doe",
                 DateOfBirth = "2000-01-01",
                 JoinedDate = "2023-05-22T00:00:00", // Monday
-                Type = UserTypeDtoEnum.Staff,
-                Gender = GenderDtoEnum.Male
+                Type = UserTypeDto.Staff,
+                Gender = GenderDto.Male
             };
 
             // Act & Assert
@@ -556,7 +557,7 @@ namespace AssetManagement.Application.Tests.Services
                 Id = Guid.Parse(adminId),
                 Username = "admin1",
                 Password = "hashed_password",
-                Location = LocationEnum.HCM
+                Location = Location.HCM
             };
 
             _mockUserRepository.Setup(r => r.GetByIdAsync(It.IsAny<Guid>()))
@@ -578,8 +579,8 @@ namespace AssetManagement.Application.Tests.Services
                 LastName = "Vu",
                 DateOfBirth = "2000-01-01",
                 JoinedDate = "2023-05-22T00:00:00", // Monday
-                Type = UserTypeDtoEnum.Staff,
-                Gender = GenderDtoEnum.Male
+                Type = UserTypeDto.Staff,
+                Gender = GenderDto.Male
             };
 
             // Act
@@ -600,7 +601,7 @@ namespace AssetManagement.Application.Tests.Services
                 Id = Guid.Parse(adminId),
                 Username = "admin2",
                 Password = "hashed_password",
-                Location = LocationEnum.HCM
+                Location = Location.HCM
             };
 
             _mockUserRepository.Setup(r => r.GetByIdAsync(It.IsAny<Guid>()))
@@ -621,8 +622,8 @@ namespace AssetManagement.Application.Tests.Services
                 LastName = "Doe",
                 DateOfBirth = "2000-01-01",
                 JoinedDate = "2023-05-22T00:00:00", // Monday
-                Type = UserTypeDtoEnum.Staff,
-                Gender = GenderDtoEnum.Male
+                Type = UserTypeDto.Staff,
+                Gender = GenderDto.Male
             };
 
             // Act
@@ -642,8 +643,8 @@ namespace AssetManagement.Application.Tests.Services
                 Id = adminUserId,
                 Username = "admin",
                 Password = "Pa$$w0rd",
-                Type = UserTypeEnum.Admin,
-                Location = LocationEnum.DN
+                Type = UserType.Admin,
+                Location = Location.DN
             };
 
             _mockUserRepository.Setup(r => r.GetByIdAsync(It.IsAny<Guid>()))
@@ -664,15 +665,15 @@ namespace AssetManagement.Application.Tests.Services
                 LastName = "Doe",
                 DateOfBirth = "2000-01-01",
                 JoinedDate = "2023-05-22T00:00:00", // Monday
-                Type = UserTypeDtoEnum.Staff,
-                Gender = GenderDtoEnum.Male
+                Type = UserTypeDto.Staff,
+                Gender = GenderDto.Male
             };
 
             // Act
             var result = await _userService.CreateUserAsync(adminUserId.ToString(), dto);
 
             // Assert
-            Assert.Equal(LocationDtoEnum.DN, result.Location); // Should be set from admin
+            Assert.Equal(LocationDto.DN, result.Location); // Should be set from admin
         }
 
         #endregion
@@ -693,8 +694,8 @@ namespace AssetManagement.Application.Tests.Services
                 Id = adminUserId,
                 Username = "admin",
                 Password = "Pa$$w0rd",
-                Type = UserTypeEnum.Admin,
-                Location = LocationEnum.HN
+                Type = UserType.Admin,
+                Location = Location.HN
             };
 
             _mockUserRepository.Setup(r => r.GetByIdAsync(It.IsAny<Guid>()))
@@ -715,8 +716,8 @@ namespace AssetManagement.Application.Tests.Services
                 LastName = "Doe",
                 DateOfBirth = dateOfBirth,
                 JoinedDate = joinedDate,
-                Type = UserTypeDtoEnum.Admin, // Test with Admin role
-                Gender = GenderDtoEnum.Male
+                Type = UserTypeDto.Admin, // Test with Admin role
+                Gender = GenderDto.Male
             };
 
             // Act
@@ -726,7 +727,7 @@ namespace AssetManagement.Application.Tests.Services
             Assert.Equal("SD0002", result.StaffCode);
             Assert.Equal("johnd", result.Username);
             Assert.Equal("Doe John", result.FullName);
-            Assert.Equal(LocationDtoEnum.HN, result.Location);
+            Assert.Equal(LocationDto.HN, result.Location);
 
             _mockUserRepository.Verify(r => r.Add(It.IsAny<User>()), Times.Once);
         }
@@ -743,9 +744,9 @@ namespace AssetManagement.Application.Tests.Services
                 Password = "hashedPassword",
                 DateOfBirth = new DateTime(2000, 1, 1),
                 JoinedDate = new DateTimeOffset(2020, 1, 6, 0, 0, 0, TimeSpan.Zero), // Monday
-                Type = UserTypeEnum.Admin,
-                Gender = GenderEnum.Male,
-                Location = LocationEnum.HCM,
+                Type = UserType.Admin,
+                Gender = Gender.Male,
+                Location = Location.HCM,
                 IsActive = true,
                 CreatedBy = Guid.NewGuid(),
                 CreatedDate = DateTime.UtcNow.AddDays(-30)
@@ -940,8 +941,8 @@ namespace AssetManagement.Application.Tests.Services
 
             var dto = new UpdateUserRequestDto
             {
-                Type = (UserTypeDtoEnum)999, // Invalid enum value
-                Gender = (GenderDtoEnum)999 // Invalid enum value
+                Type = (UserTypeDto)999, // Invalid enum value
+                Gender = (GenderDto)999 // Invalid enum value
             };
 
             // Act & Assert
@@ -1024,8 +1025,8 @@ namespace AssetManagement.Application.Tests.Services
             var adminUserId = Guid.NewGuid().ToString();
             var staffCode = "SD0001";
             var user = CreateSampleUser(staffCode);
-            user.Type = UserTypeEnum.Staff;
-            user.Gender = GenderEnum.Female;
+            user.Type = UserType.Staff;
+            user.Gender = Gender.Female;
 
             var mockRepo = new Mock<IUserRepository>();
             mockRepo.Setup(x => x.GetByStaffCodeAsync(staffCode)).ReturnsAsync(user);
@@ -1034,8 +1035,8 @@ namespace AssetManagement.Application.Tests.Services
 
             var dto = new UpdateUserRequestDto
             {
-                Type = UserTypeDtoEnum.Admin,
-                Gender = GenderDtoEnum.Male
+                Type = UserTypeDto.Admin,
+                Gender = GenderDto.Male
             };
 
             // Act
@@ -1043,8 +1044,8 @@ namespace AssetManagement.Application.Tests.Services
 
             // Assert
             Assert.Equal(staffCode, result);
-            Assert.Equal(UserTypeEnum.Admin, user.Type);
-            Assert.Equal(GenderEnum.Male, user.Gender);
+            Assert.Equal(UserType.Admin, user.Type);
+            Assert.Equal(Gender.Male, user.Gender);
 
             mockRepo.Verify(r => r.Update(user), Times.Once);
         }
@@ -1068,8 +1069,8 @@ namespace AssetManagement.Application.Tests.Services
             {
                 DateOfBirth = newDateOfBirth.ToString("yyyy-MM-dd"),
                 JoinedDate = newJoinedDate.ToString("yyyy-MM-dd"),
-                Type = UserTypeDtoEnum.Staff,
-                Gender = GenderDtoEnum.Female
+                Type = UserTypeDto.Staff,
+                Gender = GenderDto.Female
             };
 
             // Act
@@ -1079,8 +1080,8 @@ namespace AssetManagement.Application.Tests.Services
             Assert.Equal(staffCode, result);
             Assert.Equal(newDateOfBirth, user.DateOfBirth);
             Assert.Equal(newJoinedDate.Date, user.JoinedDate.Date);
-            Assert.Equal(UserTypeEnum.Staff, user.Type);
-            Assert.Equal(GenderEnum.Female, user.Gender);
+            Assert.Equal(UserType.Staff, user.Type);
+            Assert.Equal(Gender.Female, user.Gender);
 
             mockRepo.Verify(r => r.Update(user), Times.Once);
         }
@@ -1137,7 +1138,7 @@ namespace AssetManagement.Application.Tests.Services
 
             // Act & Assert
             await Assert.ThrowsAsync<KeyNotFoundException>(() =>
-                service.DeleteUser(Guid.NewGuid(), staffCode));
+                service.DeleteUserAsync(Guid.NewGuid(), staffCode));
         }
 
         [Fact]
@@ -1159,7 +1160,7 @@ namespace AssetManagement.Application.Tests.Services
             var service = new UserService(mockRepo.Object, _passwordHasherMock.Object);
 
             // Act
-            var result = await service.DeleteUser(deletedBy, user.StaffCode);
+            var result = await service.DeleteUserAsync(deletedBy, user.StaffCode);
 
             // Assert
             Assert.Equal(user.StaffCode, result);
@@ -1187,14 +1188,14 @@ namespace AssetManagement.Application.Tests.Services
                 Password = "Pa$$w0rd",
                 DateOfBirth = new DateTime(1990, 1, 1),
                 JoinedDate = DateTimeOffset.Parse("2023-01-15"),
-                Type = UserTypeEnum.Staff,
-                Location = LocationEnum.HCM
+                Type = UserType.Staff,
+                Location = Location.HCM
             };
 
             _mockUserRepository.Setup(r => r.GetByStaffCodeAsync(staffCode)).ReturnsAsync(user);
 
             // Act
-            var result = await _userService.GetByStaffCodeAsync(staffCode);
+            var result = await _userService.GetUserByStaffCodeAsync(staffCode);
 
             // Assert
             Assert.NotNull(result);
@@ -1204,8 +1205,8 @@ namespace AssetManagement.Application.Tests.Services
             Assert.Equal("johndoe", result.Username);
             Assert.Equal("01/01/1990", result.DateOfBirth);
             Assert.Equal("15/01/2023", result.JoinedDate);
-            Assert.Equal((int)UserTypeEnum.Staff, result.Type);
-            Assert.Equal((int)LocationEnum.HCM, result.Location);
+            Assert.Equal((int)UserType.Staff, result.Type);
+            Assert.Equal((int)Location.HCM, result.Location);
         }
 
         [Fact]
@@ -1219,7 +1220,7 @@ namespace AssetManagement.Application.Tests.Services
 
             // Act & Assert
             var exception = await Assert.ThrowsAsync<KeyNotFoundException>(
-                () => _userService.GetByStaffCodeAsync(staffCode));
+                () => _userService.GetUserByStaffCodeAsync(staffCode));
 
             Assert.Contains(staffCode, exception.Message);
         }
@@ -1232,7 +1233,7 @@ namespace AssetManagement.Application.Tests.Services
 
             // Act & Assert
             var exception = await Assert.ThrowsAsync<ArgumentException>(
-                () => _userService.GetByStaffCodeAsync(emptyStaffCode));
+                () => _userService.GetUserByStaffCodeAsync(emptyStaffCode));
 
             Assert.Contains("Staff code cannot be empty", exception.Message);
             Assert.Equal("staffCode", exception.ParamName);
@@ -1246,7 +1247,7 @@ namespace AssetManagement.Application.Tests.Services
 
             // Act & Assert
             var exception = await Assert.ThrowsAsync<ArgumentException>(
-                () => _userService.GetByStaffCodeAsync(nullStaffCode!));
+                () => _userService.GetUserByStaffCodeAsync(nullStaffCode!));
 
             Assert.Contains("Staff code cannot be empty", exception.Message);
             Assert.Equal("staffCode", exception.ParamName);
@@ -1266,14 +1267,14 @@ namespace AssetManagement.Application.Tests.Services
                 Password = "Pa$$w0rd",
                 DateOfBirth = null, // Null date of birth
                 JoinedDate = DateTimeOffset.Parse("2023-01-15"),
-                Type = UserTypeEnum.Staff,
-                Location = LocationEnum.HCM
+                Type = UserType.Staff,
+                Location = Location.HCM
             };
 
             _mockUserRepository.Setup(r => r.GetByStaffCodeAsync(staffCode)).ReturnsAsync(user);
 
             // Act
-            var result = await _userService.GetByStaffCodeAsync(staffCode);
+            var result = await _userService.GetUserByStaffCodeAsync(staffCode);
 
             // Assert
             Assert.NotNull(result);
@@ -1294,14 +1295,14 @@ namespace AssetManagement.Application.Tests.Services
                 Password = "Pa$$w0rd",
                 DateOfBirth = new DateTime(1990, 1, 1),
                 JoinedDate = DateTimeOffset.Parse("2023-01-15"),
-                Type = UserTypeEnum.Staff,
-                Location = LocationEnum.HCM
+                Type = UserType.Staff,
+                Location = Location.HCM
             };
 
             _mockUserRepository.Setup(r => r.GetByStaffCodeAsync(staffCode)).ReturnsAsync(user);
 
             // Act
-            var result = await _userService.GetByStaffCodeAsync(staffCode);
+            var result = await _userService.GetUserByStaffCodeAsync(staffCode);
 
             // Assert
             Assert.NotNull(result);

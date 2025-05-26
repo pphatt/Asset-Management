@@ -8,6 +8,6 @@ public class CreateUserRequestDto
     public string LastName { get; set; } = string.Empty;
     public string DateOfBirth { get; set; } = string.Empty;
     public string JoinedDate { get; set; } = string.Empty;
-    public UserTypeDtoEnum Type { get; set; }
-    public GenderDtoEnum Gender { get; set; }
+    public UserTypeDto Type { get; set; }
+    public GenderDto Gender { get; set; }
 }

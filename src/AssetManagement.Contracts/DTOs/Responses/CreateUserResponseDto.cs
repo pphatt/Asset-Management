@@ -8,5 +8,5 @@ public class CreateUserResponseDto
     public string Username { get; set; } = null!;
     public string FullName { get; set; } = null!;
     public string Email { get; set; } = null!;
-    public LocationDtoEnum Location { get; set; }
+    public LocationDto Location { get; set; }
 }

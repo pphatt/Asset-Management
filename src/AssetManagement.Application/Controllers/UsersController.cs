@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using AssetManagement.Application.Extensions;
 using AssetManagement.Application.Services.Interfaces;
+using AssetManagement.Contracts.Common;
 using AssetManagement.Contracts.Common.Pagination;
 using AssetManagement.Contracts.DTOs;
 using AssetManagement.Contracts.DTOs.Requests;
@@ -53,7 +54,7 @@ namespace AssetManagement.Application.Controllers
                     return this.ToBadRequestApiResponse<UserDetailsDto>("Staff code cannot be empty");
                 }
 
-                var result = await _userService.GetByStaffCodeAsync(staffCode);
+                var result = await _userService.GetUserByStaffCodeAsync(staffCode);
                 return this.ToApiResponse(result, $"User with staff code {staffCode} found successfully");
             }
             catch (KeyNotFoundException ex)
@@ -110,7 +111,7 @@ namespace AssetManagement.Application.Controllers
         {
             var deletedBy = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? null;
 
-            var deleteUser = await _userService.DeleteUser(Guid.Parse(deletedBy!), staffCode);
+            var deleteUser = await _userService.DeleteUserAsync(Guid.Parse(deletedBy!), staffCode);
 
             return new ApiResponse<string>
             {

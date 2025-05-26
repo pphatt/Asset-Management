@@ -5,9 +5,9 @@ namespace AssetManagement.Application.Services.Interfaces;
 
 public interface IAuthService
 {
-    Task<LoginResponse> LoginAsync(LoginRequest loginRequest);
+    Task<LoginResponseDto> LoginAsync(LoginRequestDto loginRequest);
     // Task RegisterAsync(RegisterRequestDto registerRequest);
     Task LogoutAsync();
     bool VerifyToken(string token);
-    Task<ChangePasswordResponse> ChangePasswordAsync(string username, ChangePasswordRequest loginRequest);
+    Task<ChangePasswordResponseDto> ChangePasswordAsync(string username, ChangePasswordRequestDto loginRequest);
 }

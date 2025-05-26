@@ -19,7 +19,7 @@ export const schema = yup.object({
   password: yup
     .string()
     .required("Old Password is required")
-    .min(12, "New Password Format Error"),
+    .min(12, "Old Password Format Error"),
   newPassword: yup
     .string()
     .required("New Password is required")

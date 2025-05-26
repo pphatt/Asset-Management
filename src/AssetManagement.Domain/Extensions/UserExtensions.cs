@@ -19,7 +19,7 @@ namespace AssetManagement.Domain.Extensions
                 u.StaffCode.Contains(normalizedSearchTerm));
         }
 
-        public static IQueryable<User> ApplyFilters(this IQueryable<User> query, string? userType, LocationEnum userLocation)
+        public static IQueryable<User> ApplyFilters(this IQueryable<User> query, string? userType, Location userLocation)
         {
             // Apply location filter - admin can only see users from their own location
             query = query.Where(u => u.Location == userLocation);
@@ -30,8 +30,8 @@ namespace AssetManagement.Domain.Extensions
             query = userType.ToLower() switch
             {
                 "all" => query,
-                "staff" => query.Where(u => u.Type == UserTypeEnum.Staff),
-                "admin" => query.Where(u => u.Type == UserTypeEnum.Admin),
+                "staff" => query.Where(u => u.Type == UserType.Staff),
+                "admin" => query.Where(u => u.Type == UserType.Admin),
                 _ => query,
             };
 

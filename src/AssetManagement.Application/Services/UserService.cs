@@ -1,5 +1,4 @@
 using AssetManagement.Domain.Entities;
-using AssetManagement.Domain.Repositories;
 using AssetManagement.Domain.Extensions;
 using AssetManagement.Application.Services.Interfaces;
 using AssetManagement.Contracts.Common.Pagination;
@@ -14,6 +13,7 @@ using Microsoft.EntityFrameworkCore;
 using AssetManagement.Contracts.DTOs.Responses;
 using AssetManagement.Contracts.DTOs.Requests;
 using static AssetManagement.Contracts.Exceptions.ApiExceptionTypes;
+using AssetManagement.Domain.Interfaces.Repositories;
 
 namespace AssetManagement.Application.Services
 {
@@ -28,7 +28,7 @@ namespace AssetManagement.Application.Services
             _passwordHasher = passwordHasher;
         }
 
-        private async Task<LocationEnum> GetCurrentAdminLocation(string userId)
+        private async Task<Location> GetCurrentAdminLocation(string userId)
         {
             var adminUser = await _userRepository.GetByIdAsync(Guid.Parse(userId));
 
@@ -100,11 +100,11 @@ namespace AssetManagement.Application.Services
                 }
 
                 // Validate user type is specified
-                if (dto.Type == 0 || !Enum.IsDefined(typeof(UserTypeDtoEnum), dto.Type))
+                if (dto.Type == 0 || !Enum.IsDefined(typeof(UserTypeDto), dto.Type))
                     errors.Add(new FieldValidationException("Type", "Invalid user type value"));
 
                 // Validate gender is specified
-                if (dto.Gender == 0 || !Enum.IsDefined(typeof(GenderDtoEnum), dto.Gender))
+                if (dto.Gender == 0 || !Enum.IsDefined(typeof(GenderDto), dto.Gender))
                     errors.Add(new FieldValidationException("Gender", "Invalid gender value"));
             }
 
@@ -195,37 +195,6 @@ namespace AssetManagement.Application.Services
                 Username = user.Username,
                 FullName = $"{user.LastName} {user.FirstName}",
                 Location = MapLocationToDto(location)
-            };
-        }
-
-        private static UserTypeEnum MapUserType(UserTypeDtoEnum dto)
-        {
-            return dto switch
-            {
-                UserTypeDtoEnum.Admin => UserTypeEnum.Admin,
-                UserTypeDtoEnum.Staff => UserTypeEnum.Staff,
-                _ => throw new ArgumentOutOfRangeException()
-            };
-        }
-
-        private static GenderEnum MapGender(GenderDtoEnum dto)
-        {
-            return dto switch
-            {
-                GenderDtoEnum.Male => GenderEnum.Male,
-                GenderDtoEnum.Female => GenderEnum.Female,
-                _ => throw new ArgumentOutOfRangeException()
-            };
-        }
-
-        private static LocationDtoEnum MapLocationToDto(LocationEnum domain)
-        {
-            return domain switch
-            {
-                LocationEnum.HCM => LocationDtoEnum.HCM,
-                LocationEnum.DN => LocationDtoEnum.DN,
-                LocationEnum.HN => LocationDtoEnum.HN,
-                _ => throw new ArgumentOutOfRangeException()
             };
         }
 
@@ -355,13 +324,13 @@ namespace AssetManagement.Application.Services
             }
 
             // Validate user type if provided
-            if (dto.Type.HasValue && (dto.Type == 0 || !Enum.IsDefined(typeof(UserTypeDtoEnum), dto.Type.Value)))
+            if (dto.Type.HasValue && (dto.Type == 0 || !Enum.IsDefined(typeof(UserTypeDto), dto.Type.Value)))
             {
                 errors.Add(new FieldValidationException("Type", "Invalid user type value"));
             }
 
             // Validate gender if provided
-            if (dto.Gender.HasValue && (dto.Gender == 0 || !Enum.IsDefined(typeof(GenderDtoEnum), dto.Gender.Value)))
+            if (dto.Gender.HasValue && (dto.Gender == 0 || !Enum.IsDefined(typeof(GenderDto), dto.Gender.Value)))
             {
                 errors.Add(new FieldValidationException("Gender", "Invalid gender value"));
             }
@@ -393,7 +362,7 @@ namespace AssetManagement.Application.Services
             return existingUser.StaffCode;
         }
 
-        public async Task<string> DeleteUser(Guid deletedBy, string staffCode)
+        public async Task<string> DeleteUserAsync(Guid deletedBy, string staffCode)
         {
             // Check if the user exists
             var user = await _userRepository.GetAll()
@@ -412,7 +381,7 @@ namespace AssetManagement.Application.Services
             return staffCode;
         }
 
-        public async Task<UserDetailsDto> GetByStaffCodeAsync(string staffCode)
+        public async Task<UserDetailsDto> GetUserByStaffCodeAsync(string staffCode)
         {
             if (string.IsNullOrWhiteSpace(staffCode))
             {
@@ -438,6 +407,38 @@ namespace AssetManagement.Application.Services
                 Location = (int)user.Location,
             };
         }
+
         // TODO: create a validate user method here to be shared between both create and edit user methods
+
+        private static UserType MapUserType(UserTypeDto dto)
+        {
+            return dto switch
+            {
+                UserTypeDto.Admin => UserType.Admin,
+                UserTypeDto.Staff => UserType.Staff,
+                _ => throw new ArgumentOutOfRangeException()
+            };
+        }
+
+        private static Gender MapGender(GenderDto dto)
+        {
+            return dto switch
+            {
+                GenderDto.Male => Gender.Male,
+                GenderDto.Female => Gender.Female,
+                _ => throw new ArgumentOutOfRangeException()
+            };
+        }
+
+        private static LocationDto MapLocationToDto(Location domain)
+        {
+            return domain switch
+            {
+                Location.HCM => LocationDto.HCM,
+                Location.DN => LocationDto.DN,
+                Location.HN => LocationDto.HN,
+                _ => throw new ArgumentOutOfRangeException()
+            };
+        }
     }
 }

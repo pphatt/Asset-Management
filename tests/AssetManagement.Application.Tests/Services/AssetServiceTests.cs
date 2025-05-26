@@ -3,7 +3,7 @@ using AssetManagement.Application.Services;
 using AssetManagement.Contracts.Parameters;
 using AssetManagement.Domain.Entities;
 using AssetManagement.Domain.Enums;
-using AssetManagement.Domain.Repositories;
+using AssetManagement.Domain.Interfaces.Repositories;
 using MockQueryable;
 using Moq;
 
@@ -35,8 +35,8 @@ public class AssetServiceTests
 
         var assets = new List<Asset>
         {
-            new Asset { Id = Guid.NewGuid(), AssetCode = "A001", Name = "Laptop A", State = AssetStateEnum.Available, Category = category },
-            new Asset { Id = Guid.NewGuid(), AssetCode = "A002", Name = "Laptop B", State = AssetStateEnum.Available, Category = category }
+            new Asset { Id = Guid.NewGuid(), Code = "A001", Name = "Laptop A", State = AssetState.Available, Category = category },
+            new Asset { Id = Guid.NewGuid(), Code = "A002", Name = "Laptop B", State = AssetState.Available, Category = category }
         };
 
         // Use MockQueryable to build the mock
@@ -68,12 +68,12 @@ public class AssetServiceTests
         var asset = new Asset
         {
             Id = assetId,
-            AssetCode = "A001",
+            Code = "A001",
             Name = "Laptop A",
-            State = AssetStateEnum.Available,
+            State = AssetState.Available,
             Category = new Category { Id = categoryId, Name = "Electronics" },
-            InstallDate = new DateTime(2023, 1, 1),
-            Location = LocationEnum.HCM,
+            InstalledDate = new DateTime(2023, 1, 1),
+            Location = Location.HCM,
             Specification = "Intel i7, 16GB RAM"
         };
 
@@ -85,17 +85,17 @@ public class AssetServiceTests
             .ReturnsAsync(asset);
 
         // Act
-        var result = await _assetService.GetAssetAsync(assetId);
+        var result = await _assetService.GetAssetByIdAsync(assetId);
 
         // Assert
         Assert.NotNull(result);
         Assert.Equal(assetId, result.Id);
-        Assert.Equal("A001", result.AssetCode);
+        Assert.Equal("A001", result.Code);
         Assert.Equal("Laptop A", result.Name);
         Assert.Equal("Available", result.State);
         Assert.Equal("Electronics", result.CategoryName);
         Assert.Equal("HCM", result.Location);
-        Assert.Equal(new DateTime(2023, 1, 1), result.InstallDate);
+        Assert.Equal(new DateTime(2023, 1, 1), result.InstalledDate);
         Assert.Equal("Intel i7, 16GB RAM", result.Specification);
     }
 
@@ -113,7 +113,7 @@ public class AssetServiceTests
             .ReturnsAsync((Asset?)null);
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<KeyNotFoundException>(() => _assetService.GetAssetAsync(assetId));
+        var exception = await Assert.ThrowsAsync<KeyNotFoundException>(() => _assetService.GetAssetByIdAsync(assetId));
         Assert.Equal($"Cannot find asset with id {assetId}", exception.Message);
     }
     
@@ -131,11 +131,11 @@ public class AssetServiceTests
         
         var assets = new List<Asset>
         {
-            new Asset { Id = Guid.NewGuid(), AssetCode = "A001", Name = "Asset Assigned", State = AssetStateEnum.Assigned, Category = category },
-            new Asset { Id = Guid.NewGuid(), AssetCode = "A002", Name = "Asset Available", State = AssetStateEnum.Available, Category = category },
-            new Asset { Id = Guid.NewGuid(), AssetCode = "A003", Name = "Asset NotAvailable", State = AssetStateEnum.NotAvailable, Category = category },
-            new Asset { Id = Guid.NewGuid(), AssetCode = "A004", Name = "Asset WaitingForRecycling", State = AssetStateEnum.WaitingForRecycling, Category = category },
-            new Asset { Id = Guid.NewGuid(), AssetCode = "A005", Name = "Asset Recycled", State = AssetStateEnum.Recycled, Category = category }
+            new Asset { Id = Guid.NewGuid(), Code = "A001", Name = "Asset Assigned", State = AssetState.Assigned, Category = category },
+            new Asset { Id = Guid.NewGuid(), Code = "A002", Name = "Asset Available", State = AssetState.Available, Category = category },
+            new Asset { Id = Guid.NewGuid(), Code = "A003", Name = "Asset NotAvailable", State = AssetState.NotAvailable, Category = category },
+            new Asset { Id = Guid.NewGuid(), Code = "A004", Name = "Asset WaitingForRecycling", State = AssetState.WaitingForRecycling, Category = category },
+            new Asset { Id = Guid.NewGuid(), Code = "A005", Name = "Asset Recycled", State = AssetState.Recycled, Category = category }
         };
         
         // Use MockQueryable to build the mock

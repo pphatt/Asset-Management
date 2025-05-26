@@ -2,9 +2,9 @@ using Microsoft.AspNetCore.Mvc;
 using AssetManagement.Application.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using AssetManagement.Application.Services.Interfaces;
-using AssetManagement.Contracts.DTOs;
 using AssetManagement.Contracts.DTOs.Responses;
 using AssetManagement.Contracts.DTOs.Requests;
+using AssetManagement.Contracts.Common;
 
 namespace AssetManagement.Application.Controllers;
 
@@ -19,7 +19,7 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("login")]
-    public async Task<ActionResult<ApiResponse<LoginResponse>>> Login([FromBody] LoginRequest request)
+    public async Task<ActionResult<ApiResponse<LoginResponseDto>>> Login([FromBody] LoginRequestDto request)
     {
         var loginResponse = await _authService.LoginAsync(request);
         return this.ToApiResponse(loginResponse);
@@ -27,12 +27,12 @@ public class AuthController : ControllerBase
 
     [HttpPost("password/change")]
     [Authorize]
-    public async Task<ActionResult<ApiResponse<ChangePasswordResponse>>> ChangePassword([FromBody] ChangePasswordRequest request)
+    public async Task<ActionResult<ApiResponse<ChangePasswordResponseDto>>> ChangePassword([FromBody] ChangePasswordRequestDto request)
     {
         var username = User.Identity?.Name;
         if (string.IsNullOrEmpty(username))
         {
-            return this.ToBadRequestApiResponse<ChangePasswordResponse>("User not authenticated");
+            return this.ToBadRequestApiResponse<ChangePasswordResponseDto>("User not authenticated");
         }
         var response = await _authService.ChangePasswordAsync(username, request);
         return this.ToApiResponse(response);

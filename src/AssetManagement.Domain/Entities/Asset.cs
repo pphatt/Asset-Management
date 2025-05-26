@@ -3,19 +3,19 @@
 namespace AssetManagement.Domain.Entities;
 public class Asset : BaseEntity
 {
-    public string? AssetCode { get; set; }
+    public string Code { get; set; } = null!;
+
+    public string Name { get; set; } = null!;
     
-    public string? Name { get; set; }
+    public AssetState State { get; set; }
     
-    public AssetStateEnum State { get; set; }
+    public DateTimeOffset InstalledDate { get; set; }
     
-    public DateTimeOffset InstallDate { get; set; }
-    
-    public LocationEnum Location { get; set; }
-    
-    public string? Specification { get; set; }
+    public Location Location { get; set; }
+
+    public string Specification { get; set; } = string.Empty;
 
     public Guid CategoryId { get; set; }
 
-    public virtual Category? Category { get; set; }
+    public Category Category { get; set; } = null!;
 }

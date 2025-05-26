@@ -14,7 +14,7 @@ public class CategoryConfiguration : IEntityTypeConfiguration<Category>
         {
             Id = new Guid("123e4567-e89b-12d3-a456-426614174007"),
             Name = "Monitor",
-            Slug = "Monitor",
+            Prefix = "MO",
             CreatedDate = new DateTime(2025, 5, 1, 0, 0, 0, DateTimeKind.Utc)
         }
     ];
