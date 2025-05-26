@@ -13,14 +13,13 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { useMutation } from "@tanstack/react-query";
 import { PasswordUpdateRequest } from "@/types/auth.type.ts";
 import authApi from "@/apis/auth.api.ts";
-import { toast } from "react-toastify";
 import { jwtDecode, JwtPayload } from "jwt-decode";
 import { setCookie } from "@/utils/auth.ts";
 import { useAppContext } from "@/hooks/use-app-context.tsx";
 import { Button } from "@/components/ui/button.tsx";
 import styles from "@/pages/UpdatePassword/styles.module.css";
-import { X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 
 type FormData = Pick<Schema, "newPassword" | "password" | "confirmPassword">;
 const passwordSchema = schema.pick([
@@ -35,6 +34,8 @@ type JWTPayload = {
 
 export default function ResetPassword() {
     const navigate = useNavigate();
+    const [result, setResult] = useState(false);
+    const [messageError, setMessageError] = useState("");
 
     const {
         handleSubmit,
@@ -51,9 +52,8 @@ export default function ResetPassword() {
 
     const { isPending: isLoading, mutate } = useMutation({
         mutationFn: (body: PasswordUpdateRequest) => authApi.changePassword(body),
-        onError: (err: any) => {
-            const errMsg = err.response.data.errors;
-            toast.error(errMsg[0] || "error when change password");
+        onError: () => {
+            setMessageError("Password is incorrect");
         },
     });
 
@@ -97,7 +97,8 @@ export default function ResetPassword() {
                     setCookie("profile", JSON.stringify(user), expiredTime);
 
                     setIsAuthenticated(true);
-                    toast.success("Change password successfully!");
+
+                    setResult(true);
                 },
             },
         );
@@ -111,144 +112,162 @@ export default function ResetPassword() {
                         className={`flex justify-between items-center text-lg tracking-tight w-full ${styles["card-title"]}`}
                     >
                         <span>Change password</span>
-                        <X className="text-black cursor-pointer" size={20} onClick={() => navigate(`${location.pathname}`, { replace: true })} />
                     </CardTitle>
                 </CardHeader>
 
                 <CardContent className={styles["card-content"]}>
-                    <p className="text-sm text-gray-600 mb-4">
-                        This is the first time you logged in. You have to change your
-                        password to continue.
-                    </p>
 
-                    <form className="relative" onSubmit={handleSubmit(onSubmit)}>
-                        <div className={styles["form-row"]}>
-                            <Label htmlFor={"password"} className={styles["form-label"]}>
-                                Old password
-                            </Label>
+                    {
+                        !result ? (
+                            <form className="relative" onSubmit={handleSubmit(onSubmit)}>
+                                <div className={styles["form-row"]}>
+                                    <Label htmlFor={"password"} className={styles["form-label"]}>
+                                        Old password
+                                    </Label>
 
-                            <div
-                                style={{
-                                    display: "flex",
-                                    flexDirection: "column",
-                                    width: "100%",
-                                }}
-                            >
-                                <Controller
-                                    control={control}
-                                    name="password"
-                                    render={({ field }) => (
-                                        <PasswordInput
-                                            id={"password"}
-                                            className={`${styles["form-input"]}`}
-                                            {...field}
+                                    <div
+                                        style={{
+                                            display: "flex",
+                                            flexDirection: "column",
+                                            width: "100%",
+                                        }}
+                                    >
+                                        <Controller
+                                            control={control}
+                                            name="password"
+                                            render={({ field }) => (
+                                                <PasswordInput
+                                                    id={"password"}
+                                                    className={`${styles["form-input"]}`}
+                                                    {...field}
+                                                />
+                                            )}
                                         />
-                                    )}
-                                />
 
-                                <div
-                                    style={{
-                                        width: "222px",
-                                        height: "20px",
-                                        marginTop: "calc(var(--spacing) * 2)",
-                                    }}
-                                    className="mt-2 text-sm font-medium text-red-500"
-                                >
-                                    {errors?.password?.message}
+                                        <div
+                                            style={{
+                                                width: "222px",
+                                                height: "20px",
+                                                marginTop: "calc(var(--spacing) * 2)",
+                                            }}
+                                            className="mt-2 text-sm font-medium text-red-500"
+                                        >
+                                            {errors?.password?.message || messageError}
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                        </div>
 
-                        <div className={styles["form-row"]}>
-                            <Label htmlFor={"password"} className={styles["form-label"]}>
-                                New password
-                            </Label>
+                                <div className={styles["form-row"]}>
+                                    <Label htmlFor={"password"} className={styles["form-label"]}>
+                                        New password
+                                    </Label>
 
-                            <div
-                                style={{
-                                    display: "flex",
-                                    flexDirection: "column",
-                                    width: "100%",
-                                }}
-                            >
-                                <Controller
-                                    control={control}
-                                    name="newPassword"
-                                    render={({ field }) => (
-                                        <PasswordInput
-                                            id={"password"}
-                                            className={`${styles["form-input"]}`}
-                                            {...field}
+                                    <div
+                                        style={{
+                                            display: "flex",
+                                            flexDirection: "column",
+                                            width: "100%",
+                                        }}
+                                    >
+                                        <Controller
+                                            control={control}
+                                            name="newPassword"
+                                            render={({ field }) => (
+                                                <PasswordInput
+                                                    id={"password"}
+                                                    className={`${styles["form-input"]}`}
+                                                    {...field}
+                                                />
+                                            )}
                                         />
-                                    )}
-                                />
 
-                                <div
-                                    style={{
-                                        width: "222px",
-                                        height: "20px",
-                                        marginTop: "calc(var(--spacing) * 2)",
-                                    }}
-                                    className="mt-2 text-sm font-medium text-red-500"
-                                >
-                                    {errors?.newPassword?.message}
+                                        <div
+                                            style={{
+                                                width: "222px",
+                                                height: "20px",
+                                                marginTop: "calc(var(--spacing) * 2)",
+                                            }}
+                                            className="mt-2 text-sm font-medium text-red-500"
+                                        >
+                                            {errors?.newPassword?.message}
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                        </div>
 
-                        <div className={styles["form-row"]}>
-                            <Label htmlFor={"password"} className={styles["form-label"]}>
-                                Confirm password
-                            </Label>
+                                <div className={styles["form-row"]}>
+                                    <Label htmlFor={"password"} className={styles["form-label"]}>
+                                        Confirm password
+                                    </Label>
 
-                            <div
-                                style={{
-                                    display: "flex",
-                                    flexDirection: "column",
-                                    width: "100%",
-                                }}
-                            >
-                                <Controller
-                                    control={control}
-                                    name="confirmPassword"
-                                    render={({ field }) => (
-                                        <PasswordInput
-                                            id={"password"}
-                                            className={`${styles["form-input"]}`}
-                                            {...field}
+                                    <div
+                                        style={{
+                                            display: "flex",
+                                            flexDirection: "column",
+                                            width: "100%",
+                                        }}
+                                    >
+                                        <Controller
+                                            control={control}
+                                            name="confirmPassword"
+                                            render={({ field }) => (
+                                                <PasswordInput
+                                                    id={"password"}
+                                                    className={`${styles["form-input"]}`}
+                                                    {...field}
+                                                />
+                                            )}
                                         />
-                                    )}
-                                />
 
-                                <div
-                                    style={{
-                                        width: "222px",
-                                        height: "20px",
-                                        marginTop: "calc(var(--spacing) * 2)",
-                                    }}
-                                    className="mt-2 text-sm font-medium text-red-500"
-                                >
-                                    {errors?.confirmPassword?.message}
+                                        <div
+                                            style={{
+                                                width: "222px",
+                                                height: "20px",
+                                                marginTop: "calc(var(--spacing) * 2)",
+                                            }}
+                                            className="mt-2 text-sm font-medium text-red-500"
+                                        >
+                                            {errors?.confirmPassword?.message}
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                        </div>
 
-                        <div className={styles["login-btn-wrapper"]}>
-                            <Button
-                                type="submit"
-                                className={styles["login-btn"]}
-                                disabled={
-                                    Object.keys(errors).length > 0 ||
-                                    !getValues("password") ||
-                                    !getValues("newPassword") ||
-                                    !getValues("confirmPassword") ||
-                                    isLoading
-                                }
-                            >
-                                Save
-                            </Button>
-                        </div>
-                    </form>
+                                <div className={styles["login-btn-wrapper"]}>
+                                    <Button
+                                        type="submit"
+                                        className={styles["login-btn"]}
+                                        disabled={
+                                            Object.keys(errors).length > 0 ||
+                                            !getValues("password") ||
+                                            !getValues("newPassword") ||
+                                            !getValues("confirmPassword") ||
+                                            isLoading
+                                        }
+                                    >
+                                        Save
+                                    </Button>
+                                    <Button className="ml-2 bg-white text-black border"
+                                        variant={"ghost"}
+                                        onClick={() => navigate(`${location.pathname}`, { replace: true })}
+                                    >
+                                        Cancel
+                                    </Button>
+                                </div>
+                            </form>
+                        ) : (
+                            <div>
+                                <div className="text-center mt-2.5">Your password has been changed successfully!</div>
+                                <Button className="ml-2 bg-white text-black border float-end mt-10"
+                                    variant={"ghost"}
+                                    onClick={() => navigate(`${location.pathname}`, { replace: true })}
+                                >
+                                    Close
+                                </Button>
+                            </div>
+                        )
+                    }
+
+
+
                 </CardContent>
             </Card>
         </div>
