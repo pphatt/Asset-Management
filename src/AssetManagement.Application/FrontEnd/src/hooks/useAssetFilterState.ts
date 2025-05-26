@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react';
-import { PAGINATION, STORAGE_KEYS } from '../constants/user-params';
+import { STORAGE_KEYS } from '../constants/user-params';
 import { useEffect } from 'react';
-import { ASSET_SORT_OPTIONS } from '@/constants/asset-params';
+import { ASSET_SORT_OPTIONS, PAGINATION } from '@/constants/asset-params';
 import { IAssetParams } from '@/types/asset.type';
 
 function useAssetFilterState() {

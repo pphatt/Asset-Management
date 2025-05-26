@@ -58,6 +58,6 @@ export const ASSET_CATEGORY_OPTIONS = [
 ];
 
 export const PAGINATION = {
-    DEFAULT_PAGE_SIZE: 10,
+    DEFAULT_PAGE_SIZE: 20,
     DEFAULT_PAGE_NUMBER: 1,
 };
