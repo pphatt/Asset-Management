@@ -2,57 +2,71 @@ import { ASSET_STATE_OPTIONS, AssetState } from '../../constants/asset-params';
 import useClickOutside from '../../hooks/useClickOutside';
 
 const AssetStateDropdown: React.FC<{
-    filterState: AssetState;
-    setFilterState: (state: AssetState) => void;
+    filterStates: AssetState[];
+    handleFilterByStates: (state: AssetState[]) => void;
+    handleClearState: (state: AssetState) => void;
     show: boolean;
     setShow: (show: boolean) => void;
     dropdownRef: React.RefObject<HTMLDivElement>;
-}> = ({ filterState, setFilterState, show, setShow, dropdownRef }) => {
+}> = ({ filterStates, handleFilterByStates, handleClearState: handleClearStates, show, setShow, dropdownRef }) => {
     useClickOutside(dropdownRef, () => setShow(false));
 
-    const getFilterState = () => {
-        const option = ASSET_STATE_OPTIONS.find((opt) => opt.value === filterState);
-        return option ? option.label : 'State';
+    const handleCheckboxChange = (value: AssetState) => {
+        if (filterStates.includes(value)) {
+            handleClearStates(value);
+        } else {
+            handleFilterByStates([...filterStates, value]);
+        }
     };
 
     return (
         <div className="relative" ref={dropdownRef}>
-            <button
-                type="button"
-                onClick={() => setShow(!show)}
-                className="flex items-center justify-between w-[220px] h-[34px] text-sm py-1.5 px-2 border border-tertiary rounded bg-white hover:bg-gray-50"
-            >
-                <span className="truncate">{getFilterState()}</span>
-                <div className="flex items-center">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="mr-1">
+            <div className="flex items-center justify-between w-[240px]">
+                <input
+                    type="text"
+                    readOnly
+                    placeholder="State"
+                    className="w-full h-[34px] text-sm py-1.5 px-2 border border-quaternary rounded-l bg-white cursor-pointer"
+                    onClick={() => setShow(!show)}
+                />
+                <button
+                    type="button"
+                    onClick={() => setShow(!show)}
+                    className="flex items-center justify-center h-[34px] w-[34px] border border-l-0 border-quaternary rounded-r bg-white hover:bg-gray-50"
+                >
+                    <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                        stroke="black"
+                        strokeWidth="2"
+                    >
                         <path
                             d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"
-                            stroke="currentColor"
-                            strokeWidth="2"
                             strokeLinecap="round"
                             strokeLinejoin="round"
                         />
                     </svg>
-                </div>
-            </button>
+                </button>
+            </div>
             {show && (
                 <div className="absolute top-full left-0 mt-1 w-[240px] bg-white border border-gray-200 rounded shadow-lg z-50">
                     <div className="py-1">
                         {ASSET_STATE_OPTIONS.map((option: { value: AssetState; label: string }) => (
-                            <button
+                            <label
                                 key={option.value}
-                                className={`w-full text-left px-3 py-2 text-sm ${
-                                    filterState === option.value
-                                        ? 'bg-gray-100 font-medium'
-                                        : 'hover:bg-gray-50'
-                                }`}
-                                onClick={() => {
-                                    setFilterState(option.value);
-                                    setShow(false);
-                                }}
+                                className="flex items-center w-full px-3 py-2 text-sm hover:bg-gray-50 cursor-pointer"
                             >
+                                <input
+                                    type="checkbox"
+                                    className="mr-2 h-4 w-4 accent-red-600"
+                                    checked={filterStates.includes(option.value)}
+                                    onChange={() => handleCheckboxChange(option.value)}
+                                />
                                 {option.label}
-                            </button>
+                            </label>
                         ))}
                     </div>
                 </div>

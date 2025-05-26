@@ -18,6 +18,8 @@ function useAssetFilterState() {
     }, []);
 
     const [queryParams, setQueryParams] = useState<IAssetParams>({
+        assetStates: ['Assigned', 'Available', 'NotAvailable'],
+        assetCategories: [],
         pageNumber: getSavedFilterState()?.pageNumber || PAGINATION.DEFAULT_PAGE_NUMBER,
         pageSize: PAGINATION.DEFAULT_PAGE_SIZE,
         sortBy: getSavedFilterState()?.sortBy || `${ASSET_SORT_OPTIONS.ASSET_CODE}:asc`,

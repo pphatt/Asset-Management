@@ -26,7 +26,7 @@ namespace AssetManagement.Application.Services
                 .AsNoTracking()
                 .Include(x => x.Category)
                 .ApplyAssetSearch(queryParams.SearchTerm)
-                .ApplyAssetFilters(queryParams.AssetState, queryParams.AssetCategory)
+                .ApplyAssetFilters(queryParams.AssetStates, queryParams.AssetCategories)
                 .ApplyAssetSorting(queryParams.GetSortCriteria());
 
             int total = await query.CountAsync();
@@ -54,12 +54,12 @@ namespace AssetManagement.Application.Services
                 new CancellationToken(),
                 false,
                 x => x.Category);
-            
-            if(asset == null)
+
+            if (asset == null)
             {
                 throw new KeyNotFoundException($"Cannot find asset with id {id}");
             }
-            
+
             var result = new AssetDetailsDto(
                 asset.Id,
                 asset.AssetCode,
@@ -71,8 +71,8 @@ namespace AssetManagement.Application.Services
                 : asset.State == AssetStateEnum.Recycled ? AssetStateEnum.Recycled.GetDisplayName() : "",
                 asset.Category.Name,
                 asset.InstallDate,
-                asset.Location == LocationEnum.HCM ? LocationEnum.HCM.GetDisplayName() 
-                : asset.Location == LocationEnum.DN ? LocationEnum.DN.GetDisplayName() 
+                asset.Location == LocationEnum.HCM ? LocationEnum.HCM.GetDisplayName()
+                : asset.Location == LocationEnum.DN ? LocationEnum.DN.GetDisplayName()
                 : asset.Location == LocationEnum.HN ? LocationEnum.HN.GetDisplayName() : "",
                 asset.Specification);
 

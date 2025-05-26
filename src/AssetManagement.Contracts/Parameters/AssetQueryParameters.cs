@@ -1,6 +1,6 @@
 namespace AssetManagement.Contracts.Parameters;
 
-public class AssetQueryParameters: PaginationParameters
+public class AssetQueryParameters : PaginationParameters
 {
     // <summary>
     // The search term to filter entities
@@ -15,12 +15,12 @@ public class AssetQueryParameters: PaginationParameters
     // <summary>
     // The asset state for filtering entities
     // </summary>
-    public List<string>? AssetState { get; set; }
+    public List<string>? AssetStates { get; set; }
 
     // <summary>
     // The asset category for filtering entities
     // </summary>
-    public List<string>? AssetCategory { get; set; }
+    public List<string>? AssetCategories { get; set; }
 
     // <summary>
     // Parses the SortBy string into a list of (property, order) tuples
@@ -43,5 +43,5 @@ public class AssetQueryParameters: PaginationParameters
             })
             .ToList();
     }
-    
+
 }

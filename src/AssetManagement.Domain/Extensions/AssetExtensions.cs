@@ -17,11 +17,11 @@ public static class AssetExtensions
             u.Name.Trim().ToLower().Contains(normalizedSearchTerm));
     }
 
-    public static IQueryable<Asset> ApplyAssetFilters(this IQueryable<Asset> query, List<string>? assetStates, List<string>? assetCategory)
+    public static IQueryable<Asset> ApplyAssetFilters(this IQueryable<Asset> query, List<string>? assetStates, List<string>? assetCategories)
     {
         if (assetStates != null && assetStates.Count > 0 && !assetStates.Contains("All"))
         {
-            query = query.Where(asset => assetStates.Contains(asset.State == 
+            query = query.Where(asset => assetStates.Contains(asset.State ==
                 AssetStateEnum.Assigned ? "Assigned"
                 : asset.State == AssetStateEnum.Available ? "Available"
                 : asset.State == AssetStateEnum.NotAvailable ? "NotAvailable"
@@ -29,9 +29,9 @@ public static class AssetExtensions
                 : asset.State == AssetStateEnum.Recycled ? "Recycled" : ""));
         }
 
-        if (assetCategory != null && assetCategory.Count > 0)
+        if (assetCategories != null && assetCategories.Count > 0)
         {
-            query = query.Where(a => assetCategory.Contains(a.Category.Slug));
+            query = query.Where(a => assetCategories.Contains(a.Category.Slug));
         }
 
         return query;

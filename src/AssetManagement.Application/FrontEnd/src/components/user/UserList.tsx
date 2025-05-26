@@ -7,7 +7,7 @@ import useUserFilterState from '../../hooks/useUserFilterState';
 import { IUserDetails, User } from '../../types/user.type';
 import ActiveFilters from './ActiveFilters';
 import DisableUserPopup from './DisableUserPopup';
-import Pagination from './Pagination';
+import Pagination from '../common/Pagination';
 import UserDetailsPopup from './UserDetailsPopup';
 import UserTable from './UserTable';
 import UserTypeDropdown from './UserTypeDropdown';
