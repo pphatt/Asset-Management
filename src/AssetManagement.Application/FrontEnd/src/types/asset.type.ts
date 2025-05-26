@@ -1,10 +1,17 @@
 // Define asset states for the application
 
 import { AssetState } from "../constants/asset-params";
+import { LocationEnum, UserTypeEnum } from "@/types/user.type.ts";
 
-export type IAssetState = "Assigned" | "Available" | "NotAvailable" | "WaitingRecycling" | "Recycled";
+export type IAssetState =
+  | "Assigned"
+  | "Available"
+  | "NotAvailable"
+  | "WaitingRecycling"
+  | "Recycled";
 
 export interface IAsset {
+  id: string;
   assetCode: string;
   name: string;
   categoryName: string;
@@ -25,4 +32,24 @@ export interface IAssetParams {
   pageNumber?: number;
   pageSize?: number;
   location?: string; // Add location for filtering by admin location
+}
+
+export interface IAssetDetails {
+  id: string;
+  name: string;
+  assetCode: string;
+  installDate: string;
+  type: UserTypeEnum;
+  categoryName: string;
+  specification: string;
+  location: LocationEnum;
+  state: AssetState;
+  history: IAssetDetailsHistory[];
+}
+
+export interface IAssetDetailsHistory {
+  date: string;
+  assignedTo: string;
+  assignedBy: string;
+  returnedDate: string;
 }

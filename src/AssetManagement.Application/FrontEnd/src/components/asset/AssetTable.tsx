@@ -1,19 +1,22 @@
-import { IAsset } from '@/types/asset.type';
-import TableSkeleton from '../common/TableSkeleton';
+import { IAsset } from "@/types/asset.type";
+import TableSkeleton from "../common/TableSkeleton";
 
 const AssetTable: React.FC<{
   assets: IAsset[] | undefined;
   isLoading: boolean;
   sortBy: string | undefined;
   onSort: (key: string) => void;
-}> = ({ assets, isLoading, sortBy, onSort }) => {
+  onViewDetails: (assetCode: string) => void;
+}> = ({ assets, isLoading, sortBy, onSort, onViewDetails }) => {
   const columns = [
-    { key: 'code', label: 'Asset Code', sortable: true },
-    { key: 'name', label: 'Asset Name', sortable: true },
-    { key: 'category', label: 'Category', sortable: true },
-    { key: 'state', label: 'State', sortable: true },
+    { key: "code", label: "Asset Code", sortable: true },
+    { key: "name", label: "Asset Name", sortable: true },
+    { key: "category", label: "Category", sortable: true },
+    { key: "state", label: "State", sortable: true },
   ];
+
   if (isLoading) return <TableSkeleton rows={5} columns={6} />;
+
   return (
     <table className="w-full text-sm border-collapse border-spacing-0">
       <thead>
@@ -23,16 +26,16 @@ const AssetTable: React.FC<{
               key={col.key}
               className={`text-left relative py-2 after:absolute after:bottom-0 after:left-0 after:w-[calc(100%-20px)] after:h-[2px] ${
                 sortBy?.startsWith(`${col.key}:`)
-                  ? 'after:bg-gray-600 font-semibold'
-                  : 'after:bg-gray-400 font-medium'
-              } ${col.sortable ? 'cursor-pointer' : ''}`}
+                  ? "after:bg-gray-600 font-semibold"
+                  : "after:bg-gray-400 font-medium"
+              } ${col.sortable ? "cursor-pointer" : ""}`}
               onClick={col.sortable ? () => onSort(col.key) : undefined}
             >
               {col.label}
               {col.sortable && (
                 <svg
                   className={`inline-block ml-1 w-3 h-3 ${
-                    sortBy?.startsWith(`${col.key}:`) ? 'text-primary' : ''
+                    sortBy?.startsWith(`${col.key}:`) ? "text-primary" : ""
                   }`}
                   viewBox="0 0 24 24"
                   fill="none"
@@ -48,6 +51,7 @@ const AssetTable: React.FC<{
               )}
             </th>
           ))}
+
           <th className="text-center relative w-16">
             <span className="sr-only">Actions</span>
           </th>
@@ -56,7 +60,13 @@ const AssetTable: React.FC<{
       <tbody>
         {assets && assets.length > 0 ? (
           assets.map((asset) => (
-            <tr key={asset.assetCode}>
+            <tr
+              key={asset.assetCode}
+              onClick={() => {
+                onViewDetails(asset.id);
+              }}
+              className="cursor-pointer hover:bg-gray-50"
+            >
               <td className="py-2 relative w-[100px] after:absolute after:bottom-0 after:left-0 after:w-[calc(100%-20px)] after:h-[1px] after:bg-gray-300">
                 {asset.assetCode}
               </td>
