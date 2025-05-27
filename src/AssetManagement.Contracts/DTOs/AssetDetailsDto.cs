@@ -1,12 +1,12 @@
 namespace AssetManagement.Contracts.DTOs;
 
-public class AssetDetailsDto: AssetDto
+public class AssetDetailsDto : AssetDto
 {
     public DateTimeOffset InstalledDate { get; set; }
     public string Location { get; set; }
     public string Specification { get; set; }
     public List<History> History { get; set; }
-    
+
     public AssetDetailsDto(Guid id, string code, string name, string state, string categoryName,
     DateTimeOffset installedDate, string location, string specification)
     {

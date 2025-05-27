@@ -1,13 +1,12 @@
+using AssetManagement.Application.Extensions;
 using AssetManagement.Application.Services.Interfaces;
 using AssetManagement.Contracts.Common.Pagination;
 using AssetManagement.Contracts.DTOs;
 using AssetManagement.Contracts.Parameters;
 using AssetManagement.Domain.Entities;
-using AssetManagement.Domain.Enums;
 using AssetManagement.Domain.Extensions;
 using AssetManagement.Domain.Interfaces.Repositories;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.OpenApi.Extensions;
 
 namespace AssetManagement.Application.Services
 {
@@ -64,16 +63,10 @@ namespace AssetManagement.Application.Services
                 asset.Id,
                 asset.Code,
                 asset.Name,
-                asset.State == AssetState.Assigned ? AssetState.Assigned.GetDisplayName()
-                : asset.State == AssetState.Available ? AssetState.Available.GetDisplayName()
-                : asset.State == AssetState.NotAvailable ? AssetState.NotAvailable.GetDisplayName()
-                : asset.State == AssetState.WaitingForRecycling ? AssetState.WaitingForRecycling.GetDisplayName()
-                : asset.State == AssetState.Recycled ? AssetState.Recycled.GetDisplayName() : "",
+                asset.State.GetDisplayName(),
                 asset.Category.Name,
                 asset.InstalledDate,
-                asset.Location == Location.HCM ? Location.HCM.GetDisplayName()
-                : asset.Location == Location.DN ? Location.DN.GetDisplayName()
-                : asset.Location == Location.HN ? Location.HN.GetDisplayName() : "",
+                asset.Location.GetDisplayName(),
                 asset.Specification);
 
             return result;

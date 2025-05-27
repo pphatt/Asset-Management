@@ -23,17 +23,15 @@ export const ASSET_STATE = {
     ASSIGNED: 'Assigned',
     AVAILABLE: 'Available',
     NOT_AVAILABLE: 'NotAvailable',
-    WAITING_RECYCLING: 'WaitingRecycling',
+    WAITING_RECYCLING: 'WaitingForRecycling',
     RECYCLED: 'Recycled',
 } as const;
 
 export const ASSET_CATEGORY = {
     ALL: '',
     LAPTOP: 'Laptop',
-    DESKTOP: 'Desktop',
     MONITOR: 'Monitor',
-    PRINTER: 'Printer',
-    PROJECTOR: 'Projector',
+    PC: 'Personal Computer'
 } as const;
 export type AssetCategory = (typeof ASSET_CATEGORY)[keyof typeof ASSET_CATEGORY];
 
@@ -43,18 +41,16 @@ export const ASSET_STATE_OPTIONS = [
     { value: ASSET_STATE.ALL, label: 'All' },
     { value: ASSET_STATE.ASSIGNED, label: 'Assigned' },
     { value: ASSET_STATE.AVAILABLE, label: 'Available' },
-    { value: ASSET_STATE.NOT_AVAILABLE, label: 'Not Available' },
-    { value: ASSET_STATE.WAITING_RECYCLING, label: 'Waiting Recycling' },
+    { value: ASSET_STATE.NOT_AVAILABLE, label: 'Not available' },
+    { value: ASSET_STATE.WAITING_RECYCLING, label: 'Waiting for recycling' },
     { value: ASSET_STATE.RECYCLED, label: 'Recycled' },
 ];
 
 export const ASSET_CATEGORY_OPTIONS = [
     { value: ASSET_CATEGORY.ALL, label: 'All' },
     { value: ASSET_CATEGORY.LAPTOP, label: 'Laptop' },
-    { value: ASSET_CATEGORY.DESKTOP, label: 'Desktop' },
     { value: ASSET_CATEGORY.MONITOR, label: 'Monitor' },
-    { value: ASSET_CATEGORY.PRINTER, label: 'Printer' },
-    { value: ASSET_CATEGORY.PROJECTOR, label: 'Projector' },
+    { value: ASSET_CATEGORY.PC, label: 'Personal Computer' },
 ];
 
 export const PAGINATION = {

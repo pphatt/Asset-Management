@@ -31,7 +31,7 @@ public static class AssetExtensions
 
         if (assetCategories != null && assetCategories.Count > 0)
         {
-            query = query.Where(a => assetCategories.Contains(a.Category.Name.ToLower()));
+            query = query.Where(a => assetCategories.Contains(a.Category.Name));
         }
 
         return query;

@@ -6,8 +6,8 @@ import { LocationEnum, UserTypeEnum } from "@/types/user.type.ts";
 export type IAssetState =
     | "Assigned"
     | "Available"
-    | "NotAvailable"
-    | "WaitingRecycling"
+    | "Not available"
+    | "Waiting for recycling"
     | "Recycled";
 
 export interface IAsset {
@@ -43,7 +43,7 @@ export interface IAssetDetails {
     categoryName: string;
     specification: string;
     location: LocationEnum;
-    state: AssetState;
+    state: IAssetState;
     history: IAssetDetailsHistory[];
 }
 

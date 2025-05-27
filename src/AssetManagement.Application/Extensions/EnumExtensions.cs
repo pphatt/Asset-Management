@@ -1,4 +1,7 @@
-﻿namespace AssetManagement.Application.Extensions
+﻿using System.ComponentModel.DataAnnotations;
+using System.Reflection;
+
+namespace AssetManagement.Application.Extensions
 {
     public static class EnumExtensions
     {
@@ -20,6 +23,17 @@
             }
 
             throw new ArgumentException(message ?? $"Invalid value '{value}' for enum type '{typeof(T).Name}'.");
+        }
+
+        public static string GetDisplayName(this Enum enumValue)
+        {
+            var memberInfo = enumValue.GetType()
+                .GetMember(enumValue.ToString())
+                .FirstOrDefault();
+
+            var displayAttribute = memberInfo?.GetCustomAttribute<DisplayAttribute>();
+
+            return displayAttribute?.GetName() ?? enumValue.ToString();
         }
     }
 }
