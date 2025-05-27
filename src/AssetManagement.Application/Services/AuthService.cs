@@ -143,7 +143,7 @@ namespace AssetManagement.Application.Services
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]!));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-            var expirationMinutes = _configuration.GetValue<int>("Jwt:TokenExpirationInMinutes", 60);
+            var expirationMinutes = 60;
             var token = new JwtSecurityToken(
                 issuer: _configuration["Jwt:Issuer"],
                 audience: _configuration["Jwt:Audience"],
