@@ -24,29 +24,37 @@ const AssetTable: React.FC<{
           {columns.map((col) => (
             <th
               key={col.key}
-              className={`text-left relative py-2 after:absolute after:bottom-0 after:left-0 after:w-[calc(100%-20px)] after:h-[2px] ${
-                sortBy?.startsWith(`${col.key}:`)
+              className={`text-left relative py-2 after:absolute after:bottom-0 after:left-0 after:w-[calc(100%-20px)] after:h-[2px] ${sortBy?.startsWith(`${col.key}:`)
                   ? "after:bg-gray-600 font-semibold"
                   : "after:bg-gray-400 font-medium"
-              } ${col.sortable ? "cursor-pointer" : ""}`}
+                } ${col.sortable ? "cursor-pointer" : ""}`}
               onClick={col.sortable ? () => onSort(col.key) : undefined}
             >
               {col.label}
               {col.sortable && (
                 <svg
-                  className={`inline-block ml-1 w-3 h-3 ${
-                    sortBy?.startsWith(`${col.key}:`) ? "text-primary" : ""
-                  }`}
+                  className={`inline-block ml-1 w-3 h-3 ${sortBy?.startsWith(`${col.key}:`) ? "text-primary" : ""
+                    }`}
                   viewBox="0 0 24 24"
                   fill="none"
                 >
-                  <path
-                    d="M6 9L12 15L18 9"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
+                  {sortBy?.startsWith(`${col.key}:`) && sortBy?.endsWith(':desc') ? (
+                    <path
+                      d="M18 15L12 9L6 15"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  ) : (
+                    <path
+                      d="M6 9L12 15L18 9"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  )}
                 </svg>
               )}
             </th>
@@ -83,7 +91,7 @@ const AssetTable: React.FC<{
                 <div className="flex items-center justify-center space-x-4">
                   <button
                     className="text-quaternary hover:text-gray-700"
-                    onClick={() => {}}
+                    onClick={() => { }}
                     disabled={false}
                   >
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
@@ -105,7 +113,7 @@ const AssetTable: React.FC<{
                   </button>
                   <button
                     className="text-primary hover:text-red-700"
-                    onClick={() => {}}
+                    onClick={() => { }}
                     disabled={false}
                   >
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
