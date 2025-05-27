@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AssetManagement.Data.Migrations
 {
     [DbContext(typeof(AssetManagementDbContext))]
-    [Migration("20250525140639_RemoveRedundantData")]
-    partial class RemoveRedundantData
+    [Migration("20250527015334_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -31,11 +31,12 @@ namespace AssetManagement.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("AssetCode")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<Guid>("CategoryId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid?>("CreatedBy")
                         .HasColumnType("uniqueidentifier");
@@ -49,7 +50,7 @@ namespace AssetManagement.Data.Migrations
                     b.Property<DateTime?>("DeletedDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTimeOffset>("InstallDate")
+                    b.Property<DateTimeOffset>("InstalledDate")
                         .HasColumnType("datetimeoffset");
 
                     b.Property<bool?>("IsDeleted")
@@ -65,9 +66,11 @@ namespace AssetManagement.Data.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Name")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Specification")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("State")
@@ -78,34 +81,6 @@ namespace AssetManagement.Data.Migrations
                     b.HasIndex("CategoryId");
 
                     b.ToTable("Assets");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("223e4567-e89b-12d3-a456-426614174003"),
-                            AssetCode = "MON-001",
-                            CategoryId = new Guid("123e4567-e89b-12d3-a456-426614174007"),
-                            CreatedDate = new DateTime(2025, 5, 21, 0, 0, 0, 0, DateTimeKind.Utc),
-                            InstallDate = new DateTimeOffset(new DateTime(2022, 5, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
-                            LastModifiedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Location = 1,
-                            Name = "Dell UltraSharp 27",
-                            Specification = "27-inch, 4K, IPS Panel",
-                            State = 1
-                        },
-                        new
-                        {
-                            Id = new Guid("223e4567-e89b-12d3-a456-426614174004"),
-                            AssetCode = "MON-002",
-                            CategoryId = new Guid("123e4567-e89b-12d3-a456-426614174007"),
-                            CreatedDate = new DateTime(2025, 5, 21, 0, 0, 0, 0, DateTimeKind.Utc),
-                            InstallDate = new DateTimeOffset(new DateTime(2023, 5, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
-                            LastModifiedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Location = 1,
-                            Name = "LG 32GN600",
-                            Specification = "32-inch, QHD, 144Hz",
-                            State = 1
-                        });
                 });
 
             modelBuilder.Entity("AssetManagement.Domain.Entities.Category", b =>
@@ -139,23 +114,13 @@ namespace AssetManagement.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Slug")
+                    b.Property<string>("Prefix")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
                     b.ToTable("Categories");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("123e4567-e89b-12d3-a456-426614174007"),
-                            CreatedDate = new DateTime(2025, 5, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            LastModifiedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Name = "Monitor",
-                            Slug = "Monitor"
-                        });
                 });
 
             modelBuilder.Entity("AssetManagement.Domain.Entities.User", b =>
@@ -244,7 +209,7 @@ namespace AssetManagement.Data.Migrations
                             LastModifiedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             LastName = "Dinh",
                             Location = 1,
-                            Password = "uMI9QUQKl46+b6hR2pCBizLv3ONnABhfjj3W0MD5UGG0qlTGku7p6FESWaaxFDNQ",
+                            Password = "BwhI/sZn44902IWu6WLuEZu3XNhC2/412ZEJb5Rte09IfHoIsgI8Na1pTrwzTXrz",
                             StaffCode = "SD0001",
                             Type = 1,
                             Username = "nghiadinh"
@@ -262,7 +227,7 @@ namespace AssetManagement.Data.Migrations
                             LastModifiedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             LastName = "Nguyen",
                             Location = 2,
-                            Password = "uMI9QUQKl46+b6hR2pCBizLv3ONnABhfjj3W0MD5UGG0qlTGku7p6FESWaaxFDNQ",
+                            Password = "BwhI/sZn44902IWu6WLuEZu3XNhC2/412ZEJb5Rte09IfHoIsgI8Na1pTrwzTXrz",
                             StaffCode = "SD0002",
                             Type = 1,
                             Username = "minhnguyen"

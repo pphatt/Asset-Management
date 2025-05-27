@@ -11,7 +11,7 @@ public class AssetConfiguration : IEntityTypeConfiguration<Asset>
 {
     public void Configure(EntityTypeBuilder<Asset> builder)
     {
-        var categoryIds = CategoryConfiguration.Categories.Select(c => c.Id).ToList();
+        /*var categoryIds = CategoryConfiguration.Categories.Select(c => c.Id).ToList();
 
         var assets = new List<Asset>
         {
@@ -41,7 +41,7 @@ public class AssetConfiguration : IEntityTypeConfiguration<Asset>
             },
         };
 
-        builder.HasData(assets);
+        builder.HasData(assets);*/
 
         // Define relationships and constraints
         builder.HasOne(a => a.Category)

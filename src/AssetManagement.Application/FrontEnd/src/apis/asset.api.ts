@@ -11,24 +11,24 @@ const assetApi = {
   getAssets: async (
     params: IAssetParams,
   ): Promise<HttpResponse<PaginatedResult<IAsset>>> => {
-    const { data } = await http.get("/asset", { params });
+    const { data } = await http.get("/assets", { params });
     return data;
   },
 
   getAssetCategories: async (): Promise<HttpResponse<IAssetCategory[]>> => {
-    const { data } = await http.get("/asset/categories");
+    const { data } = await http.get("/assets/categories");
     return data;
   },
 
   getAssetStates: async (): Promise<HttpResponse<IAssetState[]>> => {
-    const { data } = await http.get("/asset/states");
+    const { data } = await http.get("/assets/states");
     return data;
   },
 
   getAssetByAssetCode: async (
     assetCode: string,
   ): Promise<HttpResponse<IAssetDetails>> => {
-    const { data } = await http.get(`/asset/${assetCode}`);
+    const { data } = await http.get(`/assets/${assetCode}`);
     console.log(data);
     return data;
   },
