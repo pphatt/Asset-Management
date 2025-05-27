@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { IUser } from "@/types/user.type";
 import { clearCookieSession, getProfileFromCookie } from "@/utils/auth";
-import { DropdownMenu } from "../../components/ui/dropdown";
+import { DropdownMenu } from "../ui/Dropdown";
 import { adminNavigationItems, staffNavigationItems } from "@/constants/menu";
 
 export default function MainHeader() {

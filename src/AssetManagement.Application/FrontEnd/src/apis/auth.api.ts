@@ -6,9 +6,6 @@ import {
 import http from "../utils/http";
 
 const authApi = {
-  // loginAccount: (body: LoginRequest) =>
-  //   http.post<AuthResponse>("auth/login", body),
-
   loginAccount: async (
     body: LoginRequest,
   ): Promise<HttpResponse<AuthResponse>> => {

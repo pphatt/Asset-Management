@@ -4,10 +4,10 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card.tsx";
-import { Label } from "@/components/ui/label.tsx";
+} from "@/components/ui/Card";
+import { Label } from "@/components/ui/Label";
 import { Controller, useForm } from "react-hook-form";
-import { PasswordInput } from "@/components/layout/password-input.tsx";
+import { PasswordInput } from "@/components/layout/PasswordInput";
 
 import { Schema, schema } from "@/utils/rules";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -17,8 +17,8 @@ import authApi from "@/apis/auth.api.ts";
 import { toast } from "react-toastify";
 import { jwtDecode, JwtPayload } from "jwt-decode";
 import { setCookie } from "@/utils/auth.ts";
-import { useAppContext } from "@/hooks/use-app-context.tsx";
-import { Button } from "@/components/ui/button.tsx";
+import { useAppContext } from "@/hooks/useAppContext";
+import { Button } from "@/components/ui/Button";
 
 type FormData = Pick<Schema, "newPassword">;
 const passwordSchema = schema.pick([

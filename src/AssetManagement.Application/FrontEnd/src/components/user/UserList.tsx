@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { USER_TYPES, UserType } from '../../constants/user-params';
 import { useUser } from '../../hooks/useUser';
 import useUserFilterState from '../../hooks/useUserFilterState';
-import { IUserDetails, User } from '../../types/user.type';
+import { IUserDetails, IUser } from '../../types/user.type';
 import ActiveFilters from './ActiveFilters';
 import DisableUserPopup from './DisableUserPopup';
 import Pagination from '../common/Pagination';
@@ -25,7 +25,7 @@ const UserList: React.FC = () => {
   // Disable user
   const [confirmDeleteModal, setConfirmDeleteModal] = useState(false);
   const [userToDelete, setUserToDelete] = useState<string | null>(null);
-  const [targetUser, setTargetUser] = useState<User | null>(null);
+  const [targetUser, setTargetUser] = useState<IUser | null>(null);
 
   const navigate = useNavigate();
   const [queryParams, setQueryParams] = useUserFilterState();
@@ -159,7 +159,7 @@ const UserList: React.FC = () => {
       if (usersData?.items) {
         const user = usersData.items.find((user) => user.staffCode === staffCode);
         if (user) {
-          setTargetUser(user as User);
+          setTargetUser(user as IUser);
         }
       }
       setConfirmDeleteModal(true);

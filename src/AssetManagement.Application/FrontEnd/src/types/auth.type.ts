@@ -1,4 +1,4 @@
-import { User } from "../types/user.type";
+import { IUser } from "../types/user.type";
 
 export type LoginRequest = {
   username: string;
@@ -10,14 +10,8 @@ export type PasswordUpdateRequest = {
   newPassword: string;
 };
 
-// export type AuthResponse = SuccessResponse<{
-//   accessToken: string;
-//   expires: string;
-//   userInfo: User;
-// }>;
-
 export type AuthResponse = {
   accessToken: string;
   expires: string;
-  userInfo: User;
+  userInfo: IUser;
 };

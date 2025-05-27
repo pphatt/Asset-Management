@@ -1,109 +1,107 @@
 .card-header {
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
-    color: #D90D1E;
-    background-color: #eff1f5;
-    height: 70px;
-    border-top-left-radius: 8px;
-    border-top-right-radius: 8px;
-    padding: 10px 30px;
-    border: 1px solid black;
-    text-align: center;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  color: #d90d1e;
+  background-color: #eff1f5;
+  height: 70px;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+  padding: 10px 30px;
+  border: 1px solid black;
+  text-align: center;
 }
 
 .card-title {
-    font-size: 22px;
-    font-weight: 600;
+  font-size: 22px;
+  font-weight: 600;
 }
 
 .card-content {
-    background-color: #fafcfc;
-    border-bottom-left-radius: 8px;
-    border-bottom-right-radius: 8px;
-    border: 1px solid black;
-    border-top: none;
-    /* Avoid double border with header */
-    padding: 20px 30px 30px;
+  background-color: #fafcfc;
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+  border: 1px solid black;
+  border-top: none;
+  /* Avoid double border with header */
+  padding: 20px 30px 30px;
 }
 
 .form-row {
-    display: flex;
-    align-items: flex-start;
-    width: 100%;
-    margin-top: 1rem;
+  display: flex;
+  align-items: flex-start;
+  width: 100%;
+  margin-top: 1rem;
 }
 
 .form-label {
-    color: #1f2937;
-    width: 13rem;
-    margin-top: 0.8rem;
-    font-size: 1rem;
+  color: #1f2937;
+  width: 13rem;
+  margin-top: 0.8rem;
+  font-size: 1rem;
 }
 
 .input-wrapper {
-    position: relative;
-    display: flex;
-    align-items: center;
-    flex: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 1;
 }
 
-.form-input {}
-
 .form-input:focus {
-    border-color: #D90D1E;
+  border-color: #d90d1e;
 }
 
 .icon-group {
-    position: absolute;
-    right: 10px;
-    display: flex;
-    gap: 6px;
-    align-items: center;
+  position: absolute;
+  right: 10px;
+  display: flex;
+  gap: 6px;
+  align-items: center;
 }
 
 .icon-check {
-    color: #22c55e;
-    /* Green for checkmark */
-    font-size: 14px;
+  color: #22c55e;
+  /* Green for checkmark */
+  font-size: 14px;
 }
 
 .icon-cross {
-    color: #ef4444;
-    /* Red for cross */
-    font-size: 14px;
+  color: #ef4444;
+  /* Red for cross */
+  font-size: 14px;
 }
 
 .icon-eye {
-    color: #6b7280;
-    /* Gray for eye icon */
-    font-size: 16px;
-    cursor: pointer;
+  color: #6b7280;
+  /* Gray for eye icon */
+  font-size: 16px;
+  cursor: pointer;
 }
 
 .icon-hidden {
-    display: none;
+  display: none;
 }
 
 .login-btn-wrapper {
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
 }
 
 .login-btn {
-    background-color: #D90D1E;
-    color: white;
-    padding: 8px 20px;
-    border: none;
-    border-radius: 4px;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: background-color 0.2s;
+  background-color: #d90d1e;
+  color: white;
+  padding: 8px 20px;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
 }
 
 .login-btn:hover {
-    background-color: #b91c1c;
-    /* Darker red on hover */
+  background-color: #b91c1c;
+  /* Darker red on hover */
 }

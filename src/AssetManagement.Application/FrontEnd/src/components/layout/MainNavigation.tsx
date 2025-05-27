@@ -1,5 +1,5 @@
-import NashtechLogo from '@/assets/nashtech-logo';
-import { useAppContext } from '@/hooks/use-app-context';
+import { NashtechLogo } from '@/assets/NashtechLogo';
+import { useAppContext } from '@/hooks/useAppContext';
 import { NavLink } from 'react-router-dom';
 import { adminNavigationItems, staffNavigationItems } from '@/constants/menu';
 

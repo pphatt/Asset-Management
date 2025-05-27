@@ -1,5 +1,3 @@
-// Define asset states for the application
-
 import { AssetCategory, AssetState } from "../constants/asset-params";
 import { LocationEnum, UserTypeEnum } from "@/types/user.type.ts";
 

@@ -3,11 +3,10 @@ import {
     CardContent,
     CardHeader,
     CardTitle,
-} from "@/components/ui/card.tsx";
-import { Label } from "@/components/ui/label.tsx";
+} from "@/components/ui/Card";
+import { Label } from "@/components/ui/Label";
 import { Controller, useForm } from "react-hook-form";
-import { PasswordInput } from "@/components/layout/password-input.tsx";
-
+import { PasswordInput } from "@/components/layout/PasswordInput";
 import { Schema, schema } from "@/utils/rules";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useMutation } from "@tanstack/react-query";
@@ -15,8 +14,8 @@ import { PasswordUpdateRequest } from "@/types/auth.type.ts";
 import authApi from "@/apis/auth.api.ts";
 import { jwtDecode, JwtPayload } from "jwt-decode";
 import { setCookie } from "@/utils/auth.ts";
-import { useAppContext } from "@/hooks/use-app-context.tsx";
-import { Button } from "@/components/ui/button.tsx";
+import { useAppContext } from "@/hooks/useAppContext";
+import { Button } from "@/components/ui/Button";
 import styles from "@/pages/UpdatePassword/styles.module.css";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
@@ -265,9 +264,6 @@ export default function ResetPassword() {
                             </div>
                         )
                     }
-
-
-
                 </CardContent>
             </Card>
         </div>

@@ -1,7 +1,6 @@
 using AssetManagement.Contracts.DTOs.Requests;
 using AssetManagement.Contracts.Exceptions;
 using AssetManagement.Domain.Entities;
-using AssetManagement.Domain.Enums;
 
 namespace AssetManagement.Application.Validators
 {

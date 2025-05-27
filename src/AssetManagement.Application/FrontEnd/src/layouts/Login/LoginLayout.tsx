@@ -1,13 +1,13 @@
-import LoginHeader from "@/components/layout/login-header.tsx";
+import LoginHeader from "@/components/layout/LoginHeader";
 
 interface Props {
   children?: React.ReactNode;
 }
 
-export default function LoginLayout({children}: Props) {
+export default function LoginLayout({ children }: Props) {
   return (
     <div className="h-full">
-      <LoginHeader/>
+      <LoginHeader />
 
       <div
         className="bg-primary-foreground container grid h-[100%] max-w-none"

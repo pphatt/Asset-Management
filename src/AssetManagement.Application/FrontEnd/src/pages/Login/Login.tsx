@@ -1,19 +1,19 @@
 import * as yup from "yup";
 import { Controller, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { useAppContext } from "@/hooks/use-app-context.tsx";
+import { useAppContext } from "@/hooks/useAppContext";
 import { useMutation } from "@tanstack/react-query";
 import { LoginRequest } from "@/types/auth.type.ts";
 import { toast } from "react-toastify";
 import authApi from "@/apis/auth.api.ts";
-import { Button } from "@/components/ui/button.tsx";
-import { Input } from "@/components/ui/forms/input.tsx";
-import { Label } from "@/components/ui/label.tsx";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/forms/Input";
+import { Label } from "@/components/ui/Label";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 
 import styles from "./styles.module.css";
-import { PasswordInput } from "@/components/layout/password-input.tsx";
+import { PasswordInput } from "@/components/layout/PasswordInput";
 import { setCookie } from "@/utils/auth.ts";
 import { jwtDecode, JwtPayload } from "jwt-decode";
 

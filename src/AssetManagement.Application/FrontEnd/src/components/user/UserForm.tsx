@@ -84,7 +84,7 @@ const convertToInputFormat = (date: string): string => {
     return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
 }
 
-export default function UserForm({ mode }: UserFormProps) {
+export const UserForm: React.FC<UserFormProps> = ({ mode }: UserFormProps) => {
     const navigate = useNavigate();
     const { staffCode } = useParams<{ staffCode: string }>();
     const isEditMode = mode === 'edit';

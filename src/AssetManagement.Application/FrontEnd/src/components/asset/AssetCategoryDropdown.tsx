@@ -8,8 +8,16 @@ const AssetCategoryDropdown: React.FC<{
     show: boolean;
     setShow: (show: boolean) => void;
     dropdownRef: React.RefObject<HTMLDivElement>;
-}> = ({ filterCategories, handleFilterByCategories, handleClearCategory: handleClearCategories, show, setShow, dropdownRef }) => {
+}> = ({ filterCategories, handleFilterByCategories, handleClearCategory, show, setShow, dropdownRef }) => {
     useClickOutside(dropdownRef, () => setShow(false));
+
+    const handleCheckboxChange = (value: AssetCategory) => {
+        if (filterCategories.some(category => category === value)) {
+            handleClearCategory(value);
+        } else {
+            handleFilterByCategories([...filterCategories, value]);
+        }
+    }
 
     return (
         <div className="relative" ref={dropdownRef}>
@@ -58,13 +66,7 @@ const AssetCategoryDropdown: React.FC<{
                                         checked={filterCategories.some(
                                             (category) => category === option.value
                                         )}
-                                        onChange={() => {
-                                            if (filterCategories.some(category => category === option.value)) {
-                                                handleClearCategories(option.value);
-                                            } else {
-                                                handleFilterByCategories([...filterCategories, option.value]);
-                                            }
-                                        }}
+                                        onChange={() => handleCheckboxChange(option.value)}
                                     />
                                     {option.label}
                                 </label>

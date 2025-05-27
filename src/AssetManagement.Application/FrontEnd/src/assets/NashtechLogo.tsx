@@ -2,7 +2,7 @@ interface NashtechLogoProps extends React.HTMLAttributes<SVGElement> {
   fill?: string;
 }
 
-export default function NashtechLogo({ fill = '#D6001C', ...props }: NashtechLogoProps) {
+export const NashtechLogo: React.FC<NashtechLogoProps> = ({ fill = '#D6001C', ...props }: NashtechLogoProps) => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"

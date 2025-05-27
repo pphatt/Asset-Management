@@ -29,19 +29,17 @@ const UserTable: React.FC<{
           {columns.map((col) => (
             <th
               key={col.key}
-              className={`text-left relative py-2 after:absolute after:bottom-0 after:left-0 after:w-[calc(100%-20px)] after:h-[2px] ${
-                sortBy?.startsWith(`${col.key}:`)
+              className={`text-left relative py-2 after:absolute after:bottom-0 after:left-0 after:w-[calc(100%-20px)] after:h-[2px] ${sortBy?.startsWith(`${col.key}:`)
                   ? 'after:bg-gray-600 font-semibold'
                   : 'after:bg-gray-400 font-medium'
-              } ${col.sortable ? 'cursor-pointer' : ''}`}
+                } ${col.sortable ? 'cursor-pointer' : ''}`}
               onClick={col.sortable ? () => onSort(col.key) : undefined}
             >
               {col.label}{' '}
               {col.sortable && (
                 <svg
-                  className={`inline-block ml-1 w-3 h-3 ${
-                    sortBy?.startsWith(`${col.key}:`) ? 'text-primary' : ''
-                  }`}
+                  className={`inline-block ml-1 w-3 h-3 ${sortBy?.startsWith(`${col.key}:`) ? 'text-primary' : ''
+                    }`}
                   viewBox="0 0 24 24"
                   fill="none"
                 >

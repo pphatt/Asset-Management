@@ -59,11 +59,10 @@ const Pagination: React.FC<PaginationProps> = ({
         {' '}
         <button
           aria-label="Previous page"
-          className={`px-3 py-1 border border-tertiary rounded-sm ${
-            !hasPreviousPage || currentPage <= 1 || isLoading
+          className={`px-3 py-1 border border-tertiary rounded-sm ${!hasPreviousPage || currentPage <= 1 || isLoading
               ? 'opacity-50 cursor-not-allowed'
               : 'hover:bg-tertiary text-primary'
-          } text-xs mr-1`}
+            } text-xs mr-1`}
           onClick={() => onPageChange(currentPage - 1)}
           disabled={!hasPreviousPage || currentPage <= 1 || isLoading}
         >
@@ -73,9 +72,8 @@ const Pagination: React.FC<PaginationProps> = ({
           typeof page === 'number' ? (
             <button
               key={`page-${page}`}
-              className={`px-3 py-1 border border-tertiary rounded-sm text-xs mr-1 ${
-                page === currentPage ? 'bg-primary text-secondary' : 'hover:bg-tertiary'
-              }`}
+              className={`px-3 py-1 border border-tertiary rounded-sm text-xs mr-1 ${page === currentPage ? 'bg-primary text-secondary' : 'hover:bg-tertiary'
+                }`}
               onClick={() => onPageChange(page)}
               disabled={isLoading}
             >
@@ -90,11 +88,10 @@ const Pagination: React.FC<PaginationProps> = ({
         )}{' '}
         <button
           aria-label="Next page"
-          className={`px-3 py-1 border border-tertiary rounded-sm ${
-            !hasNextPage || currentPage >= totalPages || isLoading
+          className={`px-3 py-1 border border-tertiary rounded-sm ${!hasNextPage || currentPage >= totalPages || isLoading
               ? 'opacity-50 cursor-not-allowed'
               : 'hover:bg-tertiary text-primary'
-          } text-xs`}
+            } text-xs`}
           onClick={() => onPageChange(currentPage + 1)}
           disabled={!hasNextPage || currentPage >= totalPages || isLoading}
         >

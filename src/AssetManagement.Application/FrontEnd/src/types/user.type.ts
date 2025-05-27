@@ -1,5 +1,3 @@
-// Define user types for the application
-
 import { UserType } from "../constants/user-params";
 
 export type IUserType = "Admin" | "Staff";
@@ -70,13 +68,3 @@ export interface IUserParams {
 }
 
 export type Role = "Staff" | "Admin";
-
-export interface User {
-  staffCode: string;
-  type: Role;
-  firstName: string;
-  lastName: string;
-  username: string;
-  joinedDate: string;
-  isPasswordUpdated: boolean;
-}

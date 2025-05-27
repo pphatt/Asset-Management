@@ -8,12 +8,12 @@ const AssetStateDropdown: React.FC<{
     show: boolean;
     setShow: (show: boolean) => void;
     dropdownRef: React.RefObject<HTMLDivElement>;
-}> = ({ filterStates, handleFilterByStates, handleClearState: handleClearStates, show, setShow, dropdownRef }) => {
+}> = ({ filterStates, handleFilterByStates, handleClearState, show, setShow, dropdownRef }) => {
     useClickOutside(dropdownRef, () => setShow(false));
 
     const handleCheckboxChange = (value: AssetState) => {
         if (filterStates.includes(value)) {
-            handleClearStates(value);
+            handleClearState(value);
         } else {
             handleFilterByStates([...filterStates, value]);
         }

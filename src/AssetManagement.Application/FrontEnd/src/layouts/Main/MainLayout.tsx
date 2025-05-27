@@ -1,13 +1,15 @@
 import { AppContext } from "@/context/app.context";
-import MainHeader from "../core/MainHeader";
-import MainNavigation from "../core/MainNavigation";
+import MainHeader from "../../components/layout/MainHeader";
+import MainNavigation from "../../components/layout/MainNavigation";
 import { useContext } from "react";
 import FirstChangePassword from "@/pages/UpdatePassword/FirstChangePassword";
 import { useLocation } from "react-router-dom";
 import ResetPassword from "@/pages/UpdatePassword/ResetPassword";
+
 interface Props {
   children?: React.ReactNode;
 }
+
 export default function MainLayout({ children }: Props) {
   const { profile } = useContext(AppContext);
   const location = useLocation();

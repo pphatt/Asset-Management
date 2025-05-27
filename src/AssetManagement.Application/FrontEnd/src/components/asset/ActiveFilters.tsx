@@ -4,15 +4,15 @@ const ActiveFilters: React.FC<{
     filterStates: AssetState[];
     filterCategories: AssetCategory[];
     searchTerm: string;
-    onClearTypes: (name: AssetState) => void;
-    onClearCategories: (name: AssetCategory) => void;
+    onClearType: (name: AssetState) => void;
+    onClearCategory: (name: AssetCategory) => void;
     onClearSearch: () => void;
 }> = ({
     filterStates,
     filterCategories,
     searchTerm,
-    onClearTypes,
-    onClearCategories,
+    onClearType,
+    onClearCategory,
     onClearSearch,
 }) => {
     if (!filterStates && !filterCategories && !searchTerm) return null;
@@ -25,7 +25,7 @@ const ActiveFilters: React.FC<{
                         Type: {item === ASSET_STATE.ALL ? 'All' : item}
                         <button
                             className="ml-1 text-gray-600 hover:text-gray-800"
-                            onClick={() => onClearTypes(item)}
+                            onClick={() => onClearType(item)}
                         >
                             ×
                         </button>
@@ -38,7 +38,7 @@ const ActiveFilters: React.FC<{
                         Category: {item === ASSET_CATEGORY.ALL ? 'All' : item}
                         <button
                             className="ml-1 text-gray-600 hover:text-gray-800"
-                            onClick={() => onClearCategories(item)}
+                            onClick={() => onClearCategory(item)}
                         >
                             ×
                         </button>

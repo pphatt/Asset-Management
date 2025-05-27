@@ -276,8 +276,8 @@ const AssetList: React.FC = () => {
                 filterStates={filterStates}
                 filterCategories={filterCategories}
                 searchTerm={searchTerm}
-                onClearTypes={handleClearState}
-                onClearCategories={handleClearCategory}
+                onClearType={handleClearState}
+                onClearCategory={handleClearCategory}
                 onClearSearch={handleClearSearch}
             />
 
