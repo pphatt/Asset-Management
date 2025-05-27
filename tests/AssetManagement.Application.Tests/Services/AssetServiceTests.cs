@@ -166,8 +166,8 @@ public class AssetServiceTests
         
         Assert.Equal("Assigned", assignedAsset.State);
         Assert.Equal("Available", availableAsset.State);
-        Assert.Equal("NotAvailable", notAvailableAsset.State);
-        Assert.Equal("WaitingForRecycling", waitingForRecyclingAsset.State);
+        Assert.Equal("Not available", notAvailableAsset.State);
+        Assert.Equal("Waiting for recycling", waitingForRecyclingAsset.State);
         Assert.Equal("Recycled", recycledAsset.State);
     }
 }
