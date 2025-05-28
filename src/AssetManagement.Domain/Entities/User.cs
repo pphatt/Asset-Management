@@ -1,4 +1,5 @@
-﻿using AssetManagement.Domain.Enums;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using AssetManagement.Domain.Enums;
 
 namespace AssetManagement.Domain.Entities
 {
@@ -16,5 +17,8 @@ namespace AssetManagement.Domain.Entities
         public Location Location { get; set; }
         public Gender Gender { get; set; }
         public bool IsActive { get; set; } = true;
+
+        [InverseProperty(nameof(Assignment.Assignee))]
+        public ICollection<Assignment> Assignments = new List<Assignment>();
     }
 }
