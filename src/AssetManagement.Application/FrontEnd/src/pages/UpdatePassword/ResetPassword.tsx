@@ -244,7 +244,9 @@ export default function ResetPassword() {
                                     >
                                         Save
                                     </Button>
-                                    <Button className="ml-2 bg-white text-black border"
+                                    <Button
+                                        type="button"
+                                        className="ml-2 bg-white text-black border"
                                         variant={"ghost"}
                                         onClick={() => navigate(`${location.pathname}`, { replace: true })}
                                     >
@@ -255,7 +257,9 @@ export default function ResetPassword() {
                         ) : (
                             <div>
                                 <div className="text-center mt-2.5">Your password has been changed successfully!</div>
-                                <Button className="ml-2 bg-white text-black border float-end mt-10"
+                                <Button
+                                    type="button"
+                                    className="ml-2 bg-white text-black border float-end mt-10"
                                     variant={"ghost"}
                                     onClick={() => navigate(`${location.pathname}`, { replace: true })}
                                 >
