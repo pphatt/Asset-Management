@@ -1,5 +1,4 @@
 import path from '@/constants/path';
-import { AppContext } from '@/context/app.context.tsx';
 import { lazy, useContext } from 'react';
 import { Navigate, Outlet, RouteObject, useRoutes } from 'react-router-dom';
 import LoginLayout from './layouts/Login';
@@ -7,6 +6,7 @@ import MainLayout from './layouts/Main';
 import Home from './pages/Home';
 import CreateUser from './pages/User/CreateUser';
 import EditUser from './pages/User/EditUser';
+import { AppContext } from './contexts/app.context';
 
 function ProtectedRoute() {
   const { isAuthenticated } = useContext(AppContext);

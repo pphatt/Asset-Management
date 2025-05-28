@@ -1,10 +1,10 @@
-import { AppContext } from "@/context/app.context";
 import MainHeader from "../../components/layout/MainHeader";
 import MainNavigation from "../../components/layout/MainNavigation";
 import { useContext } from "react";
 import FirstChangePassword from "@/pages/UpdatePassword/FirstChangePassword";
 import { useLocation } from "react-router-dom";
 import ResetPassword from "@/pages/UpdatePassword/ResetPassword";
+import { AppContext } from "@/contexts/app.context";
 
 interface Props {
   children?: React.ReactNode;

@@ -1,6 +1,6 @@
 import React, { useContext } from "react";
-import { AppContext } from "../../context/app.context";
 import { IUser } from "../../types/user.type";
+import { AppContext } from "@/contexts/app.context";
 
 interface DisableUserPopupProps {
   isOpen: boolean;
@@ -50,8 +50,8 @@ const DisableUserPopup: React.FC<DisableUserPopupProps> = ({
               onClick={onConfirm}
               disabled={isSelfDisable}
               className={`py-2 px-4 rounded focus:outline-none ${isSelfDisable
-                  ? "bg-gray-400 text-gray-300 cursor-not-allowed"
-                  : "bg-primary text-white hover:bg-primary/90"
+                ? "bg-gray-400 text-gray-300 cursor-not-allowed"
+                : "bg-primary text-white hover:bg-primary/90"
                 }`}
             >
               Disable
