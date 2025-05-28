@@ -1,5 +1,4 @@
 using AssetManagement.Contracts.Common;
-using AssetManagement.Contracts.DTOs;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AssetManagement.Application.Extensions;

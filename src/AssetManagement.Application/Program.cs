@@ -18,9 +18,12 @@ builder.Services.AddOpenApi();
 builder.Services.AddSwaggerConfig();
 builder.Services.AddSqlServerConfig(builder.Configuration);
 builder.Services.AddAuthConfig(builder.Configuration);
+
+builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
-builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
+builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IAssetRepository, AssetRepository>();
 builder.Services.AddScoped<IAssetService, AssetService>();
 builder.Services.AddTransient<DataSeeder>();
