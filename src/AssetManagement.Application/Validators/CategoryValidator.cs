@@ -3,6 +3,7 @@ using AssetManagement.Contracts.Exceptions;
 using AssetManagement.Domain.Interfaces.Repositories;
 using Microsoft.EntityFrameworkCore;
 using static AssetManagement.Contracts.Exceptions.ApiExceptionTypes;
+using Microsoft.EntityFrameworkCore;
 
 namespace AssetManagement.Application.Validators
 {
@@ -26,6 +27,12 @@ namespace AssetManagement.Application.Validators
                 .AsNoTracking()
                 .FirstOrDefaultAsync(u => u.Id == Guid.Parse(userId))
                 ?? throw new KeyNotFoundException($"Cannot find user with id: {userId}");
+        }
+
+        public static void ValidatePrefixLength(string prefix)
+        {
+            if (prefix.Trim().Length != 2)
+                throw new ValidationException("Prefix must be exactly 2 characters long");
         }
 
         public static async Task ValidateDuplicateNameAsync(ICategoryRepository categoryRepository, string name)

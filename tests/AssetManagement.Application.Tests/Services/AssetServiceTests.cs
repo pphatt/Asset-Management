@@ -1,5 +1,8 @@
 using System.Linq.Expressions;
 using AssetManagement.Application.Services;
+using AssetManagement.Contracts.DTOs.Requests;
+using AssetManagement.Contracts.Enums;
+using AssetManagement.Contracts.Exceptions;
 using AssetManagement.Contracts.Parameters;
 using AssetManagement.Domain.Entities;
 using AssetManagement.Domain.Enums;
@@ -12,12 +15,18 @@ namespace AssetManagement.Application.Tests.Services;
 public class AssetServiceTests
 {
     private readonly Mock<IAssetRepository> _assetRepository;
+    private readonly Mock<ICategoryRepository> _categoryRepository;
+    private readonly Mock<IUserRepository> _userRepository;
+    private readonly string _adminId;
     private readonly AssetService _assetService;
-    
+
     public AssetServiceTests()
     {
         _assetRepository = new Mock<IAssetRepository>();
-        _assetService = new AssetService(_assetRepository.Object);
+        _categoryRepository = new Mock<ICategoryRepository>();
+        _userRepository = new Mock<IUserRepository>();
+        _assetService = new AssetService(_assetRepository.Object, _categoryRepository.Object, _userRepository.Object);
+        _adminId = Guid.NewGuid().ToString();
     }
     
     [Fact]
@@ -170,4 +179,756 @@ public class AssetServiceTests
         Assert.Equal("Waiting for recycling", waitingForRecyclingAsset.State);
         Assert.Equal("Recycled", recycledAsset.State);
     }
+    
+    [Fact]
+        public async Task CreateAssetAsync_ValidRequest_ReturnsCreateAssetResponseDto()
+        {
+            // Arrange
+            var request = new CreateAssetRequestDto
+            {
+                Name = "Test Asset",
+                CategoryId = Guid.NewGuid(),
+                Specifications = "Test specifications",
+                InstalledDate = "2023-01-01",
+                State = AssetStateDto.Available
+            };
+
+            var category = new Category
+            {
+                Id = request.CategoryId,
+                Name = "Test Category",
+                Prefix = "TC"
+            };
+
+            var adminUser = new User
+            {
+                Id = Guid.Parse(_adminId),
+                Location = Location.HCM,
+                Username = "1",
+                Password = "1"
+            };
+
+            _categoryRepository.Setup(x => x.GetByIdAsync(request.CategoryId))
+                .ReturnsAsync(category);
+
+            _userRepository.Setup(x => x.GetByIdAsync(Guid.Parse(_adminId)))
+                .ReturnsAsync(adminUser);
+
+            _assetRepository.Setup(x => x.GetAll())
+                .Returns(new List<Asset>().AsQueryable());
+
+            // Act
+            var result = await _assetService.CreateAssetAsync(request, _adminId);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(request.Name, result.Name);
+            Assert.Equal(category.Name, result.CategoryName);
+            Assert.Equal("Available", result.StateName);
+            Assert.StartsWith("TC", result.Code);
+            Assert.Equal("TC000001", result.Code);
+
+            _assetRepository.Verify(x => x.Add(It.IsAny<Asset>()), Times.Once);
+        }
+
+        [Fact]
+        public async Task CreateAssetAsync_GeneratesCorrectCode_WhenExistingAssetsExist()
+        {
+            // Arrange
+            var request = new CreateAssetRequestDto
+            {
+                Name = "Test Asset",
+                CategoryId = Guid.NewGuid(),
+                Specifications = "Test specifications",
+                InstalledDate = "2023-01-01",
+                State = AssetStateDto.Available
+            };
+
+            var category = new Category
+            {
+                Id = request.CategoryId,
+                Name = "Test Category",
+                Prefix = "TC"
+            };
+
+            var adminUser = new User
+            {
+                Id = Guid.Parse(_adminId),
+                Location = Location.HCM,
+                Username = "1",
+                Password = "1"
+            };
+
+            var existingAssets = new List<Asset>
+            {
+                new Asset { Code = "TC000001" },
+                new Asset { Code = "TC000005" },
+                new Asset { Code = "TC000003" }
+            };
+
+            _categoryRepository.Setup(x => x.GetByIdAsync(request.CategoryId))
+                .ReturnsAsync(category);
+
+            _userRepository.Setup(x => x.GetByIdAsync(Guid.Parse(_adminId)))
+                .ReturnsAsync(adminUser);
+
+            _assetRepository.Setup(x => x.GetAll())
+                .Returns(existingAssets.AsQueryable());
+
+            // Act
+            var result = await _assetService.CreateAssetAsync(request, _adminId);
+
+            // Assert
+            Assert.Equal("TC000006", result.Code);
+        }
+
+        
+
+        [Fact]
+        public async Task CreateAssetAsync_ThrowsNotFoundException_WhenCategoryNotFound()
+        {
+            // Arrange
+            var request = new CreateAssetRequestDto
+            {
+                Name = "Test Asset",
+                CategoryId = Guid.NewGuid(),
+                Specifications = "Test specifications",
+                InstalledDate = "2023-01-01",
+                State = AssetStateDto.Available
+            };
+
+            _categoryRepository.Setup(x => x.GetByIdAsync(request.CategoryId))
+                .ReturnsAsync((Category)null);
+
+            // Act & Assert
+            await Assert.ThrowsAsync<ApiExceptionTypes.NotFoundException>(
+                () => _assetService.CreateAssetAsync(request, _adminId));
+        }
+
+        [Fact]
+        public async Task CreateAssetAsync_ThrowsUnauthorizedAccessException_WhenAdminNotFound()
+        {
+            // Arrange
+            var request = new CreateAssetRequestDto
+            {
+                Name = "Test Asset",
+                CategoryId = Guid.NewGuid(),
+                Specifications = "Test specifications",
+                InstalledDate = "2023-01-01",
+                State = AssetStateDto.Available
+            };
+
+            var category = new Category
+            {
+                Id = request.CategoryId,
+                Name = "Test Category",
+                Prefix = "TC"
+            };
+
+            _categoryRepository.Setup(x => x.GetByIdAsync(request.CategoryId))
+                .ReturnsAsync(category);
+
+            _userRepository.Setup(x => x.GetByIdAsync(Guid.Parse(_adminId)))
+                .ReturnsAsync((User)null);
+
+            // Act & Assert
+            await Assert.ThrowsAsync<UnauthorizedAccessException>(
+                () => _assetService.CreateAssetAsync(request, _adminId));
+        }
+
+        [Fact]
+        public async Task CreateAssetAsync_MapsAssetStateCorrectly_Available()
+        {
+            // Arrange
+            var request = new CreateAssetRequestDto
+            {
+                Name = "Test Asset",
+                CategoryId = Guid.NewGuid(),
+                Specifications = "Test specifications",
+                InstalledDate = "2023-01-01",
+                State = AssetStateDto.Available
+            };
+
+            var category = new Category
+            {
+                Id = request.CategoryId,
+                Name = "Test Category",
+                Prefix = "TC"
+            };
+
+            var adminUser = new User
+            {
+                Id = Guid.Parse(_adminId),
+                Location = Location.HCM,
+                Username = "1",
+                Password = "1"
+            };
+
+            _categoryRepository.Setup(x => x.GetByIdAsync(request.CategoryId))
+                .ReturnsAsync(category);
+
+            _userRepository.Setup(x => x.GetByIdAsync(Guid.Parse(_adminId)))
+                .ReturnsAsync(adminUser);
+
+            _assetRepository.Setup(x => x.GetAll())
+                .Returns(new List<Asset>().AsQueryable());
+
+            Asset capturedAsset = null;
+            _assetRepository.Setup(x => x.Add(It.IsAny<Asset>()))
+                .Callback<Asset>(asset => capturedAsset = asset);
+
+            // Act
+            var result = await _assetService.CreateAssetAsync(request, _adminId);
+
+            // Assert
+            Assert.Equal("Available", result.StateName);
+            Assert.Equal(AssetState.Available, capturedAsset.State);
+        }
+
+        [Fact]
+        public async Task CreateAssetAsync_MapsAssetStateCorrectly_NotAvailable()
+        {
+            // Arrange
+            var request = new CreateAssetRequestDto
+            {
+                Name = "Test Asset",
+                CategoryId = Guid.NewGuid(),
+                Specifications = "Test specifications",
+                InstalledDate = "2023-01-01",
+                State = AssetStateDto.NotAvailable
+            };
+
+            var category = new Category
+            {
+                Id = request.CategoryId,
+                Name = "Test Category",
+                Prefix = "TC"
+            };
+
+            var adminUser = new User
+            {
+                Id = Guid.Parse(_adminId),
+                Location = Location.HCM,
+                Username = "1",
+                Password = "1"
+            };
+
+            _categoryRepository.Setup(x => x.GetByIdAsync(request.CategoryId))
+                .ReturnsAsync(category);
+
+            _userRepository.Setup(x => x.GetByIdAsync(Guid.Parse(_adminId)))
+                .ReturnsAsync(adminUser);
+
+            _assetRepository.Setup(x => x.GetAll())
+                .Returns(new List<Asset>().AsQueryable());
+
+            Asset capturedAsset = null;
+            _assetRepository.Setup(x => x.Add(It.IsAny<Asset>()))
+                .Callback<Asset>(asset => capturedAsset = asset);
+
+            // Act
+            var result = await _assetService.CreateAssetAsync(request, _adminId);
+
+            // Assert
+            Assert.Equal("Not available", result.StateName);
+            Assert.Equal(AssetState.NotAvailable, capturedAsset.State);
+        }
+
+        [Fact]
+        public async Task CreateAssetAsync_SetsCorrectAssetProperties()
+        {
+            // Arrange
+            var request = new CreateAssetRequestDto
+            {
+                Name = "Test Asset",
+                CategoryId = Guid.NewGuid(),
+                Specifications = "Test specifications",
+                InstalledDate = "2023-01-01",
+                State = AssetStateDto.Available
+            };
+
+            var category = new Category
+            {
+                Id = request.CategoryId,
+                Name = "Test Category",
+                Prefix = "TC"
+            };
+
+            var adminUser = new User
+            {
+                Id = Guid.Parse(_adminId),
+                Location = Location.HCM,
+                Username = "1",
+                Password = "1"
+            };
+
+            _categoryRepository.Setup(x => x.GetByIdAsync(request.CategoryId))
+                .ReturnsAsync(category);
+
+            _userRepository.Setup(x => x.GetByIdAsync(Guid.Parse(_adminId)))
+                .ReturnsAsync(adminUser);
+
+            _assetRepository.Setup(x => x.GetAll())
+                .Returns(new List<Asset>().AsQueryable());
+
+            Asset capturedAsset = null;
+            _assetRepository.Setup(x => x.Add(It.IsAny<Asset>()))
+                .Callback<Asset>(asset => capturedAsset = asset);
+
+            // Act
+            await _assetService.CreateAssetAsync(request, _adminId);
+
+            // Assert
+            Assert.NotNull(capturedAsset);
+            Assert.Equal(request.Name, capturedAsset.Name);
+            Assert.Equal(request.CategoryId, capturedAsset.CategoryId);
+            Assert.Equal(request.Specifications, capturedAsset.Specification);
+            Assert.Equal(Location.HCM, capturedAsset.Location);
+            Assert.Equal(Guid.Parse(_adminId), capturedAsset.CreatedBy);
+            Assert.Equal(Guid.Parse(_adminId), capturedAsset.LastModifiedBy);
+            Assert.Equal(DateTimeOffset.Parse(request.InstalledDate), capturedAsset.InstalledDate);
+        }
+        
+        [Fact]
+public async Task GenerateCode_ReturnsFirstCode_WhenNoAssetsExist()
+{
+    // Arrange
+    var request = new CreateAssetRequestDto
+    {
+        Name = "Test Asset",
+        CategoryId = Guid.NewGuid(),
+        Specifications = "Test specifications",
+        InstalledDate = "2023-01-01",
+        State = AssetStateDto.Available
+    };
+
+    var category = new Category
+    {
+        Id = request.CategoryId,
+        Name = "Test Category",
+        Prefix = "TC"
+    };
+
+    var adminUser = new User
+    {
+        Id = Guid.Parse(_adminId),
+        Location = Location.HCM,
+        Username = "admin",
+        Password = "password"
+    };
+
+    _categoryRepository.Setup(x => x.GetByIdAsync(request.CategoryId))
+        .ReturnsAsync(category);
+
+    _userRepository.Setup(x => x.GetByIdAsync(Guid.Parse(_adminId)))
+        .ReturnsAsync(adminUser);
+
+    _assetRepository.Setup(x => x.GetAll())
+        .Returns(new List<Asset>().AsQueryable().BuildMock());
+
+    // Act
+    var result = await _assetService.CreateAssetAsync(request, _adminId);
+
+    // Assert
+    Assert.Equal("TC000001", result.Code);
+    _assetRepository.Verify(x => x.Add(It.Is<Asset>(a => a.Code == "TC000001")), Times.Once());
+}
+
+[Fact]
+public async Task GenerateCode_ReturnsIncrementedCode_WhenAssetsExist()
+{
+    // Arrange
+    var request = new CreateAssetRequestDto
+    {
+        Name = "Test Asset",
+        CategoryId = Guid.NewGuid(),
+        Specifications = "Test specifications",
+        InstalledDate = "2023-01-01",
+        State = AssetStateDto.Available
+    };
+
+    var category = new Category
+    {
+        Id = request.CategoryId,
+        Name = "Test Category",
+        Prefix = "TC"
+    };
+
+    var adminUser = new User
+    {
+        Id = Guid.Parse(_adminId),
+        Location = Location.HCM,
+        Username = "admin",
+        Password = "password"
+    };
+
+    var existingAssets = new List<Asset>
+    {
+        new Asset { Code = "TC000001" },
+        new Asset { Code = "TC000003" },
+        new Asset { Code = "TC000005" }
+    };
+
+    _categoryRepository.Setup(x => x.GetByIdAsync(request.CategoryId))
+        .ReturnsAsync(category);
+
+    _userRepository.Setup(x => x.GetByIdAsync(Guid.Parse(_adminId)))
+        .ReturnsAsync(adminUser);
+
+    _assetRepository.Setup(x => x.GetAll())
+        .Returns(existingAssets.AsQueryable().BuildMock());
+
+    // Act
+    var result = await _assetService.CreateAssetAsync(request, _adminId);
+
+    // Assert
+    Assert.Equal("TC000006", result.Code);
+    _assetRepository.Verify(x => x.Add(It.Is<Asset>(a => a.Code == "TC000006")), Times.Once());
+}
+
+[Fact]
+public async Task GenerateCode_ReturnsFallbackCode_WhenLastCodeNumberInvalid()
+{
+    // Arrange
+    var request = new CreateAssetRequestDto
+    {
+        Name = "Test Asset",
+        CategoryId = Guid.NewGuid(),
+        Specifications = "Test specifications",
+        InstalledDate = "2023-01-01",
+        State = AssetStateDto.Available
+    };
+
+    var category = new Category
+    {
+        Id = request.CategoryId,
+        Name = "Test Category",
+        Prefix = "TC"
+    };
+
+    var adminUser = new User
+    {
+        Id = Guid.Parse(_adminId),
+        Location = Location.HCM,
+        Username = "admin",
+        Password = "password"
+    };
+
+    var existingAssets = new List<Asset>
+    {
+        new Asset { Code = "TCINVALID" }
+    };
+
+    _categoryRepository.Setup(x => x.GetByIdAsync(request.CategoryId))
+        .ReturnsAsync(category);
+
+    _userRepository.Setup(x => x.GetByIdAsync(Guid.Parse(_adminId)))
+        .ReturnsAsync(adminUser);
+
+    _assetRepository.Setup(x => x.GetAll())
+        .Returns(existingAssets.AsQueryable().BuildMock());
+
+    // Act
+    var result = await _assetService.CreateAssetAsync(request, _adminId);
+
+    // Assert
+    Assert.Equal("TC000001", result.Code);
+    _assetRepository.Verify(x => x.Add(It.Is<Asset>(a => a.Code == "TC000001")), Times.Once());
+}
+
+[Fact]
+public async Task MapAssetState_MapsAvailableStateCorrectly()
+{
+    // Arrange
+    var request = new CreateAssetRequestDto
+    {
+        Name = "Test Asset",
+        CategoryId = Guid.NewGuid(),
+        Specifications = "Test specifications",
+        InstalledDate = "2023-01-01",
+        State = AssetStateDto.Available
+    };
+
+    var category = new Category
+    {
+        Id = request.CategoryId,
+        Name = "Test Category",
+        Prefix = "TC"
+    };
+
+    var adminUser = new User
+    {
+        Id = Guid.Parse(_adminId),
+        Location = Location.HCM,
+        Username = "admin",
+        Password = "password"
+    };
+
+    _categoryRepository.Setup(x => x.GetByIdAsync(request.CategoryId))
+        .ReturnsAsync(category);
+
+    _userRepository.Setup(x => x.GetByIdAsync(Guid.Parse(_adminId)))
+        .ReturnsAsync(adminUser);
+
+    _assetRepository.Setup(x => x.GetAll())
+        .Returns(new List<Asset>().AsQueryable().BuildMock());
+
+    Asset capturedAsset = null;
+    _assetRepository.Setup(x => x.Add(It.IsAny<Asset>()))
+        .Callback<Asset>(asset => capturedAsset = asset);
+
+    // Act
+    var result = await _assetService.CreateAssetAsync(request, _adminId);
+
+    // Assert
+    Assert.NotNull(capturedAsset);
+    Assert.Equal(AssetState.Available, capturedAsset.State);
+    Assert.Equal("Available", result.StateName);
+}
+
+[Fact]
+public async Task MapAssetState_MapsNotAvailableStateCorrectly()
+{
+    // Arrange
+    var request = new CreateAssetRequestDto
+    {
+        Name = "Test Asset",
+        CategoryId = Guid.NewGuid(),
+        Specifications = "Test specifications",
+        InstalledDate = "2023-01-01",
+        State = AssetStateDto.NotAvailable
+    };
+
+    var category = new Category
+    {
+        Id = request.CategoryId,
+        Name = "Test Category",
+        Prefix = "TC"
+    };
+
+    var adminUser = new User
+    {
+        Id = Guid.Parse(_adminId),
+        Location = Location.HCM,
+        Username = "admin",
+        Password = "password"
+    };
+
+    _categoryRepository.Setup(x => x.GetByIdAsync(request.CategoryId))
+        .ReturnsAsync(category);
+
+    _userRepository.Setup(x => x.GetByIdAsync(Guid.Parse(_adminId)))
+        .ReturnsAsync(adminUser);
+
+    _assetRepository.Setup(x => x.GetAll())
+        .Returns(new List<Asset>().AsQueryable().BuildMock());
+
+    Asset capturedAsset = null;
+    _assetRepository.Setup(x => x.Add(It.IsAny<Asset>()))
+        .Callback<Asset>(asset => capturedAsset = asset);
+
+    // Act
+    var result = await _assetService.CreateAssetAsync(request, _adminId);
+
+    // Assert
+    Assert.NotNull(capturedAsset);
+    Assert.Equal(AssetState.NotAvailable, capturedAsset.State);
+    Assert.Equal("Not available", result.StateName);
+}
+
+[Fact]
+public async Task MapAssetState_ThrowsArgumentOutOfRangeException_ForInvalidState()
+{
+    // Arrange
+    var request = new CreateAssetRequestDto
+    {
+        Name = "Test Asset",
+        CategoryId = Guid.NewGuid(),
+        Specifications = "Test specifications",
+        InstalledDate = "2023-01-01",
+        // Simulate an invalid state by manipulating the request
+        State = (AssetStateDto)999 // Invalid enum value
+    };
+
+    var category = new Category
+    {
+        Id = request.CategoryId,
+        Name = "Test Category",
+        Prefix = "TC"
+    };
+
+    var adminUser = new User
+    {
+        Id = Guid.Parse(_adminId),
+        Location = Location.HCM,
+        Username = "admin",
+        Password = "password"
+    };
+
+    _categoryRepository.Setup(x => x.GetByIdAsync(request.CategoryId))
+        .ReturnsAsync(category);
+
+    _userRepository.Setup(x => x.GetByIdAsync(Guid.Parse(_adminId)))
+        .ReturnsAsync(adminUser);
+
+    _assetRepository.Setup(x => x.GetAll())
+        .Returns(new List<Asset>().AsQueryable().BuildMock());
+
+    // Act & Assert
+    await Assert.ThrowsAsync<ArgumentOutOfRangeException>(
+        () => _assetService.CreateAssetAsync(request, _adminId));
+}
+[Fact]
+public async Task CreateAssetAsync_SetsTimestampsCorrectly()
+{
+    // Arrange
+    var beforeTest = DateTime.UtcNow;
+    
+    var request = new CreateAssetRequestDto
+    {
+        Name = "Test Asset",
+        CategoryId = Guid.NewGuid(),
+        Specifications = "Test specifications",
+        InstalledDate = "2023-01-01",
+        State = AssetStateDto.Available
+    };
+
+    var category = new Category
+    {
+        Id = request.CategoryId,
+        Name = "Test Category",
+        Prefix = "TC"
+    };
+
+    var adminUser = new User
+    {
+        Id = Guid.Parse(_adminId),
+        Location = Location.HCM,
+        Username = "admin",
+        Password = "password"
+    };
+
+    _categoryRepository.Setup(x => x.GetByIdAsync(request.CategoryId))
+        .ReturnsAsync(category);
+
+    _userRepository.Setup(x => x.GetByIdAsync(Guid.Parse(_adminId)))
+        .ReturnsAsync(adminUser);
+
+    _assetRepository.Setup(x => x.GetAll())
+        .Returns(new List<Asset>().AsQueryable().BuildMock());
+
+    Asset capturedAsset = null;
+    _assetRepository.Setup(x => x.Add(It.IsAny<Asset>()))
+        .Callback<Asset>(asset => capturedAsset = asset);
+
+    // Act
+    await _assetService.CreateAssetAsync(request, _adminId);
+    
+    var afterTest = DateTime.UtcNow;
+
+    // Assert
+    Assert.NotNull(capturedAsset);
+    Assert.True(capturedAsset.CreatedDate >= beforeTest && capturedAsset.CreatedDate <= afterTest);
+    Assert.True(capturedAsset.LastModifiedDate >= beforeTest && capturedAsset.LastModifiedDate <= afterTest);
+}
+
+[Fact]
+public async Task CreateAssetAsync_HandlesDateTimeParsing_WithDifferentFormats()
+{
+    // Arrange
+    var request = new CreateAssetRequestDto
+    {
+        Name = "Test Asset",
+        CategoryId = Guid.NewGuid(),
+        Specifications = "Test specifications",
+        InstalledDate = "2023-12-25T10:30:00Z", // ISO format
+        State = AssetStateDto.Available
+    };
+
+    var category = new Category
+    {
+        Id = request.CategoryId,
+        Name = "Test Category",
+        Prefix = "TC"
+    };
+
+    var adminUser = new User
+    {
+        Id = Guid.Parse(_adminId),
+        Location = Location.HCM,
+        Username = "admin",
+        Password = "password"
+    };
+
+    _categoryRepository.Setup(x => x.GetByIdAsync(request.CategoryId))
+        .ReturnsAsync(category);
+
+    _userRepository.Setup(x => x.GetByIdAsync(Guid.Parse(_adminId)))
+        .ReturnsAsync(adminUser);
+
+    _assetRepository.Setup(x => x.GetAll())
+        .Returns(new List<Asset>().AsQueryable().BuildMock());
+
+    Asset capturedAsset = null;
+    _assetRepository.Setup(x => x.Add(It.IsAny<Asset>()))
+        .Callback<Asset>(asset => capturedAsset = asset);
+
+    // Act
+    await _assetService.CreateAssetAsync(request, _adminId);
+
+    // Assert
+    Assert.NotNull(capturedAsset);
+    Assert.Equal(DateTimeOffset.Parse(request.InstalledDate), capturedAsset.InstalledDate);
+}
+
+[Theory]
+[InlineData(Location.HCM)]
+[InlineData(Location.HN)]
+public async Task CreateAssetAsync_SetsCorrectLocation_BasedOnAdminLocation(Location adminLocation)
+{
+    // Arrange
+    var request = new CreateAssetRequestDto
+    {
+        Name = "Test Asset",
+        CategoryId = Guid.NewGuid(),
+        Specifications = "Test specifications",
+        InstalledDate = "2023-01-01",
+        State = AssetStateDto.Available
+    };
+
+    var category = new Category
+    {
+        Id = request.CategoryId,
+        Name = "Test Category",
+        Prefix = "TC"
+    };
+
+    var adminUser = new User
+    {
+        Id = Guid.Parse(_adminId),
+        Location = adminLocation,
+        Username = "admin",
+        Password = "password"
+    };
+
+    _categoryRepository.Setup(x => x.GetByIdAsync(request.CategoryId))
+        .ReturnsAsync(category);
+
+    _userRepository.Setup(x => x.GetByIdAsync(Guid.Parse(_adminId)))
+        .ReturnsAsync(adminUser);
+
+    _assetRepository.Setup(x => x.GetAll())
+        .Returns(new List<Asset>().AsQueryable().BuildMock());
+
+    Asset capturedAsset = null;
+    _assetRepository.Setup(x => x.Add(It.IsAny<Asset>()))
+        .Callback<Asset>(asset => capturedAsset = asset);
+
+    // Act
+    await _assetService.CreateAssetAsync(request, _adminId);
+
+    // Assert
+    Assert.NotNull(capturedAsset);
+    Assert.Equal(adminLocation, capturedAsset.Location);
+}
 }

@@ -7,5 +7,6 @@ namespace AssetManagement.Domain.Interfaces.Repositories
     {
         Task<Asset?> GetSingleAsync(Expression<Func<Asset, bool>> predicate, CancellationToken cancellationToken,
             bool isTracking = false, params Expression<Func<Asset, object>>[]? includeProperties);
+
     }
 }

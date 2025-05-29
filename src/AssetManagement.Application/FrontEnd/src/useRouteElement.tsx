@@ -20,29 +20,26 @@ function RejectedRoute() {
   return !isAuthenticated ? <Outlet /> : <Navigate to="/" />;
 }
 
-const Login = lazy(() => import('./pages/Login'));
-const Asset = lazy(() => import('./pages/Asset'));
-const User = lazy(() => import('./pages/User'));
+const Login = lazy(() => import("./pages/Login"));
+const Asset = lazy(() => import("./pages/Asset"));
+const CreateAsset = lazy(() => import("./pages/Asset/CreateAsset"));
+const User = lazy(() => import("./pages/User"));
 
 export default function useRouteElements() {
-  const routeElements = useRoutes([...ProtectedRoutes, ...RejectedRoutes, ...OtherRoutes]);
+  const routeElements = useRoutes([
+    ...ProtectedRoutes,
+    ...RejectedRoutes,
+    ...OtherRoutes,
+  ]);
 
   return routeElements;
 }
 
 const ProtectedRoutes: RouteObject[] = [
   {
-    path: '',
+    path: "",
     element: <ProtectedRoute />,
     children: [
-      {
-        path: path.asset,
-        element: (
-          <MainLayout>
-            <Asset />
-          </MainLayout>
-        ),
-      },
       {
         path: path.home,
         element: (
@@ -75,13 +72,29 @@ const ProtectedRoutes: RouteObject[] = [
           </MainLayout>
         ),
       },
+      {
+        path: path.asset,
+        element: (
+          <MainLayout>
+            <Asset />
+          </MainLayout>
+        ),
+      },
+      {
+        path: path.assetCreate,
+        element: (
+          <MainLayout>
+            <CreateAsset />
+          </MainLayout>
+        ),
+      },
     ],
   },
 ];
 
 const RejectedRoutes: RouteObject[] = [
   {
-    path: '',
+    path: "",
     element: <RejectedRoute />,
     children: [
       {
@@ -99,7 +112,7 @@ const RejectedRoutes: RouteObject[] = [
 
 const OtherRoutes: RouteObject[] = [
   {
-    path: '*',
+    path: "*",
     element: (
       <MainLayout>
         <></>

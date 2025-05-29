@@ -1,9 +1,10 @@
 const path = {
   home: "/",
   user: "/user",
-  userCreate: '/user/create',
-  userEdit: '/user/edit/:staffCode',
+  userCreate: "/user/create",
+  userEdit: "/user/edit/:staffCode",
   asset: "/asset",
+  assetCreate: "/asset/create",
   assignment: "/assignment",
   request: "/request",
   report: "/report",

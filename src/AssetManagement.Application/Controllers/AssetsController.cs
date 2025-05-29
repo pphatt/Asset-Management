@@ -1,7 +1,11 @@
+using System.Security.Claims;
+using AssetManagement.Application.Extensions;
 using AssetManagement.Application.Services.Interfaces;
 using AssetManagement.Contracts.Common;
 using AssetManagement.Contracts.Common.Pagination;
 using AssetManagement.Contracts.DTOs;
+using AssetManagement.Contracts.DTOs.Requests;
+using AssetManagement.Contracts.DTOs.Responses;
 using AssetManagement.Contracts.Parameters;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -44,5 +48,17 @@ public class AssetsController: ControllerBase
             Message = "Successfully fetched an asset details",
             Data = result,
         };
+    }
+
+    
+    [HttpPost]
+    [Authorize(Roles = "Admin")]
+    public async Task<ActionResult<ApiResponse<CreateAssetResponseDto>>> Create([FromBody] CreateAssetRequestDto dto)
+    {
+        var adminID = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (adminID is null) 
+            throw new UnauthorizedAccessException("Cannot retrieve user id from claims");
+        var createAsset = await _assetService.CreateAssetAsync(dto, adminID);
+        return this.ToCreatedApiResponse(createAsset, "Successfully created a new asset");
     }
 }

@@ -1,9 +1,9 @@
 import {
   IAsset,
-  IAssetCategory,
   IAssetDetails,
   IAssetParams,
   IAssetState,
+  ICreateAssetRequest,
 } from "@/types/asset.type";
 import http from "../utils/http";
 
@@ -12,11 +12,6 @@ const assetApi = {
     params: IAssetParams,
   ): Promise<HttpResponse<PaginatedResult<IAsset>>> => {
     const { data } = await http.get("/assets", { params });
-    return data;
-  },
-
-  getAssetCategories: async (): Promise<HttpResponse<IAssetCategory[]>> => {
-    const { data } = await http.get("/assets/categories");
     return data;
   },
 
@@ -30,6 +25,13 @@ const assetApi = {
   ): Promise<HttpResponse<IAssetDetails>> => {
     const { data } = await http.get(`/assets/${assetCode}`);
     console.log(data);
+    return data;
+  },
+
+  createAsset: async (
+    assetData: ICreateAssetRequest,
+  ): Promise<HttpResponse<IAsset>> => {
+    const { data } = await http.post("/assets", assetData);
     return data;
   },
 };
