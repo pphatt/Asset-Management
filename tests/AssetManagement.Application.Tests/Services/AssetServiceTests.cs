@@ -964,4 +964,359 @@ public class AssetServiceTests
         Assert.NotNull(capturedAsset);
         Assert.Equal(adminLocation, capturedAsset.Location);
     }
+
+    [Fact]
+    public async Task UpdateAssetAsync_UpdatesAllFields_WhenValidRequestProvided()
+    {
+        // Arrange
+        var adminId = Guid.NewGuid().ToString();
+        var assetCode = "A001";
+        var categoryId = Guid.NewGuid();
+        var existingAsset = new Asset
+        {
+            Code = assetCode,
+            Name = "Old Laptop",
+            State = AssetState.Available,
+            CategoryId = Guid.NewGuid(),
+            Specification = "Old Specs",
+            InstalledDate = new DateTime(2022, 1, 1),
+            LastModifiedDate = DateTime.UtcNow.AddDays(-10)
+        };
+
+        var request = new UpdateAssetRequestDto
+        {
+            Name = "New Laptop",
+            State = AssetStateDto.NotAvailable,
+            CategoryId = categoryId,
+            Specification = "New Specs",
+            InstalledDate = "2023-02-15"
+        };
+
+        var category = new Category { Id = categoryId, Name = "New Category" };
+
+        _assetRepository.Setup(r => r.GetByCodeAsync(assetCode))
+            .ReturnsAsync(existingAsset);
+        _categoryRepository.Setup(r => r.GetByIdAsync(categoryId))
+            .ReturnsAsync(category);
+        _assetRepository.Setup(r => r.Update(It.IsAny<Asset>()))
+            .Verifiable();
+
+        // Act
+        var result = await _assetService.UpdateAssetAsync(adminId, assetCode, request);
+
+        // Assert
+        Assert.Equal(assetCode, result);
+        Assert.Equal("New Laptop", existingAsset.Name);
+        Assert.Equal(AssetState.NotAvailable, existingAsset.State);
+        Assert.Equal(categoryId, existingAsset.CategoryId);
+        Assert.Equal("New Specs", existingAsset.Specification);
+        Assert.Equal(new DateTime(2023, 2, 15), existingAsset.InstalledDate);
+        Assert.Equal(Guid.Parse(adminId), existingAsset.LastModifiedBy);
+        Assert.True(existingAsset.LastModifiedDate > existingAsset.LastModifiedDate.AddDays(-1)); // Modified recently
+
+        _assetRepository.Verify(r => r.Update(existingAsset), Times.Once);
+    }
+
+    [Fact]
+    public async Task UpdateAssetAsync_UpdatesOnlyProvidedFields_WhenPartialRequestProvided()
+    {
+        // Arrange
+        var adminId = Guid.NewGuid().ToString();
+        var assetCode = "A001";
+        var originalName = "Original Laptop";
+        var originalSpec = "Original Specs";
+        var originalDate = new DateTime(2022, 1, 1);
+
+        var existingAsset = new Asset
+        {
+            Code = assetCode,
+            Name = originalName,
+            State = AssetState.Available,
+            CategoryId = Guid.NewGuid(),
+            Specification = originalSpec,
+            InstalledDate = originalDate
+        };
+
+        var request = new UpdateAssetRequestDto
+        {
+            Name = "New Laptop",
+            // State not provided
+            // CategoryId not provided
+            // Specification not provided
+            // InstalledDate not provided
+        };
+
+        _assetRepository.Setup(r => r.GetByCodeAsync(assetCode))
+            .ReturnsAsync(existingAsset);
+
+        // Act
+        var result = await _assetService.UpdateAssetAsync(adminId, assetCode, request);
+
+        // Assert
+        Assert.Equal(assetCode, result);
+        Assert.Equal("New Laptop", existingAsset.Name);
+        Assert.Equal(AssetState.Available, existingAsset.State); // Unchanged
+        Assert.Equal(originalSpec, existingAsset.Specification); // Unchanged
+        Assert.Equal(originalDate, existingAsset.InstalledDate); // Unchanged
+
+        _assetRepository.Verify(r => r.Update(existingAsset), Times.Once);
+    }
+
+    [Fact]
+    public async Task UpdateAssetAsync_ThrowsArgumentNullException_WhenRequestIsNull()
+    {
+        // Arrange
+        var adminId = Guid.NewGuid().ToString();
+        var assetCode = "A001";
+        UpdateAssetRequestDto? request = null;
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<ArgumentNullException>(
+            () => _assetService.UpdateAssetAsync(adminId, assetCode, request!));
+
+        Assert.Equal("request", exception.ParamName);
+        Assert.Contains("Asset update data cannot be null", exception.Message);
+    }
+
+    [Fact]
+    public async Task UpdateAssetAsync_ThrowsKeyNotFoundException_WhenAssetNotFound()
+    {
+        // Arrange
+        var adminId = Guid.NewGuid().ToString();
+        var assetCode = "A001";
+        var request = new UpdateAssetRequestDto { Name = "New Name" };
+
+        _assetRepository.Setup(r => r.GetByCodeAsync(assetCode))
+            .ReturnsAsync((Asset?)null);
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<KeyNotFoundException>(
+            () => _assetService.UpdateAssetAsync(adminId, assetCode, request));
+
+        Assert.Equal($"Cannot find asset with id {assetCode}", exception.Message);
+    }
+
+    [Fact]
+    public async Task UpdateAssetAsync_ThrowsKeyNotFoundException_WhenCategoryNotFound()
+    {
+        // Arrange
+        var adminId = Guid.NewGuid().ToString();
+        var assetCode = "A001";
+        var nonExistentCategoryId = Guid.NewGuid();
+
+        var existingAsset = new Asset
+        {
+            Code = assetCode,
+            Name = "Old Laptop",
+            State = AssetState.Available
+        };
+
+        var request = new UpdateAssetRequestDto
+        {
+            Name = "New Name",
+            CategoryId = nonExistentCategoryId
+        };
+
+        _assetRepository.Setup(r => r.GetByCodeAsync(assetCode))
+            .ReturnsAsync(existingAsset);
+        _categoryRepository.Setup(r => r.GetByIdAsync(nonExistentCategoryId))
+            .ReturnsAsync((Category?)null);
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<KeyNotFoundException>(
+            () => _assetService.UpdateAssetAsync(adminId, assetCode, request));
+
+        Assert.Equal($"Cannot find category with id {nonExistentCategoryId}", exception.Message);
+    }
+
+    [Fact]
+    public async Task UpdateAssetAsync_UpdatesState_WhenStateIsProvided()
+    {
+        // Arrange
+        var adminId = Guid.NewGuid().ToString();
+        var assetCode = "A001";
+
+        var existingAsset = new Asset
+        {
+            Code = assetCode,
+            Name = "Asset",
+            State = AssetState.Available
+        };
+
+        var request = new UpdateAssetRequestDto
+        {
+            Name = "Valid Asset Name",
+            State = AssetStateDto.Recycled
+        };
+
+        _assetRepository.Setup(r => r.GetByCodeAsync(assetCode))
+            .ReturnsAsync(existingAsset);
+
+        // Act
+        await _assetService.UpdateAssetAsync(adminId, assetCode, request);
+
+        // Assert
+        Assert.Equal(AssetState.Recycled, existingAsset.State);
+        _assetRepository.Verify(r => r.Update(existingAsset), Times.Once);
+    }
+
+    [Fact]
+    public async Task UpdateAssetAsync_ParsesInstalledDate_WhenDateStringProvided()
+    {
+        // Arrange
+        var adminId = Guid.NewGuid().ToString();
+        var assetCode = "A001";
+        var dateString = "2023-12-25 00:00:00.000 +0000";
+        var expectedDate = DateTimeOffset.Parse(dateString);
+
+        var existingAsset = new Asset
+        {
+            Code = assetCode,
+            Name = "Original Asset",
+            InstalledDate = new DateTimeOffset(2023, 12, 25, 0, 0, 0, TimeSpan.Zero)
+        };
+
+        var request = new UpdateAssetRequestDto
+        {
+            Name = "Valid Asset Name",
+            InstalledDate = dateString
+        };
+
+        _assetRepository.Setup(r => r.GetByCodeAsync(assetCode))
+            .ReturnsAsync(existingAsset);
+
+        // Act
+        await _assetService.UpdateAssetAsync(adminId, assetCode, request);
+
+        // Assert
+        Assert.Equal(expectedDate, existingAsset.InstalledDate);
+    }
+
+    [Fact]
+    public async Task UpdateAssetAsync_UpdatesStateToAvailable_WhenAvailableStateProvided()
+    {
+        // Arrange
+        var adminId = Guid.NewGuid().ToString();
+        var assetCode = "A001";
+
+        var existingAsset = new Asset
+        {
+            Code = assetCode,
+            Name = "Asset",
+            State = AssetState.NotAvailable
+        };
+
+        var request = new UpdateAssetRequestDto
+        {
+            Name = "Valid Asset Name",
+            State = AssetStateDto.Available
+        };
+
+        _assetRepository.Setup(r => r.GetByCodeAsync(assetCode))
+            .ReturnsAsync(existingAsset);
+
+        // Act
+        await _assetService.UpdateAssetAsync(adminId, assetCode, request);
+
+        // Assert
+        Assert.Equal(AssetState.Available, existingAsset.State);
+        _assetRepository.Verify(r => r.Update(existingAsset), Times.Once);
+    }
+
+    [Fact]
+    public async Task UpdateAssetAsync_UpdatesStateToAssigned_WhenAssignedStateProvided()
+    {
+        // Arrange
+        var adminId = Guid.NewGuid().ToString();
+        var assetCode = "A001";
+
+        var existingAsset = new Asset
+        {
+            Code = assetCode,
+            Name = "Asset",
+            State = AssetState.Available
+        };
+
+        var request = new UpdateAssetRequestDto
+        {
+            Name = "Valid Asset Name",
+            State = AssetStateDto.Assigned
+        };
+
+        _assetRepository.Setup(r => r.GetByCodeAsync(assetCode))
+            .ReturnsAsync(existingAsset);
+
+        // Act
+        await _assetService.UpdateAssetAsync(adminId, assetCode, request);
+
+        // Assert
+        Assert.Equal(AssetState.Assigned, existingAsset.State);
+        _assetRepository.Verify(r => r.Update(existingAsset), Times.Once);
+    }
+
+    [Fact]
+    public async Task UpdateAssetAsync_UpdatesStateToWaitingForRecycling_WhenWaitingForRecyclingStateProvided()
+    {
+        // Arrange
+        var adminId = Guid.NewGuid().ToString();
+        var assetCode = "A001";
+
+        var existingAsset = new Asset
+        {
+            Code = assetCode,
+            Name = "Asset",
+            State = AssetState.Available
+        };
+
+        var request = new UpdateAssetRequestDto
+        {
+            Name = "Valid Asset Name",
+            State = AssetStateDto.WaitingForRecycling
+        };
+
+        _assetRepository.Setup(r => r.GetByCodeAsync(assetCode))
+            .ReturnsAsync(existingAsset);
+
+        // Act
+        await _assetService.UpdateAssetAsync(adminId, assetCode, request);
+
+        // Assert
+        Assert.Equal(AssetState.WaitingForRecycling, existingAsset.State);
+        _assetRepository.Verify(r => r.Update(existingAsset), Times.Once);
+    }
+
+    [Fact]
+    public async Task UpdateAssetAsync_ThrowsArgumentOutOfRangeException_WhenInvalidStateProvided()
+    {
+        // Arrange
+        var adminId = Guid.NewGuid().ToString();
+        var assetCode = "A001";
+
+        var existingAsset = new Asset
+        {
+            Code = assetCode,
+            Name = "Asset",
+            State = AssetState.Available
+        };
+
+        // Create an invalid state value (out of enum range)
+        var invalidStateValue = (AssetStateDto)99;
+
+        var request = new UpdateAssetRequestDto
+        {
+            Name = "Valid Asset Name",
+            State = invalidStateValue
+        };
+
+        _assetRepository.Setup(r => r.GetByCodeAsync(assetCode))
+            .ReturnsAsync(existingAsset);
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<AggregateFieldValidationException>(() =>
+            _assetService.UpdateAssetAsync(adminId, assetCode, request));
+
+
+        Assert.Contains(exception.Errors, e => e.Field == "State" &&
+            e.Message == "Invalid state value");
+    }
 }

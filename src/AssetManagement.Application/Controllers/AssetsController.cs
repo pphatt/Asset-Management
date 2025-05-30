@@ -56,15 +56,34 @@ public class AssetsController : ControllerBase
         };
     }
 
-    
+
     [HttpPost]
     [Authorize(Roles = "Admin")]
     public async Task<ActionResult<ApiResponse<CreateAssetResponseDto>>> Create([FromBody] CreateAssetRequestDto dto)
     {
         var adminID = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        if (adminID is null) 
+        if (adminID is null)
             throw new UnauthorizedAccessException("Cannot retrieve user id from claims");
         var createAsset = await _assetService.CreateAssetAsync(dto, adminID);
         return this.ToCreatedApiResponse(createAsset, "Successfully created a new asset");
+    }
+
+    [HttpPatch("{assetCode}")]
+    [Authorize(Roles = "Admin")]
+    public async Task<ApiResponse<string>> Update(String assetCode, [FromBody] UpdateAssetRequestDto request)
+    {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (userId is null)
+            throw new UnauthorizedAccessException("Cannot retrieve user id from claims");
+
+        var updatedAssetCode = await _assetService.UpdateAssetAsync(userId, assetCode, request);
+
+        return new ApiResponse<string>
+        {
+            Success = true,
+            Message = "Successfully updated asset.",
+            Data = updatedAssetCode,
+        };
     }
 }

@@ -7,7 +7,19 @@ namespace AssetManagement.Data.Repositories;
 
 public class AssetRepository : GenericRepository<Asset>, IAssetRepository
 {
-    public AssetRepository(AssetManagementDbContext dbContext) : base(dbContext) { }
+    private readonly AssetManagementDbContext context;
+
+    public AssetRepository(AssetManagementDbContext dbContext) : base(dbContext)
+    {
+        context = dbContext;
+    }
+
+    public Task<Asset?> GetByCodeAsync(string assetCode)
+    {
+        var asset = context.Assets
+            .FirstOrDefaultAsync(a => a.Code == assetCode);
+        return asset;
+    }
 
     public async Task<Asset?> GetSingleAsync(Expression<Func<Asset, bool>> predicate,
         CancellationToken cancellationToken, bool isTracking = false, params Expression<Func<Asset, object>>[]? includeProperties)
@@ -25,5 +37,5 @@ public class AssetRepository : GenericRepository<Asset>, IAssetRepository
 
         return await query.SingleOrDefaultAsync(predicate, cancellationToken);
     }
-    
+
 }

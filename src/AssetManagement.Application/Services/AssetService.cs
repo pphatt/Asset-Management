@@ -24,8 +24,8 @@ namespace AssetManagement.Application.Services
         private readonly ICategoryRepository _categoryRepository;
         private readonly IUserRepository _userRepository;
 
-        public AssetService(IAssetRepository assetRepository, 
-            ICategoryRepository categoryRepository, 
+        public AssetService(IAssetRepository assetRepository,
+            ICategoryRepository categoryRepository,
             IUserRepository userRepository)
         {
             _assetRepository = assetRepository;
@@ -101,8 +101,8 @@ namespace AssetManagement.Application.Services
 
         public async Task<CreateAssetResponseDto> CreateAssetAsync(CreateAssetRequestDto request, string adminId)
         {
-            
-            AssetValidator.ValidateAsset(request); 
+
+            AssetValidator.ValidateAsset(request);
             // Validate category
             var category = await _categoryRepository.GetByIdAsync(request.CategoryId);
             if (category is null)
@@ -144,9 +144,50 @@ namespace AssetManagement.Application.Services
                 StateName = request.State.GetDisplayName()
             };
         }
-        
 
-        [assembly : InternalsVisibleTo("AssetManagement.Application.Tests")]
+        public async Task<string> UpdateAssetAsync(string adminId, string assetCode, UpdateAssetRequestDto request)
+        {
+            if (request == null)
+            {
+                throw new ArgumentNullException(nameof(request), "Asset update data cannot be null");
+            }
+
+            var existingAsset = await _assetRepository.GetByCodeAsync(assetCode);
+            if (existingAsset == null)
+            {
+                throw new KeyNotFoundException($"Cannot find asset with id {assetCode}");
+            }
+
+            AssetValidator.ValidateUpdateAsset(request, existingAsset);
+
+            existingAsset.Name = request.Name ?? existingAsset.Name;
+            if (request.State.HasValue)
+            {
+                existingAsset.State = MapAssetState(request.State.Value);
+            }
+            if (request.CategoryId.HasValue)
+            {
+                var category = await _categoryRepository.GetByIdAsync(request.CategoryId.Value);
+                if (category == null)
+                {
+                    throw new KeyNotFoundException($"Cannot find category with id {request.CategoryId}");
+                }
+                existingAsset.CategoryId = request.CategoryId.Value;
+            }
+            existingAsset.Specification = request.Specification ?? existingAsset.Specification;
+            if (!string.IsNullOrWhiteSpace(request.InstalledDate))
+                existingAsset.InstalledDate = DateTime.Parse(request.InstalledDate);
+
+            existingAsset.LastModifiedBy = Guid.Parse(adminId);
+            existingAsset.LastModifiedDate = DateTime.UtcNow;
+
+            _assetRepository.Update(existingAsset);
+            await _assetRepository.SaveChangesAsync();
+
+            return existingAsset.Code;
+        }
+
+        [assembly: InternalsVisibleTo("AssetManagement.Application.Tests")]
         private static AssetState MapAssetState(AssetStateDto dto)
         {
             return dto switch
@@ -156,7 +197,8 @@ namespace AssetManagement.Application.Services
                 _ => throw new ArgumentOutOfRangeException()
             };
         }
-        [assembly : InternalsVisibleTo("AssetManagement.Application.Tests")]
+
+        [assembly: InternalsVisibleTo("AssetManagement.Application.Tests")]
         private async Task<Location> GetCurrentAdminLocation(string userId)
         {
             var adminUser = await _userRepository.GetByIdAsync(Guid.Parse(userId));

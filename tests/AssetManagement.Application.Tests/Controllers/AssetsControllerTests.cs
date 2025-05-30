@@ -139,64 +139,66 @@ public class AssetsControllerTests
 
         _assetServiceMock.Verify();
     }
-    
+
     [Fact]
-public async Task Create_ReturnsCreatedResponse_WhenValidRequestAndAuthorized()
-{
-    // Arrange
-    var request = new CreateAssetRequestDto
+    public async Task Create_ReturnsCreatedResponse_WhenValidRequestAndAuthorized()
     {
-        Name = "Test Asset",
-        CategoryId = Guid.NewGuid(),
-        Specifications = "Test specifications",
-        InstalledDate = "2023-01-01",
-        State = AssetStateDto.Available
-    };
-
-    var expectedResponse = new CreateAssetResponseDto
-    {
-        Code = "TC000001",
-        Name = "Test Asset",
-        CategoryName = "Test Category",
-        StateName = "Available"
-    };
-
-    var adminId = Guid.NewGuid().ToString();
-    _assetServiceMock.Setup(s => s.CreateAssetAsync(request, adminId))
-        .ReturnsAsync(expectedResponse)
-        .Verifiable();
-
-    // Update ClaimsPrincipal to ensure admin role and ID
-    var user = new ClaimsPrincipal(new ClaimsIdentity(
-        new[]
+        // Arrange
+        var request = new CreateAssetRequestDto
         {
+            Name = "Test Asset",
+            CategoryId = Guid.NewGuid(),
+            Specifications = "Test specifications",
+            InstalledDate = "2023-01-01",
+            State = AssetStateDto.Available
+        };
+
+        var expectedResponse = new CreateAssetResponseDto
+        {
+            Code = "TC000001",
+            Name = "Test Asset",
+            CategoryName = "Test Category",
+            StateName = "Available"
+        };
+
+        var adminId = Guid.NewGuid().ToString();
+        _assetServiceMock.Setup(s => s.CreateAssetAsync(request, adminId))
+            .ReturnsAsync(expectedResponse)
+            .Verifiable();
+
+        // Update ClaimsPrincipal to ensure admin role and ID
+        var user = new ClaimsPrincipal(new ClaimsIdentity(
+            new[]
+            {
             new Claim(ClaimTypes.NameIdentifier, adminId),
             new Claim(ClaimTypes.Role, "Admin")
-        }, "mock"));
-    _controller.ControllerContext.HttpContext = new DefaultHttpContext { User = user };
+            }, "mock"));
+        _controller.ControllerContext.HttpContext = new DefaultHttpContext { User = user };
 
-    // Act
-    var result = await _controller.Create(request);
+        // Act
+        var result = await _controller.Create(request);
 
-    // Assert
-    // Check if the result is an ActionResult<ApiResponse<CreateAssetResponseDto>>
-    var actionResult = Assert.IsType<ActionResult<ApiResponse<CreateAssetResponseDto>>>(result);
-    // Extract the ObjectResult
-    var objectResult = Assert.IsType<ObjectResult>(actionResult.Result);
-    Assert.Equal(201, objectResult.StatusCode);
+        // Assert
+        // Check if the result is an ActionResult<ApiResponse<CreateAssetResponseDto>>
+        var actionResult = Assert.IsType<ActionResult<ApiResponse<CreateAssetResponseDto>>>(result);
+        // Extract the ObjectResult
+        var objectResult = Assert.IsType<ObjectResult>(actionResult.Result);
+        Assert.Equal(201, objectResult.StatusCode);
 
-    // Extract the ApiResponse from the Value
-    var apiResponse = Assert.IsType<ApiResponse<CreateAssetResponseDto>>(objectResult.Value);
-    Assert.True(apiResponse.Success);
-    Assert.Equal("Successfully created a new asset", apiResponse.Message);
-    Assert.Equal(expectedResponse, apiResponse.Data);
-    Assert.Equal("TC000001", apiResponse.Data.Code);
-    Assert.Equal("Test Asset", apiResponse.Data.Name);
-    Assert.Equal("Test Category", apiResponse.Data.CategoryName);
-    Assert.Equal("Available", apiResponse.Data.StateName);
+        // Extract the ApiResponse from the Value
+        var apiResponse = Assert.IsType<ApiResponse<CreateAssetResponseDto>>(objectResult.Value);
+        Assert.True(apiResponse.Success);
+        Assert.Equal("Successfully created a new asset", apiResponse.Message);
+        Assert.Equal(expectedResponse, apiResponse.Data);
+        Assert.NotNull(apiResponse.Data);
+        Assert.Equal("TC000001", apiResponse.Data.Code);
+        Assert.Equal("Test Asset", apiResponse.Data.Name);
+        Assert.Equal("Test Category", apiResponse.Data.CategoryName);
+        Assert.Equal("Available", apiResponse.Data.StateName);
 
-    _assetServiceMock.Verify();
-}
+        _assetServiceMock.Verify();
+    }
+
     [Fact]
     public async Task Create_ThrowsValidationException_WhenRequestIsInvalid()
     {
@@ -328,7 +330,71 @@ public async Task Create_ReturnsCreatedResponse_WhenValidRequestAndAuthorized()
         // We verify the service was called if the action executes.
         _assetServiceMock.Verify(s => s.CreateAssetAsync(It.IsAny<CreateAssetRequestDto>(), It.IsAny<string>()), Times.Once());
     }
-    
-    
-    
+
+    [Fact]
+    public async Task UpdateAsset_ReturnsSuccess_WhenUpdateIsValid()
+    {
+        // Arrange
+        var assetCode = "LP000123";
+        var userId = Guid.NewGuid().ToString();
+        var request = new UpdateAssetRequestDto
+        {
+            Name = "Updated MacBook Pro",
+            Specification = "M2 Pro, 32GB RAM, 1TB SSD"
+        };
+
+        // Update the mock to include the user ID claim
+        var userClaims = new ClaimsIdentity(
+        [
+            new Claim(ClaimTypes.NameIdentifier, userId),
+        new Claim(ClaimTypes.Role, "Admin")
+        ], "mock");
+
+        _controller.ControllerContext = new ControllerContext
+        {
+            HttpContext = new DefaultHttpContext { User = new ClaimsPrincipal(userClaims) }
+        };
+
+        _assetServiceMock.Setup(s => s.UpdateAssetAsync(userId, assetCode, request))
+            .ReturnsAsync(assetCode)
+            .Verifiable();
+
+        // Act
+        var result = await _controller.Update(assetCode, request);
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.True(result.Success);
+        Assert.Equal("Successfully updated user.", result.Message);
+        Assert.Equal(assetCode, result.Data);
+
+        _assetServiceMock.Verify();
+    }
+
+    [Fact]
+    public async Task UpdateAsset_ThrowsException_WhenUserIdIsNull()
+    {
+        // Arrange
+        var assetCode = "LP000123";
+        var request = new UpdateAssetRequestDto
+        {
+            Name = "Updated MacBook Pro",
+            Specification = "M2 Pro, 32GB RAM, 1TB SSD"
+        };
+
+        // Set up context without NameIdentifier claim
+        var userClaims = new ClaimsIdentity(
+        [
+            new Claim(ClaimTypes.Role, "Admin")
+        ], "mock");
+
+        _controller.ControllerContext = new ControllerContext
+        {
+            HttpContext = new DefaultHttpContext { User = new ClaimsPrincipal(userClaims) }
+        };
+
+        // Act & Assert
+        await Assert.ThrowsAsync<UnauthorizedAccessException>(() =>
+            _controller.Update(assetCode, request));
+    }
 }
