@@ -59,7 +59,7 @@ export const AssetForm: React.FC<AssetFormProps> = ({
   ) as React.RefObject<HTMLDivElement>;
 
   const { useCreateAsset } = useAsset();
-  const createUserMutation = useCreateAsset();
+  const createAssetMutation = useCreateAsset();
 
   const { useCategories } = useCategory();
   const {
@@ -80,7 +80,7 @@ export const AssetForm: React.FC<AssetFormProps> = ({
     formState: { errors, isSubmitting, isValid },
   } = useForm<FormData>({
     resolver: yupResolver(schema),
-    mode: "onChange",
+    mode: "onBlur",
     defaultValues: {
       name: "",
       category: "",
@@ -103,7 +103,7 @@ export const AssetForm: React.FC<AssetFormProps> = ({
         state: data.state,
       };
 
-      createUserMutation.mutate(assetData);
+      createAssetMutation.mutate(assetData);
     }
   };
 
@@ -114,9 +114,7 @@ export const AssetForm: React.FC<AssetFormProps> = ({
   // Check if form has errors
   const hasErrors = Object.keys(errors).length > 0;
   const isSubmitDisabled =
-    !isValid || hasErrors || isSubmitting || createUserMutation.isPending;
-
-  console.log(errors);
+    !isValid || hasErrors || isSubmitting || createAssetMutation.isPending;
 
   return (
     <div className="max-w-md mx-auto p-6 bg-white border-gray-200">
@@ -291,7 +289,7 @@ export const AssetForm: React.FC<AssetFormProps> = ({
                 : "bg-primary text-white hover:bg-primary-dark focus:ring-primary"
             }`}
           >
-            {isSubmitting || createUserMutation.isPending
+            {isSubmitting || createAssetMutation.isPending
               ? "Saving..."
               : "Save"}
           </button>

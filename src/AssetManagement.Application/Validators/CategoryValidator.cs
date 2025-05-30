@@ -29,12 +29,6 @@ namespace AssetManagement.Application.Validators
                 ?? throw new KeyNotFoundException($"Cannot find user with id: {userId}");
         }
 
-        public static void ValidatePrefixLength(string prefix)
-        {
-            if (prefix.Trim().Length != 2)
-                throw new ValidationException("Prefix must be exactly 2 characters long");
-        }
-
         public static async Task ValidateDuplicateNameAsync(ICategoryRepository categoryRepository, string name)
         {
             var duplicatedName = await categoryRepository.GetAll()
