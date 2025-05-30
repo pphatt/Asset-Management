@@ -2,29 +2,28 @@ import { IUser } from "src/types/user.type";
 
 export const cookieEventTarget = new EventTarget();
 
-export const setCookie = (name: string, value: string, durations: number) => {
-  // Validate inputs
+export const setCookie = (
+  name: string,
+  value: string,
+  maxAgeSeconds: number
+) => {
   if (!name || !value) {
-    console.warn('setCookie: Name and value must not be empty');
+    console.warn("setCookie: Name and value must not be empty");
     return;
   }
-  if (durations < 0) {
-    console.warn('setCookie: Duration must not be negative');
+  if (maxAgeSeconds < 0) {
+    console.warn("setCookie: Duration must not be negative");
     return;
   }
 
-  // Calculate expiration in milliseconds
-  const expires = durations === 0 ? '' : `expires=${new Date(Date.now() + durations).toUTCString()}`;
-
-  // Build cookie string
   const cookieString = [
     `${name}=${encodeURIComponent(value)}`,
-    expires,
-    'path=/',
-    'SameSite=None; Secure',
+    `max-age=${Math.floor(maxAgeSeconds)}`,
+    "path=/",
+    "SameSite=None; Secure",
   ]
     .filter(Boolean)
-    .join('; ');
+    .join("; ");
 
   document.cookie = cookieString;
 };
@@ -43,18 +42,18 @@ const getCookie = (name: string) => {
 
 export const clearCookieSession = () => {
   // Get all cookies as a string
-  const cookies = document.cookie.split(';');
+  const cookies = document.cookie.split(";");
 
   // Iterate through each cookie
   cookies.forEach((cookie) => {
     // Extract the cookie name
-    const cookieName = cookie.split('=')[0].trim();
+    const cookieName = cookie.split("=")[0].trim();
     // Set the cookie's expiration to a past date to delete it
     document.cookie = `${cookieName}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
   });
 
   // Optionally dispatch an event to notify listeners
-  const event = new Event('cookiesCleared');
+  const event = new Event("cookiesCleared");
   cookieEventTarget.dispatchEvent(event);
 };
 

@@ -19,6 +19,7 @@ builder.Services.AddSwaggerConfig();
 builder.Services.AddSqlServerConfig(builder.Configuration);
 builder.Services.AddAuthConfig(builder.Configuration);
 
+// TODO: move these injection code to some separate files
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
@@ -26,6 +27,8 @@ builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IAssetRepository, AssetRepository>();
 builder.Services.AddScoped<IAssetService, AssetService>();
+builder.Services.AddScoped<IAssignmentRepository, AssignmentRepository>();
+builder.Services.AddScoped<IAssignmentService, AssignmentService>();
 builder.Services.AddTransient<DataSeeder>();
 
 var app = builder.Build();

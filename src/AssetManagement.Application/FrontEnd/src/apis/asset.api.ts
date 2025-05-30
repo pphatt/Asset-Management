@@ -9,7 +9,7 @@ import http from "../utils/http";
 
 const assetApi = {
   getAssets: async (
-    params: IAssetParams,
+    params: IAssetParams
   ): Promise<HttpResponse<PaginatedResult<IAsset>>> => {
     const { data } = await http.get("/assets", { params });
     return data;
@@ -21,7 +21,7 @@ const assetApi = {
   },
 
   getAssetByAssetCode: async (
-    assetCode: string,
+    assetCode: string
   ): Promise<HttpResponse<IAssetDetails>> => {
     const { data } = await http.get(`/assets/${assetCode}`);
     console.log(data);

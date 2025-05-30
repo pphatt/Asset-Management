@@ -2,7 +2,7 @@ using AssetManagement.Domain.Enums;
 
 namespace AssetManagement.Domain.Entities
 {
-    public class Assignment
+    public class Assignment : BaseEntity
     {
         public Guid AssetId { get; set; }
         public Asset Asset { get; set; } = null!;

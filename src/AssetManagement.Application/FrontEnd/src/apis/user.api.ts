@@ -5,32 +5,44 @@ import {
   IUserDetails,
   IUserParams,
   IUserType,
-} from '../types/user.type';
-import http from '../utils/http';
+} from "../types/user.type";
+import http from "../utils/http";
 
 const userApi = {
-  getUsers: async (params: IUserParams): Promise<HttpResponse<PaginatedResult<IUser>>> => {
-    const { data } = await http.get('/users', { params });
+  getUsers: async (
+    params: IUserParams
+  ): Promise<HttpResponse<PaginatedResult<IUser>>> => {
+    const { data } = await http.get("/users", { params });
     return data;
   },
 
   getUserTypes: async (): Promise<HttpResponse<IUserType[]>> => {
-    const { data } = await http.get('/users/types');
+    const { data } = await http.get("/users/types");
     return data;
   },
 
-  createUser: async (userData: ICreateUserRequest): Promise<HttpResponse<IUser>> => {
-    const { data } = await http.post('/users', userData);
+  createUser: async (
+    userData: ICreateUserRequest
+  ): Promise<HttpResponse<IUser>> => {
+    const { data } = await http.post("/users", userData);
     return data;
   },
 
-  getUserByStaffCode: async (staffCode: string): Promise<HttpResponse<IUserDetails>> => {
+  getUserByStaffCode: async (
+    staffCode: string
+  ): Promise<HttpResponse<IUserDetails>> => {
     const { data } = await http.get(`/users/${staffCode}`);
     return data;
   },
 
-  updateUser: async (staffCode: string, data: IUpdateUserRequest): Promise<HttpResponse<IUser>> => {
-    const { data: responseData } = await http.patch(`/users/${staffCode}`, data);
+  updateUser: async (
+    staffCode: string,
+    data: IUpdateUserRequest
+  ): Promise<HttpResponse<IUser>> => {
+    const { data: responseData } = await http.patch(
+      `/users/${staffCode}`,
+      data
+    );
     return responseData;
   },
 

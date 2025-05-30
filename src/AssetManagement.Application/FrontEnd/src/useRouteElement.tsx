@@ -1,12 +1,12 @@
-import path from '@/constants/path';
-import { lazy, useContext } from 'react';
-import { Navigate, Outlet, RouteObject, useRoutes } from 'react-router-dom';
-import LoginLayout from './layouts/Login';
-import MainLayout from './layouts/Main';
-import Home from './pages/Home';
-import CreateUser from './pages/User/CreateUser';
-import EditUser from './pages/User/EditUser';
-import { AppContext } from './contexts/app.context';
+import path from "@/constants/path";
+import { lazy, useContext } from "react";
+import { Navigate, Outlet, RouteObject, useRoutes } from "react-router-dom";
+import LoginLayout from "./layouts/Login";
+import MainLayout from "./layouts/Main";
+import Home from "./pages/Home";
+import CreateUser from "./pages/User/CreateUser";
+import EditUser from "./pages/User/EditUser";
+import { AppContext } from "./contexts/app.context";
 
 function ProtectedRoute() {
   const { isAuthenticated } = useContext(AppContext);
@@ -24,6 +24,8 @@ const Login = lazy(() => import("./pages/Login"));
 const Asset = lazy(() => import("./pages/Asset"));
 const CreateAsset = lazy(() => import("./pages/Asset/CreateAsset"));
 const User = lazy(() => import("./pages/User"));
+const Assignment = lazy(() => import("./pages/Assignment"));
+const NotFound = lazy(() => import("./pages/NotFound"));
 
 export default function useRouteElements() {
   const routeElements = useRoutes([
@@ -73,6 +75,14 @@ const ProtectedRoutes: RouteObject[] = [
         ),
       },
       {
+        path: path.assignment,
+        element: (
+          <MainLayout>
+            <Assignment />
+          </MainLayout>
+        ),
+      },
+      {
         path: path.asset,
         element: (
           <MainLayout>
@@ -113,11 +123,6 @@ const RejectedRoutes: RouteObject[] = [
 const OtherRoutes: RouteObject[] = [
   {
     path: "*",
-    element: (
-      <MainLayout>
-        <></>
-        {/* Not Found */}
-      </MainLayout>
-    ),
+    element: <NotFound />,
   },
 ];

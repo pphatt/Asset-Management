@@ -1,0 +1,77 @@
+/* Custom styles for react-datepicker */
+.react-datepicker {
+  font-family: inherit;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.react-datepicker__header {
+  background-color: white;
+  border-bottom: 1px solid #f0f0f0;
+  padding-top: 10px;
+}
+
+.react-datepicker__month {
+  margin: 0.4rem;
+}
+
+.react-datepicker__day-name {
+  color: #666;
+  width: 2rem;
+  line-height: 2rem;
+}
+
+.react-datepicker__day {
+  width: 2rem;
+  line-height: 2rem;
+  margin: 0.2rem;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.react-datepicker__day--selected {
+  background-color: #e74c3c;
+  color: white;
+}
+
+/* Add a hover effect to indicate clickable for toggling */
+.react-datepicker__day--selected:hover {
+  background-color: #c0392b;
+}
+
+.react-datepicker__day:hover {
+  background-color: #f4f4f4;
+}
+
+/* Add a subtle effect to indicate toggle capability */
+.react-datepicker__day--selected:active {
+  transform: scale(0.9);
+}
+
+.react-datepicker__navigation {
+  top: 12px;
+}
+
+.react-datepicker__current-month {
+  font-size: 1rem;
+  padding-bottom: 10px;
+}
+
+.react-datepicker__day--keyboard-selected {
+  background-color: #f0f0f0;
+  color: black;
+}
+
+.react-datepicker__day--keyboard-selected:hover {
+  background-color: #e74c3c;
+  color: white;
+}
+
+/* Add double arrows for month navigation */
+.react-datepicker__navigation--previous-month,
+.react-datepicker__navigation--next-month {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

@@ -15,6 +15,7 @@ public class AssetManagementDbContext : DbContext
     public DbSet<Asset> Assets { get; set; }
     public DbSet<User> Users { get; set; }
     public DbSet<Category> Categories { get; set; }
+    public DbSet<Assignment> Assignments { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -30,6 +31,12 @@ public class AssetManagementDbContext : DbContext
         base.OnModelCreating(modelBuilder);
         modelBuilder.ApplyConfigurationsFromAssembly(
             Assembly.GetExecutingAssembly());
+
+        modelBuilder.Entity<Assignment>()
+            .HasOne(a => a.Assignee)
+            .WithMany(u => u.Assignments)
+            .HasForeignKey(a => a.AssigneeId)
+            .OnDelete(DeleteBehavior.Restrict);
 
         #region Seeding Data
 

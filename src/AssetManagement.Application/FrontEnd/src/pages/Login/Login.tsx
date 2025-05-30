@@ -19,13 +19,11 @@ import { jwtDecode, JwtPayload } from "jwt-decode";
 
 const schema = yup.object().shape({
   username: yup.string().required("Username is required"),
-  password: yup
-    .string()
-    .required("Password is required")
+  password: yup.string().required("Password is required"),
 });
 
 type JWTPayload = {
-  "http://schemas.microsoft.com/ws/2008/06/jexp": string;
+  exp: string;
 } & JwtPayload;
 
 export default function Login() {
@@ -81,13 +79,17 @@ export default function Login() {
           isPasswordUpdated,
         });
 
-        const expiredTime = Number.parseInt(
-          decode["http://schemas.microsoft.com/ws/2008/06/jexp"],
-        );
+        const expInMs = Number.parseInt(decode["exp"]) * 1000; // JWT exp to ms
+        const currentTime = Date.now(); // current time in ms
 
-        setCookie("access_token", accessToken, expiredTime);
+        console.log(currentTime, expInMs);
 
-        setCookie("profile", JSON.stringify(user), expiredTime);
+        // Cookie lifetime in seconds
+        const maxAge = Math.floor((expInMs - currentTime) / 1000);
+
+        setCookie("access_token", accessToken, maxAge);
+
+        setCookie("profile", JSON.stringify(user), maxAge);
 
         setIsAuthenticated(true);
         toast.success("Login successfully!");
