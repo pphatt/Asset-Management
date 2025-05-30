@@ -24,21 +24,23 @@ public class GenericRepository<T> : IGenericRepository<T> where T : class
         return await _dbSet.FindAsync(keyValues);
     }
 
-    public void Add(T entity)
+    public async Task AddAsync(T entity)
     {
-        _dbContext.Add(entity);
-        _dbContext.SaveChanges();
+        await _dbContext.AddAsync(entity);
     }
 
     public void Delete(T entity)
     {
         _dbContext.Remove(entity);
-        _dbContext.SaveChanges();
     }
 
     public void Update(T entity)
     {
         _dbContext.Update(entity);
-        _dbContext.SaveChanges();
+    }
+
+    public async Task<bool> SaveChangesAsync()
+    {
+        return await _dbContext.SaveChangesAsync() > 0;
     }
 }

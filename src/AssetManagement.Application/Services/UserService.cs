@@ -60,6 +60,7 @@ namespace AssetManagement.Application.Services
                 .Take(queryParams.PageSize)
                 .Select(u => new UserDto
                 {
+                    Id = u.Id,
                     FirstName = u.FirstName,
                     LastName = u.LastName,
                     JoinedDate = u.JoinedDate,
@@ -70,6 +71,33 @@ namespace AssetManagement.Application.Services
                 .ToListAsync();
 
             return new PagedResult<UserDto>(items, total, queryParams.PageSize, queryParams.PageNumber);
+        }
+
+        public async Task<UserDetailsDto> GetUserByStaffCodeAsync(string staffCode)
+        {
+            if (string.IsNullOrWhiteSpace(staffCode))
+            {
+                throw new ArgumentException("Staff code cannot be empty or null", nameof(staffCode));
+            }
+
+            var user = await _userRepository.GetByStaffCodeAsync(staffCode);
+            if (user is null)
+            {
+                throw new KeyNotFoundException($"Cannot find user with staff code {staffCode}");
+            }
+
+            return new UserDetailsDto
+            {
+                StaffCode = user.StaffCode,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Username = user.Username,
+                DateOfBirth = user.DateOfBirth?.ToString("dd/MM/yyyy"),
+                JoinedDate = user.JoinedDate.ToString("dd/MM/yyyy"),
+                Gender = (int)user.Gender,
+                Type = (int)user.Type,
+                Location = (int)user.Location,
+            };
         }
 
         public async Task<CreateUserResponseDto> CreateUserAsync(string adminUserId, CreateUserRequestDto dto)
@@ -111,7 +139,8 @@ namespace AssetManagement.Application.Services
                 CreatedDate = DateTime.UtcNow,
             };
 
-            _userRepository.Add(user);
+            await _userRepository.AddAsync(user);
+            await _userRepository.SaveChangesAsync();
 
             return new CreateUserResponseDto
             {
@@ -157,6 +186,7 @@ namespace AssetManagement.Application.Services
             existingUser.LastModifiedDate = DateTime.UtcNow;
 
             _userRepository.Update(existingUser);
+            await _userRepository.SaveChangesAsync();
             return existingUser.StaffCode;
         }
 
@@ -175,35 +205,9 @@ namespace AssetManagement.Application.Services
 
             // Update user
             _userRepository.Update(user);
+            await _userRepository.SaveChangesAsync();
 
             return staffCode;
-        }
-
-        public async Task<UserDetailsDto> GetUserByStaffCodeAsync(string staffCode)
-        {
-            if (string.IsNullOrWhiteSpace(staffCode))
-            {
-                throw new ArgumentException("Staff code cannot be empty or null", nameof(staffCode));
-            }
-
-            var user = await _userRepository.GetByStaffCodeAsync(staffCode);
-            if (user is null)
-            {
-                throw new KeyNotFoundException($"Cannot find user with staff code {staffCode}");
-            }
-
-            return new UserDetailsDto
-            {
-                StaffCode = user.StaffCode,
-                FirstName = user.FirstName,
-                LastName = user.LastName,
-                Username = user.Username,
-                DateOfBirth = user.DateOfBirth?.ToString("dd/MM/yyyy"),
-                JoinedDate = user.JoinedDate.ToString("dd/MM/yyyy"),
-                Gender = (int)user.Gender,
-                Type = (int)user.Type,
-                Location = (int)user.Location,
-            };
         }
 
         private static UserType MapUserType(UserTypeDto dto)

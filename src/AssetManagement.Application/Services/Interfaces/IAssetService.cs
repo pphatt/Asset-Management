@@ -11,7 +11,7 @@ namespace AssetManagement.Application.Services.Interfaces
         // <summary>
         // Retrieves a paginated list of users based on the provided query parameters
         // </summary>
-        Task<PagedResult<AssetDto>> GetAssetsAsync(AssetQueryParameters queryParams);
+        Task<PagedResult<AssetDto>> GetAssetsAsync(string adminId, AssetQueryParameters queryParams);
         Task<AssetDetailsDto> GetAssetByIdAsync(Guid id);
         
         Task<CreateAssetResponseDto> CreateAssetAsync(CreateAssetRequestDto request, string adminId);

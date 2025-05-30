@@ -25,7 +25,7 @@ public class AssetsControllerTests
     {
         _assetServiceMock = new Mock<IAssetService>();
         _controller = new AssetsController(_assetServiceMock.Object);
-        
+
         // Mock HttpContext User
         var user = new ClaimsPrincipal(new ClaimsIdentity(
         [
@@ -36,34 +36,58 @@ public class AssetsControllerTests
         // Initialize HttpContext
         _controller.ControllerContext = new ControllerContext
         {
-            
+
             HttpContext = new DefaultHttpContext { User = user }
         };
     }
-    
+
+    private ClaimsPrincipal CreateUserPrincipal(string userId, string role = "Admin")
+    {
+        var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier, userId),
+                new Claim(ClaimTypes.Role, role)
+            };
+        var identity = new ClaimsIdentity(claims, "TestAuthType");
+        return new ClaimsPrincipal(identity);
+    }
+
+    private void ApplyUserToController(ClaimsPrincipal user)
+    {
+        _controller.ControllerContext = new ControllerContext()
+        {
+            HttpContext = new DefaultHttpContext() { User = user }
+        };
+    }
+
     [Fact]
     public async Task GetAssetList_ReturnsPagedAssets_WhenAuthorized()
     {
         // Arrange
+        var userId = "123e4567-e89b-12d3-a456-426614174000";
         var queryParams = new AssetQueryParameters { PageNumber = 1, PageSize = 10 };
-        var dtoList = new List<AssetDto> 
-        { 
-            new AssetDto 
-            { 
-                Code = "A001", 
-                Id = Guid.NewGuid(), 
-                Name = "Test Asset", 
-                CategoryName = "Test Category", 
-                State = "Available" 
-            } 
+        var dtoList = new List<AssetDto>
+        {
+            new AssetDto
+            {
+                Code = "A001",
+                Id = Guid.NewGuid(),
+                Name = "Test Asset",
+                CategoryName = "Test Category",
+                State = "Available"
+            }
         };
         var expectedPagedResult = new PagedResult<AssetDto>(dtoList, dtoList.Count, queryParams.PageSize, queryParams.PageNumber);
-    
-        _assetServiceMock.Setup(s => s.GetAssetsAsync(It.Is<AssetQueryParameters>(p => 
-                p.PageNumber == queryParams.PageNumber && 
+
+        _assetServiceMock.Setup(s => s.GetAssetsAsync(userId, It.Is<AssetQueryParameters>(p =>
+                p.PageNumber == queryParams.PageNumber &&
                 p.PageSize == queryParams.PageSize)))
             .ReturnsAsync(expectedPagedResult)
             .Verifiable();
+
+        // Setup user claims
+        var claimsPrincipal = CreateUserPrincipal(userId);
+        ApplyUserToController(claimsPrincipal);
 
         // Act
         var result = await _controller.Get(queryParams);
@@ -71,13 +95,13 @@ public class AssetsControllerTests
         // Assert
         var actionResult = Assert.IsType<ActionResult<ApiResponse<PagedResult<AssetDto>>>>(result);
         var response = Assert.IsType<ApiResponse<PagedResult<AssetDto>>>(actionResult.Value);
-    
+
         Assert.NotNull(response);
         Assert.True(response.Success);
         Assert.Equal("Successfully fetched a paginated list of assets", response.Message);
         Assert.Equal(expectedPagedResult, response.Data);
         Assert.Equal(expectedPagedResult.Items.Count(), response.Data?.Items.Count());
-    
+
         _assetServiceMock.Verify();
     }
 

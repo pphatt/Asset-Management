@@ -5,7 +5,7 @@ namespace AssetManagement.Domain.Extensions;
 
 public static class AssetExtensions
 {
-    public static IQueryable<Asset> ApplyAssetSearch(this IQueryable<Asset> query, string? searchTerm)
+    public static IQueryable<Asset> ApplySearch(this IQueryable<Asset> query, string? searchTerm)
     {
         if (string.IsNullOrEmpty(searchTerm))
             return query;
@@ -17,8 +17,10 @@ public static class AssetExtensions
             u.Name.Trim().ToLower().Contains(normalizedSearchTerm));
     }
 
-    public static IQueryable<Asset> ApplyAssetFilters(this IQueryable<Asset> query, List<string>? assetStates, List<string>? assetCategories)
+    public static IQueryable<Asset> ApplyFilters(this IQueryable<Asset> query, List<string>? assetStates, List<string>? assetCategories, Location location)
     {
+        query = query.Where(a => a.Location == location);
+
         if (assetStates != null && assetStates.Count > 0 && !assetStates.Contains("All"))
         {
             query = query.Where(asset => assetStates.Contains(asset.State ==
@@ -37,7 +39,7 @@ public static class AssetExtensions
         return query;
     }
 
-    public static IQueryable<Asset> ApplyAssetSorting(this IQueryable<Asset> query, IList<(string Property, string Order)> sortingCriteria)
+    public static IQueryable<Asset> ApplySorting(this IQueryable<Asset> query, IList<(string Property, string Order)> sortingCriteria)
     {
         if (sortingCriteria == null || !sortingCriteria.Any())
             return query;

@@ -68,6 +68,7 @@ export default function ResetPassword() {
                     const decode = jwtDecode<JWTPayload>(accessToken);
 
                     const {
+                        id,
                         staffCode,
                         firstName,
                         lastName,
@@ -78,6 +79,7 @@ export default function ResetPassword() {
                     } = user;
 
                     setProfile({
+                        id,
                         staffCode,
                         firstName,
                         lastName,

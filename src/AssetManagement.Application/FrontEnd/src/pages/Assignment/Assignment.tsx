@@ -12,7 +12,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import "@/styles/datepicker.css"; // Import custom styles
 import { isSameDay } from "date-fns";
 import path from "@/constants/path";
-import { createSearchParams, useNavigate } from "react-router-dom";
+import { createSearchParams, NavLink, useNavigate } from "react-router-dom";
 import AssignmentDetailsPopup from "@/components/assignment/AssignmentDetailsPopup";
 import Pagination from "@/components/assignment/Pagination";
 
@@ -451,9 +451,9 @@ export default function Assignment() {
               </button>
             </form>
 
-            <button className="bg-primary text-white rounded px-3 py-2 text-sm hover:opacity-90">
+            <NavLink to={path.assignmentCreate} className="bg-primary text-white rounded px-3 py-2 text-sm hover:opacity-90">
               Create new assignment
-            </button>
+            </NavLink>
           </div>
         </div>
 

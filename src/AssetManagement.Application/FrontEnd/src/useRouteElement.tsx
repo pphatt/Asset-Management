@@ -1,12 +1,12 @@
-import path from "@/constants/path";
-import { lazy, useContext } from "react";
-import { Navigate, Outlet, RouteObject, useRoutes } from "react-router-dom";
-import LoginLayout from "./layouts/Login";
-import MainLayout from "./layouts/Main";
-import Home from "./pages/Home";
-import CreateUser from "./pages/User/CreateUser";
-import EditUser from "./pages/User/EditUser";
-import { AppContext } from "./contexts/app.context";
+import path from '@/constants/path';
+import { lazy, useContext } from 'react';
+import { Navigate, Outlet, RouteObject, useRoutes } from 'react-router-dom';
+import { AppContext } from './contexts/app.context';
+import LoginLayout from './layouts/Login';
+import MainLayout from './layouts/Main';
+import Home from './pages/Home';
+import CreateUser from './pages/User/CreateUser';
+import EditUser from './pages/User/EditUser';
 
 function ProtectedRoute() {
   const { isAuthenticated } = useContext(AppContext);
@@ -27,6 +27,10 @@ const User = lazy(() => import("./pages/User"));
 const Assignment = lazy(() => import("./pages/Assignment"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
+// AssignmentTemp components
+const CreateAssignment = lazy(() => import('./pages/Assignment/CreateAssignment'));
+const EditAssignment = lazy(() => import('./pages/Assignment/EditAssignment'));
+
 export default function useRouteElements() {
   const routeElements = useRoutes([
     ...ProtectedRoutes,
@@ -34,7 +38,7 @@ export default function useRouteElements() {
     ...OtherRoutes,
   ]);
 
-  return routeElements;
+  return routeElements;``
 }
 
 const ProtectedRoutes: RouteObject[] = [
@@ -95,6 +99,22 @@ const ProtectedRoutes: RouteObject[] = [
         element: (
           <MainLayout>
             <CreateAsset />
+          </MainLayout>
+        ),
+      },
+      {
+        path: path.assignmentCreate,
+        element: (
+          <MainLayout>
+            <CreateAssignment />
+          </MainLayout>
+        ),
+      },
+      {
+        path: path.assignmentEdit,
+        element: (
+          <MainLayout>
+            <EditAssignment />
           </MainLayout>
         ),
       },

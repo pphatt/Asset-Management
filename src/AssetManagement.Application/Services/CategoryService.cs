@@ -35,8 +35,10 @@ namespace AssetManagement.Application.Services
                 CreatedBy = Guid.Parse(userId),
                 CreatedDate = DateTime.UtcNow,
             };
-            _categoryRepository.Add(category);
-            
+
+            await _categoryRepository.AddAsync(category);
+            await _categoryRepository.SaveChangesAsync();
+
             return new CategoryDto
             {
                 Id = category.Id,

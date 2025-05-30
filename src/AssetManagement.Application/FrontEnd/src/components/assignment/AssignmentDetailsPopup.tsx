@@ -1,5 +1,4 @@
 import { IAssignment } from "@/types/assignment.type";
-import { format } from "date-fns";
 
 interface AssignmentDetailsPopupProps {
   assignment: IAssignment | null;
@@ -13,11 +12,6 @@ export default function AssignmentDetailsPopup({
   onClose,
 }: AssignmentDetailsPopupProps) {
   if (!isOpen || !assignment) return null;
-
-  // Format date if it exists
-  const formattedDate = assignment.assignedDate
-    ? format(new Date(assignment.assignedDate), "dd/MM/yyyy")
-    : "";
 
   return (
     <div className="fixed inset-0 bg-opacity-5 border-black-50 flex items-center justify-center z-50">
@@ -75,7 +69,7 @@ export default function AssignmentDetailsPopup({
             <div>{assignment.assignedBy}</div>
 
             <div className="text-gray-600">Assigned Date</div>
-            <div>{formattedDate}</div>
+            <div>{assignment.assignedDate}</div>
 
             <div className="text-gray-600">State</div>
             <div>{assignment.state}</div>

@@ -729,7 +729,7 @@ namespace AssetManagement.Application.Tests.Services
             Assert.Equal("Doe John", result.FullName);
             Assert.Equal(LocationDto.HN, result.Location);
 
-            _mockUserRepository.Verify(r => r.Add(It.IsAny<User>()), Times.Once);
+            _mockUserRepository.Verify(r => r.AddAsync(It.IsAny<User>()), Times.Once);
         }
 
         private User CreateSampleUser(string staffCode = "SD0001")

@@ -3,7 +3,6 @@ using AssetManagement.Contracts.Exceptions;
 using AssetManagement.Domain.Interfaces.Repositories;
 using Microsoft.EntityFrameworkCore;
 using static AssetManagement.Contracts.Exceptions.ApiExceptionTypes;
-using Microsoft.EntityFrameworkCore;
 
 namespace AssetManagement.Application.Validators
 {

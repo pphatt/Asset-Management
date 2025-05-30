@@ -33,14 +33,27 @@ namespace AssetManagement.Application.Services
             _userRepository = userRepository;
         }
 
-        public async Task<PagedResult<AssetDto>> GetAssetsAsync(AssetQueryParameters queryParams)
+        private async Task<Location> GetLocationByUserId(string userId)
         {
+            var user = await _userRepository.GetByIdAsync(Guid.Parse(userId));
+            if (user is null)
+            {
+                throw new KeyNotFoundException($"User with id {userId} not found");
+            }
+
+            return user.Location;
+        }
+
+        public async Task<PagedResult<AssetDto>> GetAssetsAsync(string adminId, AssetQueryParameters queryParams)
+        {
+            var currentAdminLocation = await GetLocationByUserId(adminId);
+
             IQueryable<Asset> query = _assetRepository.GetAll()
                 .AsNoTracking()
                 .Include(x => x.Category)
-                .ApplyAssetSearch(queryParams.SearchTerm)
-                .ApplyAssetFilters(queryParams.AssetStates, queryParams.AssetCategories)
-                .ApplyAssetSorting(queryParams.GetSortCriteria());
+                .ApplySearch(queryParams.SearchTerm)
+                .ApplyFilters(queryParams.AssetStates, queryParams.AssetCategories, currentAdminLocation)
+                .ApplySorting(queryParams.GetSortCriteria());
 
             int total = await query.CountAsync();
 
@@ -120,7 +133,9 @@ namespace AssetManagement.Application.Services
                 LastModifiedDate = DateTime.UtcNow,
             };
 
-            _assetRepository.Add(asset);
+            await _assetRepository.AddAsync(asset);
+            await _assetRepository.SaveChangesAsync();
+
             return new CreateAssetResponseDto
             {
                 Code = assetCode,

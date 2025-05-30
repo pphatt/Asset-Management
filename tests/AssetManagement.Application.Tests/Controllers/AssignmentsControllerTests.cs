@@ -4,6 +4,8 @@ using AssetManagement.Application.Services.Interfaces;
 using AssetManagement.Contracts.Common;
 using AssetManagement.Contracts.Common.Pagination;
 using AssetManagement.Contracts.DTOs;
+using AssetManagement.Contracts.DTOs.Requests;
+using AssetManagement.Contracts.Exceptions;
 using AssetManagement.Contracts.Parameters;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -168,6 +170,101 @@ namespace AssetManagement.Application.Tests.Controllers
             Assert.True(apiResponse.Success);
             Assert.NotNull(apiResponse.Data);
             Assert.Empty(apiResponse.Data.Items);
+        }
+
+        [Fact]
+        public async Task Create_WithValidData_ReturnsCreatedResult()
+        {
+            // Arrange
+            var adminId = Guid.NewGuid();
+            var dto = new CreateAssignmentRequestDto
+            {
+                AssetId = Guid.NewGuid().ToString(),
+                AssigneeId = Guid.NewGuid().ToString(),
+                AssignedDate = DateTimeOffset.Now.AddDays(1).ToString("dd/MM/yyyy"),
+                Note = "Test assignment"
+            };
+
+            var createdAssignment = new AssignmentDto
+            {
+                Id = Guid.NewGuid(),
+                AssetCode = "LP001",
+                AssetName = "Laptop Dell",
+                AssignedBy = "admin1",
+                AssignedTo = "user1",
+                AssignedDate = DateTimeOffset.Now.ToString("dd/MM/yyyy"),
+                State = "WaitingForAcceptance"
+            };
+
+            _mockAssignmentService.Setup(x => x.CreateAssignmentAsync(adminId, dto))
+                .ReturnsAsync(createdAssignment);
+
+            var claimsPrincipal = CreateUserPrincipal(adminId.ToString());
+            ApplyUserToController(claimsPrincipal);
+
+            // Act
+            var result = await _controller.Create(dto);
+
+            // Assert
+            var createdResult = Assert.IsType<ActionResult<ApiResponse<AssignmentDto>>>(result);
+            var objectResult = Assert.IsType<ObjectResult>(createdResult.Result);
+            Assert.Equal(StatusCodes.Status201Created, objectResult.StatusCode);
+            var apiResponse = Assert.IsType<ApiResponse<AssignmentDto>>(objectResult.Value);
+            Assert.True(apiResponse.Success);
+            Assert.Equal("New assignment created successfully!", apiResponse.Message);
+            Assert.Equal(createdAssignment, apiResponse.Data);
+        }
+
+        [Fact]
+        public async Task Create_WithInvalidData_ThrowsAggregateFieldValidationException()
+        {
+            // Arrange
+            var adminId = Guid.NewGuid();
+            var dto = new CreateAssignmentRequestDto
+            {
+                AssetId = "invalid-guid",
+                AssigneeId = Guid.NewGuid().ToString(),
+                AssignedDate = DateTimeOffset.Now.AddDays(1).ToString("dd/MM/yyyy"),
+                Note = "Test assignment"
+            };
+
+            _mockAssignmentService.Setup(x => x.CreateAssignmentAsync(adminId, dto))
+                .ThrowsAsync(new AggregateFieldValidationException(new List<FieldValidationException>
+                {
+                    new FieldValidationException("AssetId", "Invalid Asset ID format")
+                }));
+
+            var claimsPrincipal = CreateUserPrincipal(adminId.ToString());
+            ApplyUserToController(claimsPrincipal);
+
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<AggregateFieldValidationException>(
+                () => _controller.Create(dto));
+
+            Assert.Single(exception.Errors);
+            Assert.Equal("AssetId", exception.Errors[0].Field);
+            Assert.Equal("Invalid Asset ID format", exception.Errors[0].Message);
+        }
+
+        [Fact]
+        public async Task Create_WithoutUserClaim_ThrowsUnauthorizedAccessException()
+        {
+            // Arrange
+            var dto = new CreateAssignmentRequestDto
+            {
+                AssetId = Guid.NewGuid().ToString(),
+                AssigneeId = Guid.NewGuid().ToString(),
+                AssignedDate = DateTimeOffset.Now.AddDays(1).ToString("dd/MM/yyyy"),
+                Note = "Test assignment"
+            };
+
+            ApplyUserToController(new ClaimsPrincipal());
+
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<UnauthorizedAccessException>(
+                () => _controller.Create(dto));
+
+            Assert.Equal("Cannot retrieve user id from claims", exception.Message);
         }
     }
 }

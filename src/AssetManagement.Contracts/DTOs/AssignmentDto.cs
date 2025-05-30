@@ -2,6 +2,7 @@ namespace AssetManagement.Contracts.DTOs
 {
     public class AssignmentDto
     {
+        public Guid Id { get; set; }
         public int No { get; set; }
         public string? AssetCode { get; set; }
         public string? AssetName { get; set; }

@@ -14,7 +14,7 @@ namespace AssetManagement.Application.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class AssetsController: ControllerBase
+public class AssetsController : ControllerBase
 {
     private readonly IAssetService _assetService;
 
@@ -22,12 +22,18 @@ public class AssetsController: ControllerBase
     {
         _assetService = assetService;
     }
-    
+
     [HttpGet("")]
     [Authorize(Roles = "Admin, Staff")]
     public async Task<ActionResult<ApiResponse<PagedResult<AssetDto>>>> Get([FromQuery] AssetQueryParameters queryParameters)
     {
-        var pagedData = await _assetService.GetAssetsAsync(queryParameters);
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (userId is null)
+        {
+            throw new UnauthorizedAccessException("Cannot retrieve user id from claims");
+        }
+
+        var pagedData = await _assetService.GetAssetsAsync(userId, queryParameters);
 
         return new ApiResponse<PagedResult<AssetDto>>
         {
@@ -36,7 +42,7 @@ public class AssetsController: ControllerBase
             Data = pagedData
         };
     }
-    
+
     [HttpGet("{id:Guid}")]
     [Authorize(Roles = "Admin, Staff")]
     public async Task<ApiResponse<AssetDetailsDto>> GetById(Guid id)
