@@ -2,19 +2,23 @@
 using AssetManagement.Contracts.Exceptions;
 using AssetManagement.Domain.Interfaces.Repositories;
 using Microsoft.EntityFrameworkCore;
+using System.Text.RegularExpressions;
 using static AssetManagement.Contracts.Exceptions.ApiExceptionTypes;
 
 namespace AssetManagement.Application.Validators
 {
     public static class CategoryValidator
     {
+        private static string _pattern = @"^[A-Za-z]+$";
+
         public static void ValidateCreateCategory(CreateCategoryRequestDto request)
         {
             var errors = new List<FieldValidationException>();
 
             AddErrorIfEmpty(errors, request.Name, "CategoryName", "Category name is required");
-            AddErrorIfEmpty(errors, request.Name, "CategoryPrefix", "Prefix is required");
-            ValidatePrefixLength(errors, request.Prefix, "CategoryPrefix", 
+            AddErrorIfEmpty(errors, request.Prefix, "CategoryPrefix", "Prefix is required");
+
+            ValidatePrefix(errors, request.Prefix, "CategoryPrefix",
                 "The category prefix must be exactly 2 characters and is mandatory");
 
             ThrowIfErrors(errors); 
@@ -55,18 +59,19 @@ namespace AssetManagement.Application.Validators
                 errors.Add(new FieldValidationException(field, message));
         }
 
-        private static void ValidatePrefixLength(List<FieldValidationException> errors,
+        private static void ValidatePrefix(List<FieldValidationException> errors,
             string value,
             string field, 
             string message)
         {
-            if (value.Trim().Length != 2)
+            if (!Regex.IsMatch(value, _pattern) || value.Trim().Length != 2)
                 errors.Add(new FieldValidationException(field, message));
         }
 
         private static void ThrowIfErrors(List<FieldValidationException> errors)
         {
-            if (errors.Count > 0) throw new AggregateFieldValidationException(errors);
+            if (errors.Count > 0) 
+                throw new AggregateFieldValidationException(errors);
         }
     }
 }

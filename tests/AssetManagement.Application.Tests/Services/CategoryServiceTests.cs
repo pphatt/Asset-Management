@@ -145,7 +145,8 @@ namespace AssetManagement.Application.Tests.Services
             var service = new CategoryService(_mockCategoryRepository.Object, mockUserRepo.Object);
 
             // Act & Assert
-            await Assert.ThrowsAsync<AggregateFieldValidationException>(() => service.CreateCategoryAsync(request, userId));
+            await Assert.ThrowsAsync<AggregateFieldValidationException>(() 
+                => service.CreateCategoryAsync(request, userId));
         }
 
         [Fact]
@@ -199,6 +200,32 @@ namespace AssetManagement.Application.Tests.Services
 
             // Act & Assert
             await Assert.ThrowsAsync<DuplicateResourceException>(() => service.CreateCategoryAsync(request, userId));
+        }
+
+        [Theory]
+        [InlineData("A1")]
+        [InlineData("A-")]
+        [InlineData("!@")]
+        public async Task CreateCategory_ThrowsValidationException_WhenPrefixIsNotAlphabetic(string prefix)
+        {
+            // Arrange
+            var userId = Guid.NewGuid().ToString();
+            var user = new User { Id = Guid.Parse(userId), Username = "testuser", Password = "pass" };
+            var request = new CreateCategoryRequestDto { Name = "Stationery", Prefix = prefix };
+
+            var mockUserQueryable = new List<User> { user }.AsQueryable().BuildMock();
+            var mockCategoryQueryable = new List<Category>().AsQueryable().BuildMock();
+
+            var mockUserRepo = new Mock<IUserRepository>();
+            mockUserRepo.Setup(x => x.GetAll()).Returns(mockUserQueryable);
+
+            _mockCategoryRepository.Setup(x => x.GetAll()).Returns(mockCategoryQueryable);
+
+            var service = new CategoryService(_mockCategoryRepository.Object, mockUserRepo.Object);
+
+            // Act & Assert
+            await Assert.ThrowsAsync<AggregateFieldValidationException>(() => 
+                service.CreateCategoryAsync(request, userId));
         }
 
         #endregion
