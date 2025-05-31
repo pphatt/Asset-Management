@@ -70,6 +70,80 @@ namespace AssetManagement.Application.Validators
             ThrowIfErrors(errors);
         }
 
+        public static async Task ValidateUpdateAssignmentAsync(
+            Guid assignmentId,
+            UpdateAssignmentRequestDto dto,
+            Guid adminId,
+            IAssetRepository assetRepository,
+            IUserRepository userRepository,
+            IAssignmentRepository assignmentRepository
+        )
+        {
+            var errors = new List<FieldValidationException>();
+
+            var assignment = await assignmentRepository.GetByIdAsync(assignmentId);
+            if (assignment == null)
+            {
+                throw new KeyNotFoundException($"Assignment with id {assignmentId} not found");
+            }
+
+            // Only waiting for acceptance assignments can be updated
+            if (assignment.State != AssignmentState.WaitingForAcceptance)
+            {
+                throw new InvalidOperationException("Can only edit assignments with state 'Waiting for acceptance'");
+            }
+
+            // Get admin and validate location
+            var admin = await userRepository.GetByIdAsync(adminId);
+            if (admin is null)
+            {
+                throw new UnauthorizedAccessException("Admin user not found");
+            }
+
+            var adminLocation = admin.Location;
+
+            // Validate that admin is the assignor
+            // Admin can only edit assignments that they created (Business rule - optional)
+            // if (assignment.AssignorId != adminId)
+            // {
+            //     throw new UnauthorizedAccessException("You can only update assignments you created");
+            // }
+
+            // Validate new asset if provided
+            if (!string.IsNullOrWhiteSpace(dto.AssetId))
+            {
+                if (!Guid.TryParse(dto.AssetId, out var newAssetId))
+                {
+                    errors.Add(new FieldValidationException("AssetId", "Invalid Asset ID format"));
+                }
+                else if (newAssetId != assignment.AssetId)
+                {
+                    await ValidateAssetForAssignmentAsync(errors, newAssetId, adminLocation, assetRepository, assignmentRepository, assignmentId);
+                }
+            }
+
+            // Validate new assignee if provided
+            if (!string.IsNullOrWhiteSpace(dto.AssigneeId))
+            {
+                if (!Guid.TryParse(dto.AssigneeId, out var newAssigneeId))
+                {
+                    errors.Add(new FieldValidationException("AssigneeId", "Invalid Assignee ID format"));
+                }
+                else if (newAssigneeId != assignment.AssigneeId)
+                {
+                    await ValidateAssigneeAsync(errors, newAssigneeId, adminLocation, userRepository);
+                }
+            }
+
+            // Validate new assigned date if provided
+            if (!string.IsNullOrWhiteSpace(dto.AssignedDate))
+            {
+                ValidateAssignedDate(errors, dto.AssignedDate);
+            }
+
+            ThrowIfErrors(errors);
+        }
+
         private static DateTimeOffset ValidateAssignedDate(List<FieldValidationException> errors, string dateString)
         {
             if (!DateTimeOffset.TryParse(dateString, out var date))
@@ -93,7 +167,8 @@ namespace AssetManagement.Application.Validators
             Guid assetId,
             Location adminLocation,
             IAssetRepository assetRepository,
-            IAssignmentRepository assignmentRepository)
+            IAssignmentRepository assignmentRepository,
+            Guid? excludeAssignmentId = null)
         {
             // Check if asset exists
             var asset = await assetRepository.GetByIdAsync(assetId);
@@ -118,12 +193,18 @@ namespace AssetManagement.Application.Validators
             }
 
             // Check if asset already has an active assignment
-            var existingAssignment = await assignmentRepository.GetAll()
+            var query = assignmentRepository.GetAll()
                 .Where(a => a.AssetId == assetId &&
-                           (a.State == AssignmentState.WaitingForAcceptance || a.State == AssignmentState.Accepted))
-                .FirstOrDefaultAsync();
+                           (a.State == AssignmentState.WaitingForAcceptance || a.State == AssignmentState.Accepted));
 
-            if (existingAssignment != null)
+            if (excludeAssignmentId.HasValue)
+            {
+                query = query.Where(a => a.AssetId != excludeAssignmentId);
+            }
+
+            var existingAssignment = await query.FirstOrDefaultAsync();
+
+            if (existingAssignment is not null)
             {
                 errors.Add(new FieldValidationException("AssetId", "Asset is already assigned and waiting for acceptance or accepted"));
             }

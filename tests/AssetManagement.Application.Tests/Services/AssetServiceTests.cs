@@ -28,6 +28,7 @@ public class AssetServiceTests
         _assetService = new AssetService(_assetRepository.Object, _categoryRepository.Object, _userRepository.Object);
     }
 
+    #region Helpers
     private User CreateAdminUser(Guid? id = null)
     {
         return new User
@@ -38,7 +39,9 @@ public class AssetServiceTests
             Location = Location.HCM
         };
     }
+    #endregion
 
+    #region GetAssets
     [Fact]
     public async Task GetAssetsAsync_ReturnsPagedResult()
     {
@@ -195,7 +198,9 @@ public class AssetServiceTests
         Assert.Equal("Waiting for recycling", waitingForRecyclingAsset.State);
         Assert.Equal("Recycled", recycledAsset.State);
     }
+    #endregion
 
+    #region CreateAsset
     [Fact]
     public async Task CreateAssetAsync_ValidRequest_ReturnsCreateAssetResponseDto()
     {
@@ -300,8 +305,6 @@ public class AssetServiceTests
         // Assert
         Assert.Equal("TC000006", result.Code);
     }
-
-
 
     [Fact]
     public async Task CreateAssetAsync_ThrowsNotFoundException_WhenCategoryNotFound()
@@ -557,6 +560,7 @@ public class AssetServiceTests
         // Assert
         Assert.Equal("TC000001", result.Code);
         _assetRepository.Verify(x => x.AddAsync(It.Is<Asset>(a => a.Code == "TC000001")), Times.Once());
+        _assetRepository.Verify(x => x.SaveChangesAsync(), Times.Once);
     }
 
     [Fact]
@@ -589,11 +593,11 @@ public class AssetServiceTests
         };
 
         var existingAssets = new List<Asset>
-    {
-        new Asset { Code = "TC000001" },
-        new Asset { Code = "TC000003" },
-        new Asset { Code = "TC000005" }
-    };
+        {
+            new Asset { Code = "TC000001" },
+            new Asset { Code = "TC000003" },
+            new Asset { Code = "TC000005" }
+        };
 
         _categoryRepository.Setup(x => x.GetByIdAsync(request.CategoryId))
             .ReturnsAsync(category);
@@ -610,6 +614,7 @@ public class AssetServiceTests
         // Assert
         Assert.Equal("TC000006", result.Code);
         _assetRepository.Verify(x => x.AddAsync(It.Is<Asset>(a => a.Code == "TC000006")), Times.Once());
+        _assetRepository.Verify(x => x.SaveChangesAsync(), Times.Once);
     }
 
     [Fact]
@@ -642,9 +647,9 @@ public class AssetServiceTests
         };
 
         var existingAssets = new List<Asset>
-    {
-        new Asset { Code = "TCINVALID" }
-    };
+        {
+            new Asset { Code = "TCINVALID" }
+        };
 
         _categoryRepository.Setup(x => x.GetByIdAsync(request.CategoryId))
             .ReturnsAsync(category);
@@ -661,6 +666,7 @@ public class AssetServiceTests
         // Assert
         Assert.Equal("TC000001", result.Code);
         _assetRepository.Verify(x => x.AddAsync(It.Is<Asset>(a => a.Code == "TC000001")), Times.Once());
+        _assetRepository.Verify(x => x.SaveChangesAsync(), Times.Once);
     }
 
     [Fact]
@@ -808,6 +814,7 @@ public class AssetServiceTests
         await Assert.ThrowsAsync<ArgumentOutOfRangeException>(
             () => _assetService.CreateAssetAsync(request, adminId.ToString()));
     }
+
     [Fact]
     public async Task CreateAssetAsync_SetsTimestampsCorrectly()
     {
@@ -964,7 +971,9 @@ public class AssetServiceTests
         Assert.NotNull(capturedAsset);
         Assert.Equal(adminLocation, capturedAsset.Location);
     }
+    #endregion
 
+    #region UpdateAsset
     [Fact]
     public async Task UpdateAssetAsync_UpdatesAllFields_WhenValidRequestProvided()
     {
@@ -1015,6 +1024,7 @@ public class AssetServiceTests
         Assert.True(existingAsset.LastModifiedDate > existingAsset.LastModifiedDate.AddDays(-1)); // Modified recently
 
         _assetRepository.Verify(r => r.Update(existingAsset), Times.Once);
+        _assetRepository.Verify(r => r.SaveChangesAsync(), Times.Once);
     }
 
     [Fact]
@@ -1060,6 +1070,7 @@ public class AssetServiceTests
         Assert.Equal(originalDate, existingAsset.InstalledDate); // Unchanged
 
         _assetRepository.Verify(r => r.Update(existingAsset), Times.Once);
+        _assetRepository.Verify(r => r.SaveChangesAsync(), Times.Once);
     }
 
     [Fact]
@@ -1158,6 +1169,7 @@ public class AssetServiceTests
         // Assert
         Assert.Equal(AssetState.Recycled, existingAsset.State);
         _assetRepository.Verify(r => r.Update(existingAsset), Times.Once);
+        _assetRepository.Verify(r => r.SaveChangesAsync(), Times.Once);
     }
 
     [Fact]
@@ -1221,6 +1233,7 @@ public class AssetServiceTests
         // Assert
         Assert.Equal(AssetState.Available, existingAsset.State);
         _assetRepository.Verify(r => r.Update(existingAsset), Times.Once);
+        _assetRepository.Verify(r => r.SaveChangesAsync(), Times.Once);
     }
 
     [Fact]
@@ -1252,6 +1265,7 @@ public class AssetServiceTests
         // Assert
         Assert.Equal(AssetState.Assigned, existingAsset.State);
         _assetRepository.Verify(r => r.Update(existingAsset), Times.Once);
+        _assetRepository.Verify(r => r.SaveChangesAsync(), Times.Once);
     }
 
     [Fact]
@@ -1283,6 +1297,7 @@ public class AssetServiceTests
         // Assert
         Assert.Equal(AssetState.WaitingForRecycling, existingAsset.State);
         _assetRepository.Verify(r => r.Update(existingAsset), Times.Once);
+        _assetRepository.Verify(r => r.SaveChangesAsync(), Times.Once);
     }
 
     [Fact]
@@ -1315,8 +1330,8 @@ public class AssetServiceTests
         var exception = await Assert.ThrowsAsync<AggregateFieldValidationException>(() =>
             _assetService.UpdateAssetAsync(adminId, assetCode, request));
 
-
         Assert.Contains(exception.Errors, e => e.Field == "State" &&
             e.Message == "Invalid state value");
     }
+    #endregion
 }

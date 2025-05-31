@@ -43,6 +43,26 @@ namespace AssetManagement.Application.Controllers
             };
         }
 
+        [HttpGet("{id:guid}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<ActionResult<ApiResponse<UserDetailsDto>>> GetById(Guid id)
+        {
+            try
+            {
+                var result = await _userService.GetUserByIdAsync(id);
+
+                if (result == null)
+                    return this.ToNotFoundApiResponse<UserDetailsDto>($"User with Id {id} not found");
+
+                return this.ToApiResponse(result, $"User with Id {id} found successfully");
+            }
+            catch (Exception ex)
+            {
+                return this.ToErrorApiResponse<UserDetailsDto>(
+                    $"An error occurred while getting user by Id: {ex.Message}");
+            }
+        }
+
         [HttpGet("{staffCode}")]
         [Authorize(Roles = "Admin")]
         public async Task<ActionResult<ApiResponse<UserDetailsDto>>> GetByStaffCode(string staffCode)

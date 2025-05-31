@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.Linq.Expressions;
 using AssetManagement.Domain.Entities;
 using AssetManagement.Domain.Enums;
@@ -57,6 +58,8 @@ namespace AssetManagement.Domain.Extensions
                     "assigneddate" => a => a.AssignedDate,
                     "state" => a => a.State,
                     "no" => a => a.CreatedDate,
+                    "created" => a => a.CreatedDate,
+                    "updated" => a => a.LastModifiedDate,
                     _ => a => a.CreatedDate,
                 };
 

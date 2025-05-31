@@ -2,6 +2,7 @@ namespace AssetManagement.Contracts.DTOs
 {
     public class UserDetailsDto
     {
+        public Guid Id { get; set; }
         public string? StaffCode { get; set; } = string.Empty;
         public string? FirstName { get; set; } = string.Empty;
         public string? LastName { get; set; } = string.Empty;

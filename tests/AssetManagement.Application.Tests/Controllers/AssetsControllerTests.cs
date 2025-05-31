@@ -365,7 +365,7 @@ public class AssetsControllerTests
         // Assert
         Assert.NotNull(result);
         Assert.True(result.Success);
-        Assert.Equal("Successfully updated user.", result.Message);
+        Assert.Equal("Successfully updated asset.", result.Message);
         Assert.Equal(assetCode, result.Data);
 
         _assetServiceMock.Verify();

@@ -26,6 +26,7 @@ namespace AssetManagement.Application.Tests.Services
             _assignmentService = new AssignmentService(_mockAssignmentRepository.Object, _mockAssetRepository.Object, _mockUserRepository.Object);
         }
 
+        #region Helpers
         private User CreateAdminUser(Guid? id = null)
         {
             return new User
@@ -86,7 +87,9 @@ namespace AssetManagement.Application.Tests.Services
             }
             return assignments;
         }
+        #endregion
 
+        #region GetAssignments
         [Fact]
         public async Task GetAssignmentsAsync_WithValidAdminId_ReturnsPagedResult()
         {
@@ -111,7 +114,7 @@ namespace AssetManagement.Application.Tests.Services
             _mockAssignmentRepository.Setup(x => x.GetAll()).Returns(mockQueryable);
 
             // Act
-            var result = await _assignmentService.GetAssignmentsAsync(adminUser.Id.ToString(), queryParams);
+            var result = await _assignmentService.GetAssignmentsAsync(adminUser.Id, queryParams);
 
             // Assert
             Assert.NotNull(result);
@@ -125,7 +128,7 @@ namespace AssetManagement.Application.Tests.Services
         public async Task GetAssignmentsAsync_WithInvalidAdminId_ThrowsKeyNotFoundException()
         {
             // Arrange
-            var adminId = "7643dabd-9069-42fc-b4b4-7f46a7ffc254";
+            var adminId = Guid.NewGuid();
             var queryParams = new AssignmentQueryParameters();
 
             _mockUserRepository.Setup(x => x.GetByIdAsync(It.IsAny<Guid>())).ReturnsAsync((User?)null);
@@ -163,7 +166,7 @@ namespace AssetManagement.Application.Tests.Services
                 .Returns(mockQueryable);
 
             // Act
-            var result = await _assignmentService.GetAssignmentsAsync(adminUser.Id.ToString(), queryParams);
+            var result = await _assignmentService.GetAssignmentsAsync(adminUser.Id, queryParams);
 
             // Assert
             Assert.NotNull(result);
@@ -192,7 +195,7 @@ namespace AssetManagement.Application.Tests.Services
                 .Returns(mockQueryable);
 
             // Act
-            var result = await _assignmentService.GetAssignmentsAsync(adminUser.Id.ToString(), queryParams);
+            var result = await _assignmentService.GetAssignmentsAsync(adminUser.Id, queryParams);
 
             // Assert
             Assert.NotNull(result);
@@ -219,7 +222,7 @@ namespace AssetManagement.Application.Tests.Services
                 .Returns(mockQueryable);
 
             // Act
-            var result = await _assignmentService.GetAssignmentsAsync(adminUser.Id.ToString(), queryParams);
+            var result = await _assignmentService.GetAssignmentsAsync(adminUser.Id, queryParams);
 
             // Assert
             Assert.NotNull(result);
@@ -262,7 +265,9 @@ namespace AssetManagement.Application.Tests.Services
             // Assert
             Assert.Null(result);
         }
+        #endregion
 
+        #region CreateAssignment
         [Fact]
         public async Task CreateAssignmentAsync_WhenValidationPasses_CreatesAssignment()
         {
@@ -365,5 +370,396 @@ namespace AssetManagement.Application.Tests.Services
             Assert.Equal("AssetId", exception.Errors[0].Field);
             Assert.Equal("Asset not found", exception.Errors[0].Message);
         }
+        #endregion
+
+        #region UpdateAssignment
+        [Fact]
+        public async Task UpdateAssignmentAsync_WhenValidationPasses_UpdatesAssignment()
+        {
+            // Arrange
+            var adminId = Guid.NewGuid();
+            var assignmentId = Guid.NewGuid();
+            var originalAssetId = Guid.NewGuid();
+            var newAssetId = Guid.NewGuid();
+            var originalAssigneeId = Guid.NewGuid();
+            var newAssigneeId = Guid.NewGuid();
+            var newAssignedDate = DateTimeOffset.Now.AddDays(1).ToString("yyyy/MM/dd");
+
+            var dto = new UpdateAssignmentRequestDto
+            {
+                AssetId = newAssetId.ToString(),
+                AssigneeId = newAssigneeId.ToString(),
+                AssignedDate = newAssignedDate,
+                Note = "Updated note"
+            };
+
+            var admin = CreateAdminUser(adminId);
+            var originalAsset = new Asset { Id = originalAssetId, Name = "Old asset", State = AssetState.Available, Location = Location.HCM };
+            var originalAssigneee = CreateStaffUser(originalAssigneeId);
+            var assignment = new Assignment
+            {
+                Id = assignmentId,
+                AssetId = originalAssetId,
+                Asset = originalAsset,
+                AssigneeId = originalAssigneeId,
+                Assignee = originalAssigneee,
+                AssignorId = adminId,
+                Assignor = admin,
+                State = AssignmentState.WaitingForAcceptance,
+                AssignedDate = DateTimeOffset.Now,
+                Note = "Original note",
+                LastModifiedBy = adminId,
+                LastModifiedDate = DateTime.UtcNow.AddDays(-1)
+            };
+
+            var newAsset = new Asset { Id = newAssetId, Name = "New asset", State = AssetState.Available, Location = Location.HCM };
+            var newAssignee = CreateStaffUser(newAssigneeId);
+
+            _mockAssignmentRepository.Setup(x => x.GetByIdAsync(assignmentId)).ReturnsAsync(assignment);
+            _mockUserRepository.Setup(x => x.GetByIdAsync(adminId)).ReturnsAsync(admin);
+            _mockAssetRepository.Setup(x => x.GetByIdAsync(newAssetId)).ReturnsAsync(newAsset);
+            _mockUserRepository.Setup(x => x.GetByIdAsync(newAssigneeId)).ReturnsAsync(newAssignee);
+            _mockAssignmentRepository.Setup(x => x.GetAll()).Returns(new List<Assignment>().AsQueryable().BuildMock());
+            _mockAssignmentRepository.Setup(x => x.Update(It.IsAny<Assignment>()));
+            _mockAssignmentRepository.Setup(x => x.SaveChangesAsync()).ReturnsAsync(true);
+
+            // Act
+            var result = await _assignmentService.UpdateAssignmentAsync(assignmentId, adminId, dto);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(newAssetId, assignment.AssetId);
+            Assert.Equal(newAssigneeId, assignment.AssigneeId);
+            Assert.Equal(DateTimeOffset.Parse(newAssignedDate), assignment.AssignedDate);
+            Assert.Equal("Updated note", assignment.Note);
+            Assert.Equal(adminId, assignment.LastModifiedBy);
+            Assert.True(assignment.LastModifiedDate > DateTime.UtcNow.AddSeconds(-10));
+
+            _mockAssignmentRepository.Verify(x => x.Update(assignment), Times.Once);
+            _mockAssignmentRepository.Verify(x => x.SaveChangesAsync(), Times.Once);
+        }
+
+        [Fact]
+        public async Task UpdateAssignmentAsync_AssignmentNotFound_ThrowsKeyNotFoundException()
+        {
+            // Arrange
+            var adminId = Guid.NewGuid();
+            var assignmentId = Guid.NewGuid();
+            var dto = new UpdateAssignmentRequestDto();
+
+            _mockAssignmentRepository.Setup(x => x.GetByIdAsync(assignmentId)).ReturnsAsync((Assignment?)null);
+
+            // Act & Assert
+            await Assert.ThrowsAsync<KeyNotFoundException>(() =>
+                _assignmentService.UpdateAssignmentAsync(assignmentId, adminId, dto));
+        }
+
+        [Fact]
+        public async Task UpdateAssignmentAsync_InvalidState_ThrowsInvalidOperationException()
+        {
+            // Arrange
+            var adminId = Guid.NewGuid();
+            var assignmentId = Guid.NewGuid();
+            var assignment = new Assignment
+            {
+                Id = assignmentId,
+                State = AssignmentState.Accepted,
+                AssignorId = adminId
+            };
+            var dto = new UpdateAssignmentRequestDto();
+
+            _mockAssignmentRepository.Setup(x => x.GetByIdAsync(assignmentId)).ReturnsAsync(assignment);
+            _mockUserRepository.Setup(x => x.GetByIdAsync(adminId)).ReturnsAsync(CreateAdminUser(adminId));
+
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+                _assignmentService.UpdateAssignmentAsync(assignmentId, adminId, dto));
+            Assert.Equal("Can only edit assignments with state 'Waiting for acceptance'", exception.Message);
+        }
+
+        [Fact]
+        public async Task UpdateAssignmentAsync_InvalidAsset_ThrowsAggregateFieldValidationException()
+        {
+            // Arrange
+            var adminId = Guid.NewGuid();
+            var assignmentId = Guid.NewGuid();
+            var invalidAssetId = Guid.NewGuid();
+            var assignment = new Assignment
+            {
+                Id = assignmentId,
+                State = AssignmentState.WaitingForAcceptance,
+                AssignorId = adminId,
+                AssetId = Guid.NewGuid()
+            };
+            var dto = new UpdateAssignmentRequestDto { AssetId = invalidAssetId.ToString() };
+
+            _mockAssignmentRepository.Setup(x => x.GetByIdAsync(assignmentId)).ReturnsAsync(assignment);
+            _mockUserRepository.Setup(x => x.GetByIdAsync(adminId)).ReturnsAsync(CreateAdminUser(adminId));
+            _mockAssetRepository.Setup(x => x.GetByIdAsync(invalidAssetId)).ReturnsAsync((Asset?)null);
+
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<AggregateFieldValidationException>(() =>
+                _assignmentService.UpdateAssignmentAsync(assignmentId, adminId, dto));
+            Assert.Contains("Asset not found", exception.Errors.Select(e => e.Message));
+        }
+        #endregion
+
+        #region DeleteAssignment
+        [Fact]
+        public async Task DeleteAssignmentAsync_WhenAssignmentExistsAndIsWaitingForAcceptance_ShouldDeleteSuccessfully()
+        {
+            // Arrange
+            var adminId = Guid.NewGuid();
+            var admin = CreateAdminUser(adminId);
+            var assetId = Guid.NewGuid();
+            var asset = new Asset { Id = assetId, Location = admin.Location, State = AssetState.Assigned };
+            var assignmentId = Guid.NewGuid();
+            var assignment = CreateAssignment(assignmentId, assetId, "LP001", "Laptop 1", admin.Location, adminId, "admin1", Guid.NewGuid(), "user1", AssignmentState.WaitingForAcceptance);
+            assignment.Asset = asset;
+
+            var assignments = new List<Assignment> { assignment };
+            var mockQueryable = assignments.AsQueryable().BuildMock();
+
+            _mockAssignmentRepository.Setup(r => r.GetAll()).Returns(mockQueryable);
+            _mockUserRepository.Setup(r => r.GetByIdAsync(adminId)).ReturnsAsync(admin);
+            _mockAssetRepository.Setup(r => r.GetByIdAsync(assetId)).ReturnsAsync(asset);
+            _mockAssignmentRepository.Setup(r => r.Update(It.IsAny<Assignment>())).Verifiable();
+            _mockAssetRepository.Setup(r => r.Update(It.IsAny<Asset>())).Verifiable();
+            _mockAssetRepository.Setup(r => r.SaveChangesAsync()).ReturnsAsync(true);
+
+            // Act
+            var result = await _assignmentService.DeleteAssignmentAsync(assignmentId, adminId);
+
+            // Assert
+            Assert.True(result);
+            Assert.True(assignment.IsDeleted);
+            Assert.Equal(adminId, assignment.DeletedBy);
+            Assert.NotNull(assignment.DeletedDate);
+            Assert.Equal(AssetState.Available, asset.State);
+            _mockAssignmentRepository.Verify(r => r.Update(assignment), Times.Once());
+            _mockAssetRepository.Verify(r => r.Update(asset), Times.Once());
+        }
+
+        [Fact]
+        public async Task DeleteAssignmentAsync_WhenAssignmentNotFound_ShouldReturnFalse()
+        {
+            // Arrange
+            var adminId = Guid.NewGuid();
+            var admin = CreateAdminUser(adminId);
+            var assignmentId = Guid.NewGuid();
+            var assignments = new List<Assignment>();
+            var mockQueryable = assignments.AsQueryable().BuildMock();
+
+            _mockAssignmentRepository.Setup(r => r.GetAll()).Returns(mockQueryable);
+            _mockUserRepository.Setup(r => r.GetByIdAsync(adminId)).ReturnsAsync(admin);
+
+            // Act
+            var result = await _assignmentService.DeleteAssignmentAsync(assignmentId, adminId);
+
+            // Assert
+            Assert.False(result);
+        }
+
+        [Fact]
+        public async Task DeleteAssignmentAsync_WhenLocationsDoNotMatch_ShouldReturnFalse()
+        {
+            // Arrange
+            var adminId = Guid.NewGuid();
+            var admin = CreateAdminUser(adminId);
+            var assetId = Guid.NewGuid();
+            var asset = new Asset { Id = assetId, Location = Location.HN, State = AssetState.Assigned };
+            var assignmentId = Guid.NewGuid();
+            var assignment = CreateAssignment(assignmentId, assetId, "LP001", "Laptop 1", Location.HN, adminId, "admin1", Guid.NewGuid(), "user1", AssignmentState.WaitingForAcceptance);
+            assignment.Asset = asset;
+
+            var assignments = new List<Assignment> { assignment };
+            var mockQueryable = assignments.AsQueryable().BuildMock();
+
+            _mockAssignmentRepository.Setup(r => r.GetAll()).Returns(mockQueryable);
+            _mockUserRepository.Setup(r => r.GetByIdAsync(adminId)).ReturnsAsync(admin);
+
+            // Act
+            var result = await _assignmentService.DeleteAssignmentAsync(assignmentId, adminId);
+
+            // Assert
+            Assert.False(result);
+            Assert.True(assignment.IsDeleted == null || assignment.IsDeleted.Equals(false));
+        }
+
+        [Fact]
+        public async Task DeleteAssignmentAsync_WhenStateIsNotWaitingForAcceptance_ShouldThrowInvalidOperationException()
+        {
+            // Arrange
+            var adminId = Guid.NewGuid();
+            var admin = CreateAdminUser(adminId);
+            var assetId = Guid.NewGuid();
+            var asset = new Asset { Id = assetId, Location = admin.Location, State = AssetState.Assigned };
+            var assignmentId = Guid.NewGuid();
+            var assignment = CreateAssignment(assignmentId, assetId, "LP001", "Laptop 1", admin.Location, adminId, "admin1", Guid.NewGuid(), "user1", AssignmentState.Accepted);
+            assignment.Asset = asset;
+
+            var assignments = new List<Assignment> { assignment };
+            var mockQueryable = assignments.AsQueryable().BuildMock();
+
+            _mockAssignmentRepository.Setup(r => r.GetAll()).Returns(mockQueryable);
+            _mockUserRepository.Setup(r => r.GetByIdAsync(adminId)).ReturnsAsync(admin);
+
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => _assignmentService.DeleteAssignmentAsync(assignmentId, adminId));
+            Assert.Equal("Can only delete assignments that are waiting for acceptance", exception.Message);
+        }
+        #endregion
+
+        #region AcceptAssignment
+        [Fact]
+        public async Task AcceptAssignmentAsync_WhenValid_ShouldAcceptAssignment()
+        {
+            // Arrange
+            var userId = Guid.NewGuid();
+            var assetId = Guid.NewGuid();
+            var asset = new Asset { Id = assetId, State = AssetState.Available };
+            var assignmentId = Guid.NewGuid();
+            var assignment = CreateAssignment(assignmentId, assetId, "LP001", "Laptop 1", Location.HCM, Guid.NewGuid(), "admin1", userId, "user1", AssignmentState.WaitingForAcceptance);
+            assignment.Asset = asset;
+
+            _mockAssignmentRepository.Setup(r => r.GetByIdAsync(assignmentId)).ReturnsAsync(assignment);
+            _mockAssetRepository.Setup(r => r.GetByIdAsync(assetId)).ReturnsAsync(asset);
+            _mockAssignmentRepository.Setup(r => r.Update(It.IsAny<Assignment>())).Verifiable();
+            _mockAssetRepository.Setup(r => r.Update(It.IsAny<Asset>())).Verifiable();
+            _mockAssignmentRepository.Setup(r => r.SaveChangesAsync()).ReturnsAsync(true);
+
+            // Act
+            var result = await _assignmentService.AcceptAssignmentAsync(assignmentId, userId);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(AssignmentState.Accepted, assignment.State);
+            Assert.Equal(AssetState.Assigned, asset.State);
+            Assert.Equal(userId, assignment.LastModifiedBy);
+            // In case LastModifiedDate is nullable
+            // Assert.NotNull(assignment.LastModifiedDate);
+            Assert.NotEqual(DateTime.MinValue, assignment.LastModifiedDate);
+            _mockAssignmentRepository.Verify(r => r.Update(assignment), Times.Once());
+            _mockAssetRepository.Verify(r => r.Update(asset), Times.Once());
+        }
+
+        [Fact]
+        public async Task AcceptAssignmentAsync_WhenAssignmentNotFound_ShouldThrowKeyNotFoundException()
+        {
+            // Arrange
+            var assignmentId = Guid.NewGuid();
+            var userId = Guid.NewGuid();
+
+            _mockAssignmentRepository.Setup(r => r.GetByIdAsync(assignmentId)).ReturnsAsync((Assignment?)null);
+
+            // Act & Assert
+            await Assert.ThrowsAsync<KeyNotFoundException>(() => _assignmentService.AcceptAssignmentAsync(assignmentId, userId));
+        }
+
+        [Fact]
+        public async Task AcceptAssignmentAsync_WhenUserIsNotAssignee_ShouldThrowUnauthorizedAccessException()
+        {
+            // Arrange
+            var userId = Guid.NewGuid();
+            var assigneeId = Guid.NewGuid();
+            var assignmentId = Guid.NewGuid();
+            var assignment = CreateAssignment(assignmentId, Guid.NewGuid(), "LP001", "Laptop 1", Location.HCM, Guid.NewGuid(), "admin1", assigneeId, "user1", AssignmentState.WaitingForAcceptance);
+
+            _mockAssignmentRepository.Setup(r => r.GetByIdAsync(assignmentId)).ReturnsAsync(assignment);
+
+            // Act & Assert
+            await Assert.ThrowsAsync<UnauthorizedAccessException>(() => _assignmentService.AcceptAssignmentAsync(assignmentId, userId));
+        }
+
+        [Fact]
+        public async Task AcceptAssignmentAsync_WhenStateIsNotWaitingForAcceptance_ShouldThrowInvalidOperationException()
+        {
+            // Arrange
+            var userId = Guid.NewGuid();
+            var assignmentId = Guid.NewGuid();
+            var assignment = CreateAssignment(assignmentId, Guid.NewGuid(), "LP001", "Laptop 1", Location.HCM, Guid.NewGuid(), "admin1", userId, "user1", AssignmentState.Accepted);
+
+            _mockAssignmentRepository.Setup(r => r.GetByIdAsync(assignmentId)).ReturnsAsync(assignment);
+
+            // Act & Assert
+            await Assert.ThrowsAsync<InvalidOperationException>(() => _assignmentService.AcceptAssignmentAsync(assignmentId, userId));
+        }
+        #endregion
+
+        #region DeclineAssignment
+        [Fact]
+        public async Task DeclineAssignmentAsync_WhenValid_ShouldDeclineAssignment()
+        {
+            // Arrange
+            var userId = Guid.NewGuid();
+            var assetId = Guid.NewGuid();
+            var asset = new Asset { Id = assetId, State = AssetState.Assigned };
+            var assignmentId = Guid.NewGuid();
+            var assignment = CreateAssignment(assignmentId, assetId, "LP001", "Laptop 1", Location.HCM, Guid.NewGuid(), "admin1", userId, "user1", AssignmentState.WaitingForAcceptance);
+            assignment.Asset = asset;
+
+            _mockAssignmentRepository.Setup(r => r.GetByIdAsync(assignmentId)).ReturnsAsync(assignment);
+            _mockAssetRepository.Setup(r => r.GetByIdAsync(assetId)).ReturnsAsync(asset);
+            _mockAssignmentRepository.Setup(r => r.Update(It.IsAny<Assignment>())).Verifiable();
+            _mockAssetRepository.Setup(r => r.Update(It.IsAny<Asset>())).Verifiable();
+            _mockAssignmentRepository.Setup(r => r.SaveChangesAsync()).ReturnsAsync(true);
+
+            // Act
+            var result = await _assignmentService.DeclineAssignmentAsync(assignmentId, userId);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(AssignmentState.Declined, assignment.State);
+            Assert.Equal(AssetState.Available, asset.State);
+            Assert.Equal(userId, assignment.LastModifiedBy);
+            // In case LastModifiedDate is nullable
+            // Assert.NotNull(assignment.LastModifiedDate);
+            Assert.NotEqual(DateTime.MinValue, assignment.LastModifiedDate);
+            _mockAssignmentRepository.Verify(r => r.Update(assignment), Times.Once());
+            _mockAssetRepository.Verify(r => r.Update(asset), Times.Once());
+        }
+
+        [Fact]
+        public async Task DeclineAssignmentAsync_WhenAssignmentNotFound_ShouldThrowKeyNotFoundException()
+        {
+            // Arrange
+            var assignmentId = Guid.NewGuid();
+            var userId = Guid.NewGuid();
+
+            _mockAssignmentRepository.Setup(r => r.GetByIdAsync(assignmentId)).ReturnsAsync((Assignment?)null);
+
+            // Act & Assert
+            await Assert.ThrowsAsync<KeyNotFoundException>(() => _assignmentService.DeclineAssignmentAsync(assignmentId, userId));
+        }
+
+        [Fact]
+        public async Task DeclineAssignmentAsync_WhenUserIsNotAssignee_ShouldThrowUnauthorizedAccessException()
+        {
+            // Arrange
+            var userId = Guid.NewGuid();
+            var assigneeId = Guid.NewGuid();
+            var assignmentId = Guid.NewGuid();
+            var assignment = CreateAssignment(assignmentId, Guid.NewGuid(), "LP001", "Laptop 1", Location.HCM, Guid.NewGuid(), "admin1", assigneeId, "user1", AssignmentState.WaitingForAcceptance);
+
+            _mockAssignmentRepository.Setup(r => r.GetByIdAsync(assignmentId)).ReturnsAsync(assignment);
+
+            // Act & Assert
+            await Assert.ThrowsAsync<UnauthorizedAccessException>(() => _assignmentService.DeclineAssignmentAsync(assignmentId, userId));
+        }
+
+        [Fact]
+        public async Task DeclineAssignmentAsync_WhenStateIsNotWaitingForAcceptance_ShouldThrowInvalidOperationException()
+        {
+            // Arrange
+            var userId = Guid.NewGuid();
+            var assignmentId = Guid.NewGuid();
+            var assignment = CreateAssignment(assignmentId, Guid.NewGuid(), "LP001", "Laptop 1", Location.HCM, Guid.NewGuid(), "admin1", userId, "user1", AssignmentState.Declined);
+
+            _mockAssignmentRepository.Setup(r => r.GetByIdAsync(assignmentId)).ReturnsAsync(assignment);
+
+            // Act & Assert
+            await Assert.ThrowsAsync<InvalidOperationException>(() => _assignmentService.DeclineAssignmentAsync(assignmentId, userId));
+        }
+        #endregion
     }
 }

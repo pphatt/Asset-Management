@@ -43,7 +43,7 @@ public class AssetsController : ControllerBase
         };
     }
 
-    [HttpGet("{id:Guid}")]
+    [HttpGet("{id:guid}")]
     [Authorize(Roles = "Admin, Staff")]
     public async Task<ApiResponse<AssetDetailsDto>> GetById(Guid id)
     {
@@ -55,7 +55,6 @@ public class AssetsController : ControllerBase
             Data = result,
         };
     }
-
 
     [HttpPost]
     [Authorize(Roles = "Admin")]
@@ -70,7 +69,7 @@ public class AssetsController : ControllerBase
 
     [HttpPatch("{assetCode}")]
     [Authorize(Roles = "Admin")]
-    public async Task<ApiResponse<string>> Update(String assetCode, [FromBody] UpdateAssetRequestDto request)
+    public async Task<ApiResponse<string>> Update(string assetCode, [FromBody] UpdateAssetRequestDto request)
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 

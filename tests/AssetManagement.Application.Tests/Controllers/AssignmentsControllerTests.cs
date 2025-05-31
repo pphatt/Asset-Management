@@ -24,6 +24,7 @@ namespace AssetManagement.Application.Tests.Controllers
             _controller = new AssignmentsController(_mockAssignmentService.Object);
         }
 
+        #region Helpers
         private ClaimsPrincipal CreateUserPrincipal(string userId, string role = "Admin")
         {
             var claims = new List<Claim>
@@ -42,12 +43,14 @@ namespace AssetManagement.Application.Tests.Controllers
                 HttpContext = new DefaultHttpContext() { User = user }
             };
         }
+        #endregion
 
+        #region GetAssignments
         [Fact]
         public async Task Get_WithValidUser_ReturnsOkResult()
         {
             // Arrange
-            var userId = "123e4567-e89b-12d3-a456-426614174000";
+            var userId = Guid.NewGuid();
             var queryParams = new AssignmentQueryParameters();
 
             var expectedResult = new PagedResult<AssignmentDto>(
@@ -72,7 +75,7 @@ namespace AssetManagement.Application.Tests.Controllers
                 .ReturnsAsync(expectedResult);
 
             // Setup user claims
-            var claimsPrincipal = CreateUserPrincipal(userId);
+            var claimsPrincipal = CreateUserPrincipal(userId.ToString());
             ApplyUserToController(claimsPrincipal);
 
             // Act
@@ -110,14 +113,14 @@ namespace AssetManagement.Application.Tests.Controllers
         public async Task Get_WithServiceException_ThrowsException()
         {
             // Arrange
-            var userId = "123e4567-e89b-12d3-a456-426614174000";
+            var userId = Guid.NewGuid();
             var queryParams = new AssignmentQueryParameters();
 
             _mockAssignmentService.Setup(x => x.GetAssignmentsAsync(userId, queryParams))
                 .ThrowsAsync(new KeyNotFoundException("User not found"));
 
             // Setup user claims
-            var claimsPrincipal = CreateUserPrincipal(userId);
+            var claimsPrincipal = CreateUserPrincipal(userId.ToString());
             ApplyUserToController(claimsPrincipal);
 
             // Act & Assert
@@ -131,7 +134,7 @@ namespace AssetManagement.Application.Tests.Controllers
         public async Task Get_WithComplexQueryParams_CallsServiceCorrectly()
         {
             // Arrange
-            var userId = "123e4567-e89b-12d3-a456-426614174000";
+            var userId = Guid.NewGuid();
             var queryParams = new AssignmentQueryParameters
             {
                 SearchTerm = "laptop",
@@ -153,7 +156,7 @@ namespace AssetManagement.Application.Tests.Controllers
                 .ReturnsAsync(expectedResult);
 
             // Setup user claims
-            var claimsPrincipal = CreateUserPrincipal(userId);
+            var claimsPrincipal = CreateUserPrincipal(userId.ToString());
             ApplyUserToController(claimsPrincipal);
 
             // Act
@@ -171,7 +174,9 @@ namespace AssetManagement.Application.Tests.Controllers
             Assert.NotNull(apiResponse.Data);
             Assert.Empty(apiResponse.Data.Items);
         }
+        #endregion
 
+        #region CreateAssignment
         [Fact]
         public async Task Create_WithValidData_ReturnsCreatedResult()
         {
@@ -266,5 +271,211 @@ namespace AssetManagement.Application.Tests.Controllers
 
             Assert.Equal("Cannot retrieve user id from claims", exception.Message);
         }
+        #endregion
+
+        #region UpdateAssignment
+        [Fact]
+        public async Task Update_ValidRequest_ReturnsOkResult()
+        {
+            // Arrange
+            var adminId = Guid.NewGuid();
+            var assignmentId = Guid.NewGuid();
+            var dto = new UpdateAssignmentRequestDto();
+            var updatedDto = new AssignmentDto { Id = assignmentId };
+
+            _mockAssignmentService.Setup(x => x.UpdateAssignmentAsync(assignmentId, adminId, dto))
+                .ReturnsAsync(updatedDto);
+            ApplyUserToController(CreateUserPrincipal(adminId.ToString()));
+
+            // Act
+            var result = await _controller.Update(assignmentId, dto);
+
+            // Assert
+            var okResult = Assert.IsType<ActionResult<ApiResponse<AssignmentDto>>>(result);
+            var objectResult = Assert.IsType<OkObjectResult>(okResult.Result);
+            var apiResponse = Assert.IsType<ApiResponse<AssignmentDto>>(objectResult.Value);
+            Assert.True(apiResponse.Success);
+            Assert.Equal("Assignment updated successfully", apiResponse.Message);
+            Assert.Equal(updatedDto, apiResponse.Data);
+        }
+
+        [Fact]
+        public async Task Update_NoUserId_ThrowsUnauthorizedAccessException()
+        {
+            // Arrange
+            var assignmentId = Guid.NewGuid();
+            var dto = new UpdateAssignmentRequestDto();
+            ApplyUserToController(new ClaimsPrincipal());
+
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<UnauthorizedAccessException>(() =>
+                _controller.Update(assignmentId, dto));
+            Assert.Equal("Cannot retrieve user id from claims", exception.Message);
+        }
+
+        [Fact]
+        public async Task Update_ServiceThrowsException_PropagatesException()
+        {
+            // Arrange
+            var adminId = Guid.NewGuid();
+            var assignmentId = Guid.NewGuid();
+            var dto = new UpdateAssignmentRequestDto();
+
+            _mockAssignmentService.Setup(x => x.UpdateAssignmentAsync(assignmentId, adminId, dto))
+                .ThrowsAsync(new AggregateFieldValidationException(new List<FieldValidationException>
+                {
+                    new FieldValidationException("AssetId", "Asset not found")
+                }));
+            ApplyUserToController(CreateUserPrincipal(adminId.ToString()));
+
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<AggregateFieldValidationException>(() =>
+                _controller.Update(assignmentId, dto));
+            Assert.Contains("Asset not found", exception.Errors.Select(e => e.Message));
+        }
+        #endregion
+
+        #region DeleteAssignment
+        [Fact]
+        public async Task Delete_AssignmentExists_ShouldReturnSuccess()
+        {
+            // Arrange
+            var assignmentId = Guid.NewGuid();
+            var adminId = Guid.NewGuid();
+            _mockAssignmentService.Setup(s => s.DeleteAssignmentAsync(assignmentId, adminId)).ReturnsAsync(true);
+
+            var claimsPrincipal = CreateUserPrincipal(adminId.ToString());
+            ApplyUserToController(claimsPrincipal);
+
+            // Act
+            var result = await _controller.Delete(assignmentId);
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result.Result);
+            var apiResponse = Assert.IsType<ApiResponse<bool>>(okResult.Value);
+            Assert.True(apiResponse.Success);
+            Assert.Equal("Assignment deleted successfully", apiResponse.Message);
+        }
+
+        [Fact]
+        public async Task Delete_AssignmentNotFound_ShouldReturnNotFound()
+        {
+            // Arrange
+            var assignmentId = Guid.NewGuid();
+            var adminId = Guid.NewGuid();
+            _mockAssignmentService.Setup(s => s.DeleteAssignmentAsync(assignmentId, adminId)).ReturnsAsync(false);
+
+            var claimsPrincipal = CreateUserPrincipal(adminId.ToString());
+            ApplyUserToController(claimsPrincipal);
+
+            // Act
+            var result = await _controller.Delete(assignmentId);
+
+            // Assert
+            var notFoundResult = Assert.IsType<NotFoundObjectResult>(result.Result);
+            var apiResponse = Assert.IsType<ApiResponse<bool>>(notFoundResult.Value);
+            Assert.False(apiResponse.Success);
+            Assert.Equal("Assignment deleted failed due to unexpected circumstance.", apiResponse.Message);
+        }
+        #endregion
+
+        #region AcceptAssignment
+        [Fact]
+        public async Task AcceptAssignment_ValidAssignment_ShouldReturnSuccess()
+        {
+            // Arrange
+            var assignmentId = Guid.NewGuid();
+            var userId = Guid.NewGuid();
+            var acceptedDto = new AssignmentDto { Id = assignmentId, State = "Accepted" };
+            _mockAssignmentService.Setup(s => s.AcceptAssignmentAsync(assignmentId, userId)).ReturnsAsync(acceptedDto);
+
+            var claimsPrincipal = CreateUserPrincipal(userId.ToString());
+            ApplyUserToController(claimsPrincipal);
+
+            // Act
+            var result = await _controller.AcceptAssignment(assignmentId);
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result.Result);
+            var apiResponse = Assert.IsType<ApiResponse<AssignmentDto>>(okResult.Value);
+            Assert.True(apiResponse.Success);
+            Assert.Equal("Assignment accepted successfully", apiResponse.Message);
+        }
+
+        [Fact]
+        public async Task AcceptAssignment_UnauthorizedUser_ThrowsUnauthorizedAccessException()
+        {
+            // Arrange
+            var assignmentId = Guid.NewGuid();
+            var userId = Guid.NewGuid();
+            _mockAssignmentService
+              .Setup(s => s.AcceptAssignmentAsync(assignmentId, userId))
+              .ThrowsAsync(new UnauthorizedAccessException("Not the assignee"));
+            ApplyUserToController(CreateUserPrincipal(userId.ToString()));
+
+            // Act & Assert
+            await Assert.ThrowsAsync<UnauthorizedAccessException>(
+              () => _controller.AcceptAssignment(assignmentId)
+            );
+        }
+
+        [Fact]
+        public async Task AcceptAssignment_NoUserClaim_ShouldReturnBadRequest()
+        {
+            // Arrange
+            var assignmentId = Guid.NewGuid();
+            // Do *not* set up any NameIdentifier claim:
+            ApplyUserToController(new ClaimsPrincipal(new ClaimsIdentity()));
+
+            // Act
+            var result = await _controller.AcceptAssignment(assignmentId);
+
+            // Assert
+            var badRequest = Assert.IsType<BadRequestObjectResult>(result.Result);
+            var response = Assert.IsType<ApiResponse<AssignmentDto>>(badRequest.Value);
+            Assert.False(response.Success);
+            Assert.Equal("Cannot retrieve user ID from claims", response.Message);
+        }
+        #endregion
+
+        #region DeclineAssignment
+        [Fact]
+        public async Task DeclineAssignment_ValidAssignment_ShouldReturnSuccess()
+        {
+            // Arrange
+            var assignmentId = Guid.NewGuid();
+            var userId = Guid.NewGuid();
+            var declinedDto = new AssignmentDto { Id = assignmentId, State = "Declined" };
+            _mockAssignmentService.Setup(s => s.DeclineAssignmentAsync(assignmentId, userId)).ReturnsAsync(declinedDto);
+
+            var claimsPrincipal = CreateUserPrincipal(userId.ToString());
+            ApplyUserToController(claimsPrincipal);
+
+            // Act
+            var result = await _controller.DeclineAssignment(assignmentId);
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result.Result);
+            var apiResponse = Assert.IsType<ApiResponse<AssignmentDto>>(okResult.Value);
+            Assert.True(apiResponse.Success);
+            Assert.Equal("Assignment declined successfully", apiResponse.Message);
+        }
+
+        [Fact]
+        public async Task DeclineAssignment_AssignmentNotFound_ShouldReturnNotFound()
+        {
+            // Arrange
+            var assignmentId = Guid.NewGuid();
+            var userId = Guid.NewGuid();
+            _mockAssignmentService.Setup(s => s.DeclineAssignmentAsync(assignmentId, userId))
+                .ThrowsAsync(new KeyNotFoundException("Assignment not found"));
+            ApplyUserToController(CreateUserPrincipal(userId.ToString()));
+
+            // Act & Assert
+            await Assert.ThrowsAsync<KeyNotFoundException>(
+              () => _controller.DeclineAssignment(assignmentId)
+            );
+        }
+        #endregion
     }
 }

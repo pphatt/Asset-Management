@@ -99,10 +99,11 @@ namespace AssetManagement.Application.Tests.Services
             // Assert
             Assert.Equal(request.Name, result.Name);
             Assert.Equal(request.Prefix.ToUpper(), result.Prefix);
-            _mockCategoryRepository.Verify(x => x.Add(It.Is<Category>(c => c.Name == request.Name 
+            _mockCategoryRepository.Verify(x => x.AddAsync(It.Is<Category>(c => c.Name == request.Name 
                 && c.Prefix == request.Prefix.ToUpper() 
                 && c.CreatedBy == user.Id)), 
                 Times.Once);
+            _mockCategoryRepository.Verify(x => x.SaveChangesAsync(), Times.Once);
         }
 
         [Fact]

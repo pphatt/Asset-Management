@@ -17,6 +17,7 @@ const UserTypeDropdown: React.FC<{
         <input
           type="text"
           readOnly
+          placeholder='Type'
           className="w-full h-[34px] text-sm py-1.5 px-2 border border-quaternary rounded-l bg-white cursor-pointer"
           onClick={() => setShow(!show)}
         />

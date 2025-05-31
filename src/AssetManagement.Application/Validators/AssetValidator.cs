@@ -1,6 +1,5 @@
 using AssetManagement.Contracts.DTOs.Requests;
 using AssetManagement.Contracts.Exceptions;
-using AssetManagement.Domain.Entities;
 
 namespace AssetManagement.Application.Validators;
 
@@ -15,10 +14,9 @@ public static class AssetValidator
         AddErrorIfEmpty(error, asset.CategoryId.ToString(), "Category", "Category is required");
         AddErrorIfEmpty(error, asset.InstalledDate, "Installed Date", "Installed Date is required");
         AddErrorIfInvalidEnum(error, asset.State, "State", "Invalid state");
-
     }
 
-    public static void ValidateUpdateAsset(UpdateAssetRequestDto dto, Asset existingAsset)
+    public static void ValidateUpdateAsset(UpdateAssetRequestDto dto)
     {
         var errors = new List<FieldValidationException>();
 
@@ -45,7 +43,7 @@ public static class AssetValidator
 
     private static void AddErrorIfInvalidEnum<T>(List<FieldValidationException> errors, T value, string field, string message) where T : Enum
     {
-        if (Convert.ToInt32(value) == 0 || !Enum.IsDefined(typeof(T), value))
+        if (!Enum.IsDefined(typeof(T), value))
             errors.Add(new FieldValidationException(field, message));
     }
 

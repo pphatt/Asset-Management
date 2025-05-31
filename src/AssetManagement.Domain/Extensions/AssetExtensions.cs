@@ -60,6 +60,10 @@ public static class AssetExtensions
                         : query.OrderBy(a => a.State),
                     "category" => order == "desc" ? query.OrderByDescending(a => a.Category)
                         : query.OrderBy(a => a.Category),
+                    "created" => order == "desc" ? query.OrderByDescending(a => a.CreatedDate)
+                        : query.OrderBy(a => a.CreatedDate),
+                    "updated" => order == "desc" ? query.OrderByDescending(a => a.LastModifiedDate)
+                        : query.OrderBy(a => a.LastModifiedDate),
                     _ => query.OrderBy(a => a.Id),
                 };
             }
@@ -75,6 +79,10 @@ public static class AssetExtensions
                         : orderedQuery.ThenBy(a => a.State),
                     "category" => order == "desc" ? orderedQuery.ThenByDescending(a => a.Category)
                         : orderedQuery.ThenBy(a => a.Category),
+                    "created" => order == "desc" ? orderedQuery.ThenByDescending(a => a.CreatedDate)
+                        : orderedQuery.ThenBy(a => a.CreatedDate),
+                    "updated" => order == "desc" ? orderedQuery.ThenByDescending(a => a.LastModifiedDate)
+                        : orderedQuery.ThenBy(a => a.LastModifiedDate),
                     _ => orderedQuery.ThenBy(a => a.Id),
                 };
             }

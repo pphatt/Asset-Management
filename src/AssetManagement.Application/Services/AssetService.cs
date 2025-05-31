@@ -1,4 +1,3 @@
-using System.Runtime.CompilerServices;
 using AssetManagement.Application.Extensions;
 using AssetManagement.Application.Services.Interfaces;
 using AssetManagement.Application.Validators;
@@ -158,7 +157,7 @@ namespace AssetManagement.Application.Services
                 throw new KeyNotFoundException($"Cannot find asset with id {assetCode}");
             }
 
-            AssetValidator.ValidateUpdateAsset(request, existingAsset);
+            AssetValidator.ValidateUpdateAsset(request);
 
             existingAsset.Name = request.Name ?? existingAsset.Name;
             if (request.State.HasValue)
@@ -192,8 +191,11 @@ namespace AssetManagement.Application.Services
         {
             return dto switch
             {
+                AssetStateDto.Assigned => AssetState.Assigned,
                 AssetStateDto.Available => AssetState.Available,
                 AssetStateDto.NotAvailable => AssetState.NotAvailable,
+                AssetStateDto.WaitingForRecycling => AssetState.WaitingForRecycling,
+                AssetStateDto.Recycled => AssetState.Recycled,
                 _ => throw new ArgumentOutOfRangeException()
             };
         }
@@ -208,6 +210,5 @@ namespace AssetManagement.Application.Services
 
             return adminUser.Location;
         }
-
     }
 }

@@ -4,7 +4,6 @@ using AssetManagement.Application.Services.Interfaces;
 using AssetManagement.Contracts.Common.Pagination;
 using AssetManagement.Contracts.DTOs;
 using AssetManagement.Contracts.Enums;
-using AssetManagement.Contracts.Exceptions;
 using AssetManagement.Contracts.Parameters;
 using AssetManagement.Data.Helpers.Hashing;
 using AssetManagement.Data.Helpers.Users;
@@ -73,6 +72,29 @@ namespace AssetManagement.Application.Services
             return new PagedResult<UserDto>(items, total, queryParams.PageSize, queryParams.PageNumber);
         }
 
+        public async Task<UserDetailsDto?> GetUserByIdAsync(Guid id)
+        {
+            var user = await _userRepository.GetByIdAsync(id);
+            if (user is null)
+            {
+                return null;
+            }
+
+            return new UserDetailsDto
+            {
+                Id = user.Id,
+                StaffCode = user.StaffCode,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Username = user.Username,
+                DateOfBirth = user.DateOfBirth?.ToString("dd/MM/yyyy"),
+                JoinedDate = user.JoinedDate.ToString("dd/MM/yyyy"),
+                Gender = (int)user.Gender,
+                Type = (int)user.Type,
+                Location = (int)user.Location,
+            };
+        }
+
         public async Task<UserDetailsDto> GetUserByStaffCodeAsync(string staffCode)
         {
             if (string.IsNullOrWhiteSpace(staffCode))
@@ -88,6 +110,7 @@ namespace AssetManagement.Application.Services
 
             return new UserDetailsDto
             {
+                Id = user.Id,
                 StaffCode = user.StaffCode,
                 FirstName = user.FirstName,
                 LastName = user.LastName,
@@ -102,8 +125,6 @@ namespace AssetManagement.Application.Services
 
         public async Task<CreateUserResponseDto> CreateUserAsync(string adminUserId, CreateUserRequestDto dto)
         {
-            var errors = new List<FieldValidationException>();
-
             if (dto == null)
                 throw new ArgumentNullException(nameof(dto));
 
@@ -153,8 +174,6 @@ namespace AssetManagement.Application.Services
 
         public async Task<string> UpdateUserAsync(string adminId, string staffCode, UpdateUserRequestDto dto)
         {
-            var errors = new List<FieldValidationException>();
-
             if (dto == null)
             {
                 throw new ArgumentNullException(nameof(dto));
