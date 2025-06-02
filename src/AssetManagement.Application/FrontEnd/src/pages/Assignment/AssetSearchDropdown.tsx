@@ -103,8 +103,7 @@ const AssetSearchDropdown: React.FC<AssetSearchDropdownProps> = ({ value, onChan
   const columns = [
     { key: 'code', label: 'Asset Code', sortable: true },
     { key: 'name', label: 'Asset Name', sortable: true },
-    { key: 'categoryName', label: 'Category', sortable: true },
-    { key: 'state', label: 'State', sortable: true },
+    { key: 'category', label: 'Category', sortable: true },
   ];
 
   useEffect(() => {
@@ -226,7 +225,7 @@ const AssetSearchDropdown: React.FC<AssetSearchDropdownProps> = ({ value, onChan
                           </th>
                         ))}
                       </tr>
-                    </thead>
+                    </thead>{' '}
                     <tbody>
                       {assetData?.items && assetData.items.length > 0 ? (
                         assetData.items.map((asset) => (
@@ -248,9 +247,6 @@ const AssetSearchDropdown: React.FC<AssetSearchDropdownProps> = ({ value, onChan
                             </td>
                             <td className="py-2 relative w-[120px] after:absolute after:bottom-0 after:left-0 after:w-[calc(100%-20px)] after:h-[1px] after:bg-gray-300">
                               {asset.categoryName}
-                            </td>
-                            <td className="py-2 relative w-[80px] after:absolute after:bottom-0 after:left-0 after:w-[calc(100%-20px)] after:h-[1px] after:bg-gray-300">
-                              {asset.state}
                             </td>
                           </tr>
                         ))

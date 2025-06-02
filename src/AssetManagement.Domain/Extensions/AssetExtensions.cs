@@ -58,8 +58,8 @@ public static class AssetExtensions
                         : query.OrderBy(a => a.Code),
                     "state" => order == "desc" ? query.OrderByDescending(a => a.State)
                         : query.OrderBy(a => a.State),
-                    "category" => order == "desc" ? query.OrderByDescending(a => a.Category)
-                        : query.OrderBy(a => a.Category),
+                    "category" => order == "desc" ? query.OrderByDescending(a => a.Category.Name)
+                        : query.OrderBy(a => a.Category.Name),
                     "created" => order == "desc" ? query.OrderByDescending(a => a.CreatedDate)
                         : query.OrderBy(a => a.CreatedDate),
                     "updated" => order == "desc" ? query.OrderByDescending(a => a.LastModifiedDate)
@@ -77,8 +77,8 @@ public static class AssetExtensions
                         : orderedQuery.ThenBy(a => a.Code),
                     "state" => order == "desc" ? orderedQuery.ThenByDescending(a => a.State)
                         : orderedQuery.ThenBy(a => a.State),
-                    "category" => order == "desc" ? orderedQuery.ThenByDescending(a => a.Category)
-                        : orderedQuery.ThenBy(a => a.Category),
+                    "category" => order == "desc" ? orderedQuery.ThenByDescending(a => a.Category.Name)
+                        : orderedQuery.ThenBy(a => a.Category.Name),
                     "created" => order == "desc" ? orderedQuery.ThenByDescending(a => a.CreatedDate)
                         : orderedQuery.ThenBy(a => a.CreatedDate),
                     "updated" => order == "desc" ? orderedQuery.ThenByDescending(a => a.LastModifiedDate)

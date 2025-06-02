@@ -49,6 +49,7 @@ namespace AssetManagement.Application.Services
 
             IQueryable<Asset> query = _assetRepository.GetAll()
                 .AsNoTracking()
+                .Include(a => a.Category)
                 .ApplySearch(queryParams.SearchTerm)
                 .ApplyFilters(queryParams.AssetStates, queryParams.AssetCategories, currentAdminLocation)
                 .ApplySorting(queryParams.GetSortCriteria())

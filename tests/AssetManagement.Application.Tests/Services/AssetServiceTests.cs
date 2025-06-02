@@ -811,7 +811,7 @@ public class AssetServiceTests
             .Returns(new List<Asset>().AsQueryable().BuildMock());
 
         // Act & Assert
-        await Assert.ThrowsAsync<ArgumentOutOfRangeException>(
+        await Assert.ThrowsAsync<AggregateFieldValidationException>(
             () => _assetService.CreateAssetAsync(request, adminId.ToString()));
     }
 
