@@ -1,5 +1,6 @@
-namespace AssetManagement.Contracts.Exceptions;
+using System.Runtime.CompilerServices;
 
+namespace AssetManagement.Contracts.Exceptions;
 public class AppException : Exception
 {
     /// <summary>
@@ -23,7 +24,7 @@ public class AppException : Exception
     /// Throw this exception to propagate domain-specific errors with clear context, 
     /// enabling consistent error handling across the application.
     /// </summary>    /// <inheritdoc />
-    protected AppException(string message, int statusCode = 500, string errorCode = "GENERAL_ERROR")
+    public AppException(string message, int statusCode = 500, string errorCode = "GENERAL_ERROR")
         : base(message)
     {
         StatusCode = statusCode;

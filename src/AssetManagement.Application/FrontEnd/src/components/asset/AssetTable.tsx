@@ -6,8 +6,9 @@ const AssetTable: React.FC<{
   isLoading: boolean;
   sortBy: string | undefined;
   onSort: (key: string) => void;
+  onDelete: (assetId: string) => void;
   onViewDetails: (assetCode: string) => void;
-}> = ({ assets, isLoading, sortBy, onSort, onViewDetails }) => {
+}> = ({ assets, isLoading, sortBy, onSort, onDelete, onViewDetails }) => {
   const columns = [
     { key: "code", label: "Asset Code", sortable: true },
     { key: "name", label: "Asset Name", sortable: true },
@@ -116,7 +117,10 @@ const AssetTable: React.FC<{
                   </button>
                   <button
                     className="text-primary hover:text-red-700"
-                    onClick={() => {}}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onDelete(asset.id);
+                    }}
                     disabled={false}
                   >
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none">

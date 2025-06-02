@@ -85,4 +85,19 @@ public class AssetsController : ControllerBase
             Data = updatedAssetCode,
         };
     }
+
+    [HttpDelete("{assetId:Guid}")]
+    [Authorize(Roles = "Admin")]
+    public async Task<ActionResult<ApiResponse<string>>> Delete(Guid assetId)
+    {
+        var deletedBy = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? throw new UnauthorizedAccessException("Cannot retrieve user id from claims");
+        var deletedAsset = await _assetService.DeleteAssetAsync(Guid.Parse(deletedBy!), assetId);
+        return new ApiResponse<string>
+        {
+            Success = true,
+            Message = "Successfully deleted asset.",
+            Data = deletedAsset,
+        };
+    }
+    
 }

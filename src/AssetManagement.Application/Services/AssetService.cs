@@ -49,10 +49,10 @@ namespace AssetManagement.Application.Services
 
             IQueryable<Asset> query = _assetRepository.GetAll()
                 .AsNoTracking()
-                .Include(x => x.Category)
                 .ApplySearch(queryParams.SearchTerm)
                 .ApplyFilters(queryParams.AssetStates, queryParams.AssetCategories, currentAdminLocation)
-                .ApplySorting(queryParams.GetSortCriteria());
+                .ApplySorting(queryParams.GetSortCriteria())
+                .Where(c => c.IsDeleted != true);
 
             int total = await query.CountAsync();
 
@@ -75,7 +75,7 @@ namespace AssetManagement.Application.Services
         public async Task<AssetDetailsDto> GetAssetByIdAsync(Guid id)
         {
             var asset = await _assetRepository.GetSingleAsync(
-                x => x.Id == id,
+                x => x.Id == id && x.IsDeleted != true,
                 new CancellationToken(),
                 false,
                 x => x.Category);
@@ -209,6 +209,29 @@ namespace AssetManagement.Application.Services
                 throw new UnauthorizedAccessException("Cannot find admin to extract location");
 
             return adminUser.Location;
+        }
+
+        public async Task<string> DeleteAssetAsync(Guid deletedBy, Guid id)
+        {
+            var asset = await _assetRepository.GetByIdAsync(id);
+            if (asset == null)
+            {
+                throw new KeyNotFoundException($"Cannot find asset with id {id}");
+            }
+            else if (asset.IsDeleted == true)
+            {
+                throw new InvalidOperationException($"Asset is already deleted");
+            } 
+            else
+            {
+                asset.DeletedBy = deletedBy;
+                asset.DeletedDate = DateTime.UtcNow;
+                asset.IsDeleted = true;
+                
+                _assetRepository.Update(asset);
+                await _assetRepository.SaveChangesAsync();
+                return asset.Code;  
+            }
         }
     }
 }

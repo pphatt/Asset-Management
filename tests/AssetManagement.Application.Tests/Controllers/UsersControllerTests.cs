@@ -245,5 +245,85 @@ namespace AssetManagement.Application.Tests.Controllers
             Assert.Equal(StatusCodes.Status500InternalServerError, statusCodeResult.StatusCode);
             Assert.Contains(errorMessage, response.Message);
         }
+        
+        [Fact]
+        public async Task UpdateUser_ValidRequest_ReturnsSuccessResponse()
+        {
+            // Arrange
+            var adminId = _controller.User.FindFirst(ClaimTypes.NameIdentifier)?.Value!;
+            var staffCode = "SD0001";
+            var request = new UpdateUserRequestDto
+            {
+                DateOfBirth = "2000-01-01",
+                JoinedDate = "2022-01-01",
+                Gender = Contracts.Enums.GenderDto.Male,
+                Type = Contracts.Enums.UserTypeDto.Staff
+            };
+
+            _userServiceMock
+                .Setup(s => s.UpdateUserAsync(adminId, staffCode, request))
+                .ReturnsAsync(staffCode);
+
+            // Act
+            var result = await _controller.UpdateUser(staffCode, request);
+            var apiResponse = Assert.IsType<ApiResponse<string>>(result.Value);
+
+            // Assert
+            Assert.True(apiResponse.Success);
+            Assert.Equal("Successfully updated user.", apiResponse.Message);
+            Assert.Equal(staffCode, apiResponse.Data);
+        }
+        
+        [Fact]
+        public async Task UpdateUser_MissingAdminId_ThrowsUnauthorizedAccessException()
+        {
+            // Arrange
+            _controller.ControllerContext.HttpContext.User = new ClaimsPrincipal(); // no claims
+
+            var staffCode = "SD0001";
+            var request = new UpdateUserRequestDto();
+
+            // Act & Assert
+            await Assert.ThrowsAsync<UnauthorizedAccessException>(() =>
+                _controller.UpdateUser(staffCode, request));
+        }
+        
+        [Fact]
+        public async Task DeleteUser_ValidRequest_ReturnsSuccessResponse()
+        {
+            // Arrange
+            var adminId = _controller.User.FindFirst(ClaimTypes.NameIdentifier)?.Value!;
+            var staffCode = "SD0001";
+
+            _userServiceMock
+                .Setup(s => s.DeleteUserAsync(Guid.Parse(adminId), staffCode))
+                .ReturnsAsync(staffCode);
+
+            // Act
+            var result = await _controller.DeleteUser(staffCode);
+            var apiResponse = Assert.IsType<ApiResponse<string>>(result.Value);
+
+            // Assert
+            Assert.True(apiResponse.Success);
+            Assert.Equal("Successfully deleted user.", apiResponse.Message);
+            Assert.Equal(staffCode, apiResponse.Data);
+        }
+        
+        [Fact]
+        public async Task DeleteUser_MissingAdminId_ThrowsInvalidOperationException()
+        {
+            // Arrange
+            _controller.ControllerContext.HttpContext.User = new ClaimsPrincipal(); // no claims
+
+            var staffCode = "SD0001";
+
+            // Act & Assert
+            await Assert.ThrowsAsync<ArgumentNullException>(() =>
+                _controller.DeleteUser(staffCode));
+        }
+
+
+
+
     }
 }

@@ -1334,4 +1334,79 @@ public class AssetServiceTests
             e.Message == "Invalid state value");
     }
     #endregion
+    
+    [Fact]
+    public async Task DeleteAssetAsync_MarksAssetAsDeletedAndReturnsCode_WhenAssetExists()
+    {
+        // Arrange
+        var assetId = Guid.NewGuid();
+        var deletedBy = Guid.NewGuid();
+        var asset = new Asset
+        {
+            Id = assetId,
+            Code = "A001",
+            Name = "Test Asset",
+            IsDeleted = false
+        };
+
+        _assetRepository.Setup(repo => repo.GetByIdAsync(assetId))
+            .ReturnsAsync(asset);
+        _assetRepository.Setup(repo => repo.Update(It.IsAny<Asset>()))
+            .Verifiable();
+
+        // Act
+        var result = await _assetService.DeleteAssetAsync(deletedBy, assetId);
+
+        // Assert
+        Assert.Equal("A001", result);
+        Assert.True(asset.IsDeleted);
+        Assert.Equal(deletedBy, asset.DeletedBy);
+        Assert.True(asset.DeletedDate.HasValue);
+        Assert.True(asset.DeletedDate.Value <= DateTime.UtcNow);
+        _assetRepository.Verify(repo => repo.GetByIdAsync(assetId), Times.Once());
+        _assetRepository.Verify(repo => repo.Update(asset), Times.Once());
+    }
+
+    [Fact]
+    public async Task DeleteAssetAsync_ThrowsKeyNotFoundException_WhenAssetDoesNotExist()
+    {
+        // Arrange
+        var assetId = Guid.NewGuid();
+        var deletedBy = Guid.NewGuid();
+
+        _assetRepository.Setup(repo => repo.GetByIdAsync(assetId))
+            .ReturnsAsync((Asset?)null);
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<KeyNotFoundException>(
+            () => _assetService.DeleteAssetAsync(deletedBy, assetId));
+        Assert.Equal($"Cannot find asset with id {assetId}", exception.Message);
+        _assetRepository.Verify(repo => repo.GetByIdAsync(assetId), Times.Once());
+        _assetRepository.Verify(repo => repo.Update(It.IsAny<Asset>()), Times.Never());
+    }
+
+    [Fact]
+    public async Task DeleteAssetAsync_ThrowsInvalidOperationException_WhenAssetAlreadyDeleted()
+    {
+        // Arrange
+        var assetId = Guid.NewGuid();
+        var deletedBy = Guid.NewGuid();
+        var asset = new Asset
+        {
+            Id = assetId,
+            Code = "A001",
+            Name = "Test Asset",
+            IsDeleted = true
+        };
+
+        _assetRepository.Setup(repo => repo.GetByIdAsync(assetId))
+            .ReturnsAsync(asset);
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
+            () => _assetService.DeleteAssetAsync(deletedBy, assetId));
+        Assert.Equal("Asset is already deleted", exception.Message);
+        _assetRepository.Verify(repo => repo.GetByIdAsync(assetId), Times.Once());
+        _assetRepository.Verify(repo => repo.Update(It.IsAny<Asset>()), Times.Never());
+    }
 }

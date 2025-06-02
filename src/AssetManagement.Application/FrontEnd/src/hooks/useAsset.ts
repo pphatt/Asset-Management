@@ -105,12 +105,31 @@ export function useAsset() {
     });
   }
 
+  /**
+   * Delete a asset
+   * @returns {UseMutationResult<void>} The deleted asset
+   * @description Delete a asset from the API
+   * @technique {useMutation} -> Mutate the deleted asset from the API
+   */
+  function useDeleteAsset() {
+    return useMutation({
+      mutationFn: async (assetId: string) => {
+        const response = await assetApi.deleteAsset(assetId);
+
+        if (!response.success) {
+          throw new Error(response.message || "Failed to delete asset");
+        }
+      },
+    });
+  }
+
   return {
     useAssetList,
     useAssetStates,
     useAssetByAssetCode,
     getCurrentAdminLocation,
     useCreateAsset,
+    useDeleteAsset,
   };
 }
 

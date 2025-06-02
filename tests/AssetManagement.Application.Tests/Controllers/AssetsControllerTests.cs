@@ -1,4 +1,6 @@
+using System;
 using System.Security.Claims;
+using System.Threading.Tasks;
 using AssetManagement.Application.Controllers;
 using AssetManagement.Application.Services.Interfaces;
 using AssetManagement.Contracts.Common;
@@ -12,6 +14,7 @@ using AssetManagement.Contracts.Parameters;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
+using Xunit;
 
 namespace AssetManagement.Application.Tests.Controllers;
 
@@ -19,6 +22,7 @@ public class AssetsControllerTests
 {
     private readonly Mock<IAssetService> _assetServiceMock;
     private readonly AssetsController _controller;
+    private readonly Guid _adminId;
 
 
     public AssetsControllerTests()
@@ -27,16 +31,16 @@ public class AssetsControllerTests
         _controller = new AssetsController(_assetServiceMock.Object);
 
         // Mock HttpContext User
+        _adminId = Guid.NewGuid();
         var user = new ClaimsPrincipal(new ClaimsIdentity(
         [
-            new Claim(ClaimTypes.NameIdentifier, Guid.NewGuid().ToString()),
+            new Claim(ClaimTypes.NameIdentifier, _adminId.ToString()),
             new Claim(ClaimTypes.Role, "Admin")
         ], "mock"));
 
         // Initialize HttpContext
         _controller.ControllerContext = new ControllerContext
         {
-
             HttpContext = new DefaultHttpContext { User = user }
         };
     }
@@ -119,7 +123,7 @@ public class AssetsControllerTests
             DateTimeOffset.UtcNow.AddYears(1),
             "HN",
             "M1 Pro, 16GB RAM, 512GB SSD"
-            );
+        );
 
         _assetServiceMock.Setup(s => s.GetAssetByIdAsync(assetId))
             .ReturnsAsync(expectedAsset)
@@ -137,6 +141,115 @@ public class AssetsControllerTests
         Assert.Equal(expectedAsset.Code, response.Data?.Code);
         Assert.Equal(expectedAsset.Name, response.Data?.Name);
 
+        _assetServiceMock.Verify();
+    }
+
+    [Fact]
+public async Task Delete_ReturnsOkResponse_WhenAssetIsDeletedSuccessfully()
+{
+    // Arrange
+    var assetId = Guid.NewGuid();
+    var adminId = Guid.NewGuid();
+    var assetCode = "A001";
+
+    _assetServiceMock.Setup(s => s.DeleteAssetAsync(adminId, assetId))
+        .ReturnsAsync(assetCode)
+        .Verifiable();
+
+    // Set up ClaimsPrincipal for admin
+    var claims = new[]
+    {
+        new Claim(ClaimTypes.NameIdentifier, adminId.ToString()),
+        new Claim(ClaimTypes.Role, "Admin")
+    };
+    var identity = new ClaimsIdentity(claims, "mock"); // Ensure authentication type is set
+    var user = new ClaimsPrincipal(identity);
+    _controller.ControllerContext.HttpContext = new DefaultHttpContext { User = user };
+
+    // Verify user is authenticated and has Admin role
+    Console.WriteLine($"IsAuthenticated: {user.Identity.IsAuthenticated}, Roles: {string.Join(", ", user.Claims.Select(c => c.Type + ": " + c.Value))}");
+
+    // Act
+    var result = await _controller.Delete(assetId);
+
+    // Assert
+    Assert.NotNull(result);
+    var actionResult = Assert.IsType<ActionResult<ApiResponse<string>>>(result);
+
+    if (actionResult.Result == null && actionResult.Value != null)
+    {
+        // If the method returns ApiResponse<string> directly, it�s wrapped in OkObjectResult
+        var apiResponse = Assert.IsType<ApiResponse<string>>(actionResult.Value);
+        Assert.True(apiResponse.Success);
+        Assert.Equal("Successfully deleted asset.", apiResponse.Message);
+        Assert.Equal(assetCode, apiResponse.Data);
+        Assert.Empty(apiResponse.Errors);
+    }
+    else
+    {
+        if (actionResult.Result == null)
+        {
+            Assert.Fail($"actionResult.Result is null. Actual result type: {result.GetType().Name}, Value: {result}");
+        }
+
+        var okResult = Assert.IsType<OkObjectResult>(actionResult.Result);
+        Assert.Equal(200, okResult.StatusCode);
+
+        var apiResponse = Assert.IsType<ApiResponse<string>>(okResult.Value);
+        Assert.True(apiResponse.Success);
+        Assert.Equal("Successfully deleted asset.", apiResponse.Message);
+        Assert.Equal(assetCode, apiResponse.Data);
+        Assert.Empty(apiResponse.Errors);
+    }
+
+    _assetServiceMock.Verify();
+}
+    [Fact]
+    public async Task Delete_ThrowsUnauthorizedAccessException_WhenAdminIdIsMissing()
+    {
+        // Arrange
+        var assetId = Guid.NewGuid();
+        var user = new ClaimsPrincipal(new ClaimsIdentity(new Claim[] { new Claim(ClaimTypes.Role, "Admin") }, "mock"));
+        _controller.ControllerContext.HttpContext = new DefaultHttpContext { User = user };
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<UnauthorizedAccessException>(
+            () => _controller.Delete(assetId));
+        Assert.Equal("Cannot retrieve user id from claims", exception.Message);
+        _assetServiceMock.Verify(s => s.DeleteAssetAsync(It.IsAny<Guid>(), It.IsAny<Guid>()), Times.Never());
+    }
+
+    [Fact]
+    public async Task Delete_ThrowsKeyNotFoundException_WhenAssetDoesNotExist()
+    {
+        // Arrange
+        var assetId = Guid.NewGuid();
+
+        _assetServiceMock.Setup(s => s.DeleteAssetAsync(_adminId, assetId))
+            .ThrowsAsync(new KeyNotFoundException($"Cannot find asset with id {assetId}"))
+            .Verifiable();
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<KeyNotFoundException>(
+            () => _controller.Delete(assetId));
+        Assert.Equal($"Cannot find asset with id {assetId}", exception.Message);
+        _assetServiceMock.Verify();
+    }
+
+    [Fact]
+    public async Task Delete_ThrowsInvalidOperationException_WhenAssetAlreadyDeleted()
+    {
+        // Arrange
+        var assetId = Guid.NewGuid();
+
+        _assetServiceMock.Setup(s => s.DeleteAssetAsync(_adminId, assetId))
+            .ThrowsAsync(new InvalidOperationException("Asset is already deleted"))
+            .Verifiable();
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
+            () => _controller.Delete(assetId));
+        Assert.Equal("Asset is already deleted", exception.Message);
         _assetServiceMock.Verify();
     }
 

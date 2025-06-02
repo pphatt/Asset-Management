@@ -19,6 +19,7 @@ import { IAssetDetails } from "@/types/asset.type.ts";
 import { IAssetParams } from "@/types/asset.type";
 import path from "@/constants/path.ts";
 import { useNavigate } from "react-router-dom";
+import DisableAssetPopup from "@/components/asset/DeleteAssetPopup.tsx";
 
 const AssetList: React.FC = () => {
   const navigate = useNavigate();
@@ -48,9 +49,13 @@ const AssetList: React.FC = () => {
   );
   const [isDetailsPopupOpen, setIsDetailsPopupOpen] = useState(false);
 
+  // Disable asset
+  const [confirmDeleteModal, setConfirmDeleteModal] = useState(false);
+  const [assetToDelete, setAssetToDelete] = useState<string | null>(null);
+
   const [queryParams, setQueryParams] = useAssetFilterState();
 
-  const { useAssetList, useAssetByAssetCode } = useAsset();
+  const { useAssetList, useDeleteAsset, useAssetByAssetCode } = useAsset();
   const {
     data: assetData,
     isLoading: isLoadingAssets,
@@ -64,6 +69,9 @@ const AssetList: React.FC = () => {
     isError: isAssetDetailsError,
     error: assetDetailsError,
   } = useAssetByAssetCode(selectedAssetCode);
+
+  const { mutate: deleteAssetMutation, isPending: isDeleting } =
+    useDeleteAsset();
 
   const handleSearch = useCallback(() => {
     setQueryParams((prev) => ({
@@ -195,6 +203,50 @@ const AssetList: React.FC = () => {
   }, []);
 
   /**
+   * Open delete confirmation modal
+   * @param assetId - The id of the asset to delete
+   * @returns void
+   * @description Open the delete confirmation modal
+   * @technique UseCallback
+   */
+  const handleDeleteAsset = useCallback(
+    (assetId: string) => {
+      setAssetToDelete(assetId);
+      setConfirmDeleteModal(true);
+    },
+    [assetData?.items],
+  );
+
+  /**
+   * Delete asset
+   * @returns void
+   * @description Delete a asset and refetch the assets list
+   * @technique UseCallback
+   */
+  const confirmDeleteAsset = useCallback(() => {
+    if (assetToDelete) {
+      deleteAssetMutation(assetToDelete, {
+        onSuccess: () => {
+          refetchAssets();
+          setConfirmDeleteModal(false);
+          setAssetToDelete(null);
+        },
+      });
+    }
+  }, [assetToDelete, deleteAssetMutation, refetchAssets]);
+
+  /**
+   * Close delete confirmation modal
+   * @returns void
+   * @description Close the delete confirmation modal
+   * @technique UseCallback
+   */
+  const closeDeleteModal = useCallback(() => {
+    setConfirmDeleteModal(false);
+    setAssetToDelete(null);
+  }, []);
+
+  /**
    * Create new asset
    * @returns void
    * @description Create a new asset
@@ -258,7 +310,7 @@ const AssetList: React.FC = () => {
           />
         </div>
         <div className="flex items-center">
-          {' '}
+          {" "}
           <div className="flex items-center justify-between">
             <input
               type="text"
@@ -334,8 +386,19 @@ const AssetList: React.FC = () => {
           isLoading={isLoadingAssets}
           sortBy={queryParams.sortBy}
           onSort={handleSort}
+          onDelete={handleDeleteAsset}
           onViewDetails={handleViewAssetDetails}
         />
+
+        {/* Disable Asset Popup */}
+        {confirmDeleteModal && (
+          <DisableAssetPopup
+            isOpen={true}
+            isDisabled={isDeleting}
+            onClose={closeDeleteModal}
+            onConfirm={confirmDeleteAsset}
+          />
+        )}
       </div>
 
       {/* Pagination */}
