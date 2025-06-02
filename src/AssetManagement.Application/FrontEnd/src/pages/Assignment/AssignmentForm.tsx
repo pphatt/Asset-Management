@@ -53,6 +53,8 @@ const AssignmentForm: React.FC<AssignmentFormProps> = ({ mode, initialData, onSu
     handleSubmit,
     formState: { errors, isValid, isSubmitting: formIsSubmitting },
     reset,
+    setValue,
+    watch,
   } = useForm<IAssignmentCreateUpdateRequest>({
     resolver: yupResolver(assignmentSchema),
     defaultValues: mode === 'create' ? defaultValues : { ...defaultValues, ...initialData },
@@ -60,10 +62,9 @@ const AssignmentForm: React.FC<AssignmentFormProps> = ({ mode, initialData, onSu
     reValidateMode: 'onSubmit',
   });
 
-  // Reset form khi chuyển sang edit hoặc initialData thay đổi
-  useEffect(() => {
-    if (mode === 'edit' && initialData) reset(initialData);
-  }, [mode, initialData, reset]);
+  // Theo dõi giá trị assignedDate để debug
+  const assignedDateValue = watch('assignedDate');
+  useEffect(() => {}, [assignedDateValue]);
 
   /**
    * Xử lý submit form
@@ -92,6 +93,18 @@ const AssignmentForm: React.FC<AssignmentFormProps> = ({ mode, initialData, onSu
   // Trạng thái submit tổng hợp
   const isSubmitting = formIsSubmitting || isExternalSubmitting;
   const isSubmitDisabled = !isValid || isSubmitting;
+
+  // Reset form khi chuyển sang edit hoặc initialData thay đổi
+  useEffect(() => {
+    if (mode === 'edit' && initialData) {
+      reset(initialData);
+
+      // Đảm bảo giá trị assignedDate được set đúng
+      if (initialData.assignedDate) {
+        setValue('assignedDate', initialData.assignedDate);
+      }
+    }
+  }, [mode, initialData, reset, setValue]);
 
   return (
     <div className="max-w-md mx-auto p-6 bg-white border-gray-200">
@@ -141,11 +154,20 @@ const AssignmentForm: React.FC<AssignmentFormProps> = ({ mode, initialData, onSu
                   value={field.value ?? ''}
                   onChange={(e) => {
                     const selectedDate = e.target.value; // string yyyy-MM-dd
-                    if (mode === 'create' && selectedDate < formatDateToString(getStartOfToday())) return;
+
+                    // Nếu đang ở chế độ tạo mới, kiểm tra ngày có trước ngày hiện tại không
+                    if (mode === 'create') {
+                      const today = formatDateToString(getStartOfToday());
+                      if (selectedDate < today) {
+                        console.warn('Selected date is before today, ignoring');
+                        return;
+                      }
+                    }
+
                     field.onChange(selectedDate);
                   }}
                   min={mode === 'create' ? formatDateToString(new Date()) : undefined}
-                  className="w-full p-2 border border-gray-300 rounded-md ..."
+                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-primary hover:border-gray-400 transition-colors"
                 />
               )}
             />

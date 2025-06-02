@@ -1,4 +1,5 @@
 import { IAsset } from './asset.type';
+import { AssignmentState } from './assignment.type';
 import { IUser } from './user.type';
 
 export interface IAssignmentFormData {
@@ -22,17 +23,21 @@ export interface IAssignmentCreateUpdateResponse {
   assignedTo: string;
   assignedBy: string;
   assignedDate: Date;
-  state: string;
+  state: AssignmentState;
 }
 
 export interface IAssginmentDetail {
   id: string;
-  no: string;
+  no: number;
+  assetId: string;
   assetCode: string;
   assetName: string;
   assignedTo: string;
+  assignedToId: string;
   assignedBy: string;
+  assignedById: string;
   assignedDate: string;
-  state: string;
+  state: AssignmentState;
+  specification: string;
   note: string;
 }

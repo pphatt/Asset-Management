@@ -17,7 +17,6 @@ const AssetDetailsPopup: React.FC<AssetDetailsPopupProps> = ({
   if (!isOpen || !asset) return null;
 
   const formatDate = (dateString: string): string => {
-    console.log(dateString);
     if (!dateString) return "";
 
     const date = new Date(dateString);

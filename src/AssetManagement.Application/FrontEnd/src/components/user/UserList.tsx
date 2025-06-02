@@ -129,7 +129,6 @@ const UserList: React.FC = () => {
    * @technique UseCallback
    */
   const handleCreateNewUser = useCallback(() => {
-    console.log('Create new user');
     navigate(path.userCreate);
   }, []);
 
@@ -141,7 +140,6 @@ const UserList: React.FC = () => {
    * @technique UseCallback
    */
   const handleEditUser = useCallback((staffCode: string) => {
-    console.log('Edit user', staffCode);
     navigate(path.userEdit.replace(':staffCode', staffCode));
   }, []);
 

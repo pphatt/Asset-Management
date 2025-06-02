@@ -44,7 +44,7 @@ http.interceptors.response.use(
 
             if (status === 401) {
                 // Unauthorized - Redirect to login
-                console.log('Unauthorized access. Redirecting to login...');
+                toast.error('Unauthorized access. Redirecting to login...');
             } else if (status === 403) {
                 toast.error('Access denied. You do not have permission to perform this action.');
             } else if (status === 404) {

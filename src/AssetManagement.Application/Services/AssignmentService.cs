@@ -19,7 +19,8 @@ namespace AssetManagement.Application.Services
         private readonly IAssetRepository _assetRepository;
         private readonly IUserRepository _userRepository;
 
-        public AssignmentService(IAssignmentRepository assignmentRepository, IAssetRepository assetRepository, IUserRepository userRepository)
+        public AssignmentService(IAssignmentRepository assignmentRepository, IAssetRepository assetRepository,
+            IUserRepository userRepository)
         {
             _assignmentRepository = assignmentRepository;
             _assetRepository = assetRepository;
@@ -37,7 +38,8 @@ namespace AssetManagement.Application.Services
             return user.Location;
         }
 
-        public async Task<PagedResult<AssignmentDto>> GetAssignmentsAsync(Guid adminId, AssignmentQueryParameters queryParams)
+        public async Task<PagedResult<AssignmentDto>> GetAssignmentsAsync(Guid adminId,
+            AssignmentQueryParameters queryParams)
         {
             var currentAdminLocation = await GetLocationByUserId(adminId);
 
@@ -79,7 +81,14 @@ namespace AssetManagement.Application.Services
 
         public async Task<AssignmentDto?> GetAssignmentByIdAsync(Guid id)
         {
-            var assignment = await _assignmentRepository.GetByIdAsync(id);
+            var assignment = await _assignmentRepository
+                .GetAll()
+                .Include(a => a.Asset)
+                .Include(a => a.Assignee)
+                .Include(a => a.Assignor)
+                .Where(a => a.Id == id)
+                .FirstOrDefaultAsync();
+
             if (assignment is null)
             {
                 return null;
@@ -118,9 +127,12 @@ namespace AssetManagement.Application.Services
                 Id = assignment.Id,
                 AssetCode = assignment.Asset.Code,
                 AssetName = assignment.Asset.Name,
+                AssetId = assignment.AssetId,
                 AssignedBy = assignment.Assignor.Username,
                 AssignedTo = assignment.Assignee.Username,
                 AssignedDate = assignment.AssignedDate.ToString("dd/MM/yyyy"),
+                AssignedById = assignment.AssignorId,
+                AssignedToId = assignment.AssigneeId,
                 State = assignment.State.GetDisplayName(),
                 Specification = assignment.Asset.Specification,
                 Note = assignment.Note,
@@ -129,7 +141,8 @@ namespace AssetManagement.Application.Services
 
         public async Task<AssignmentDto> CreateAssignmentAsync(Guid adminId, CreateAssignmentRequestDto dto)
         {
-            await AssignmentValidator.ValidateCreateAssignmentAsync(dto, adminId, _assetRepository, _userRepository, _assignmentRepository);
+            await AssignmentValidator.ValidateCreateAssignmentAsync(dto, adminId, _assetRepository, _userRepository,
+                _assignmentRepository);
 
             var assignment = new Assignment
             {
@@ -154,7 +167,8 @@ namespace AssetManagement.Application.Services
 
         public async Task<AssignmentDto> UpdateAssignmentAsync(Guid id, Guid adminId, UpdateAssignmentRequestDto dto)
         {
-            await AssignmentValidator.ValidateUpdateAssignmentAsync(id, dto, adminId, _assetRepository, _userRepository, _assignmentRepository);
+            await AssignmentValidator.ValidateUpdateAssignmentAsync(id, dto, adminId, _assetRepository, _userRepository,
+                _assignmentRepository);
 
             var assignment = await _assignmentRepository.GetByIdAsync(id);
             if (assignment is null)

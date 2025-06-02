@@ -15,7 +15,6 @@ const authApi = {
   changePassword: async (
     body: PasswordUpdateRequest,
   ): Promise<HttpResponse<AuthResponse>> => {
-    console.log("body", body);
     const { data } = await http.post("auth/password/change", body);
     return data;
   },

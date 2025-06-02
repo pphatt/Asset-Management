@@ -75,7 +75,6 @@ export default function Login() {
         const expInMs = Number.parseInt(decode["exp"]) * 1000; // JWT exp to ms
         const currentTime = Date.now(); // current time in ms
 
-        console.log(currentTime, expInMs);
 
         // Cookie lifetime in seconds
         const maxAge = Math.floor((expInMs - currentTime) / 1000);

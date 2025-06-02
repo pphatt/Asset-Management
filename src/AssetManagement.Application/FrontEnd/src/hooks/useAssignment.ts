@@ -1,9 +1,9 @@
 import assignmentApi from '@/apis/assingment.api';
 import path from '@/constants/path';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { IAssignmentCreateUpdateRequest } from '@/types/assingment.type';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { IAssignmentCreateUpdateRequest } from '../types/assingment.type';
 
 export function useAssignment() {
   const navigate = useNavigate();
@@ -13,6 +13,7 @@ export function useAssignment() {
    * Create a new assignment
    * @returns {UseMutationResult} The mutation result
    * @description Create a new assignment via the API
+   * @note Newly created assignments will automatically have "Waiting for acceptance" state
    */
   function useCreateAssignment() {
     return useMutation({
@@ -30,11 +31,11 @@ export function useAssignment() {
       },
     });
   }
-
   /**
    * Update an assignment
    * @returns {UseMutationResult} The mutation result
    * @description Update an assignment via the API
+   * @note Only assignments with "Waiting for acceptance" state can be edited
    */
   function useUpdateAssignment() {
     return useMutation({
@@ -52,10 +53,28 @@ export function useAssignment() {
       },
     });
   }
+  function useGetAssignmentDetails(id: string) {
+    return useQuery({
+      queryKey: ['assignment', id],
+      queryFn: async () => {
+        if (!id) throw new Error('Assignment ID is required');
+        const response = await assignmentApi.getAssignmentDetails(id);
+        if (response.success && response.data) {
+          return response.data;
+        }
+        throw new Error(response.message || 'Failed to fetch assignment details');
+      },
+      enabled: !!id,
+      staleTime: 0, // Always fetch fresh data
+      refetchOnWindowFocus: true,
+      refetchOnMount: true,
+    });
+  }
 
   return {
     useCreateAssignment,
     useUpdateAssignment,
+    useGetAssignmentDetails,
   };
 }
 

@@ -40,7 +40,6 @@ export function useAsset() {
           apiParams.sortBy = apiParams._apiSortBy;
           delete apiParams._apiSortBy;
         }
-        console.log("API Params:", apiParams);
         const response = await assetApi.getAssets(apiParams);
         if (response.success && response.data) {
           return response.data;

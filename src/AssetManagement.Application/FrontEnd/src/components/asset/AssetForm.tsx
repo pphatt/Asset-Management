@@ -91,7 +91,6 @@ export const AssetForm: React.FC<AssetFormProps> = ({
   });
 
   const onSubmit = (data: FormData) => {
-    // console.log(data);
     if (isEditMode) {
       // TODO: This is for edit asset.
     } else {

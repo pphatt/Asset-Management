@@ -167,7 +167,6 @@ const AssetList: React.FC = () => {
         ...filterCategories.filter((category) => category !== name),
       ];
       setQueryParams((prev) => {
-        console.log(updatedCategories);
         const newParams: IAssetParams = {
           ...prev,
           assetCategories: updatedCategories.includes(ASSET_CATEGORY.ALL)
@@ -202,7 +201,6 @@ const AssetList: React.FC = () => {
    * @technique UseCallback
    */
   const handleCreateNewAsset = useCallback(() => {
-    console.log("Create new asset");
     navigate(path.assetCreate);
   }, []);
 

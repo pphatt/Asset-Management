@@ -4,5 +4,8 @@ namespace AssetManagement.Contracts.DTOs
     {
         public string? Specification { get; set; }
         public string? Note { get; set; }
+        public Guid? AssignedToId { get; set; }
+        public Guid? AssignedById { get; set; }
+        public Guid? AssetId { get; set; }
     }
 }

@@ -14,7 +14,6 @@ export default function AssignmnetPagination({
   pathName,
 }: Props) {
   const page = Number(queryConfig.pageNumber);
-  console.log(page, totalPage);
   const rederPagination = () => {
     let dotAfter = false;
     let dotBefore = false;

@@ -24,7 +24,6 @@ const assetApi = {
     assetCode: string
   ): Promise<HttpResponse<IAssetDetails>> => {
     const { data } = await http.get(`/assets/${assetCode}`);
-    console.log(data);
     return data;
   },
 

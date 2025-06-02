@@ -114,7 +114,6 @@ export const UserForm: React.FC<UserFormProps> = ({ mode }: UserFormProps) => {
     });
 
     const onSubmit = (data: FormData) => {
-        // console.log(data);
         if (isEditMode) {
             const userData: IUpdateUserRequest = {
                 dateOfBirth: data.dateOfBirth,
@@ -122,7 +121,6 @@ export const UserForm: React.FC<UserFormProps> = ({ mode }: UserFormProps) => {
                 joinedDate: data.joinedDate,
                 type: data.type,
             }
-            // console.log(userData);
             if (staffCode)
                 updateUserMutation.mutate({ staffCode, userData });
         }
@@ -135,7 +133,6 @@ export const UserForm: React.FC<UserFormProps> = ({ mode }: UserFormProps) => {
                 joinedDate: data.joinedDate,
                 type: data.type
             };
-            // console.log(userData);
             createUserMutation.mutate(userData);
         }
     };
@@ -146,7 +143,6 @@ export const UserForm: React.FC<UserFormProps> = ({ mode }: UserFormProps) => {
 
     useEffect(() => {
         if (isEditMode && userData) {
-            console.log('Setting form data:', userData);
 
             reset({
                 firstName: userData.firstName,
