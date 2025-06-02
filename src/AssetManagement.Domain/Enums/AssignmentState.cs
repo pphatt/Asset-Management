@@ -12,5 +12,7 @@ namespace AssetManagement.Domain.Enums
         Returned,
         [Display(Name = "Waiting for acceptance")]
         WaitingForAcceptance,
+        [Display(Name = "Waiting for returning")]
+        WaitingForReturning,
     }
 }
