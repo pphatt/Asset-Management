@@ -6,9 +6,10 @@ public class AssetDetailsDto : AssetDto
     public string Location { get; set; }
     public string Specification { get; set; }
     public List<History> History { get; set; }
+    public Guid CategoryId { get; set; }
 
     public AssetDetailsDto(Guid id, string code, string name, string state, string categoryName,
-    DateTimeOffset installedDate, string location, string specification)
+    DateTimeOffset installedDate, string location, string specification, Guid categoryId)
     {
         Id = id;
         Code = code;
@@ -19,6 +20,7 @@ public class AssetDetailsDto : AssetDto
         Location = location;
         Specification = specification;
         History = new List<History>();
+        CategoryId = categoryId;
     }
 }
 

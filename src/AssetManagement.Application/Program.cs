@@ -12,6 +12,7 @@ using AssetManagement.Domain.Interfaces.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddCors();
 builder.Services.AddControllers();
 builder.Services.AddSpaStaticFiles(cfg => cfg.RootPath = "FrontEnd/build");
 builder.Services.AddOpenApi();
@@ -32,6 +33,13 @@ builder.Services.AddScoped<IAssignmentService, AssignmentService>();
 builder.Services.AddTransient<DataSeeder>();
 
 var app = builder.Build();
+
+
+app.UseCors(builder =>
+    builder.WithOrigins("http://localhost:5173")
+            .AllowAnyMethod()
+            .AllowAnyHeader()
+            .AllowCredentials());
 
 // Test database connection
 using (var scope = app.Services.CreateScope())

@@ -4,6 +4,7 @@ import {
   IAssetParams,
   IAssetState,
   ICreateAssetRequest,
+  IUpdateAssetRequest,
 } from "@/types/asset.type";
 import http from "../utils/http";
 
@@ -34,10 +35,20 @@ const assetApi = {
     return data;
   },
 
+  updateAsset: async (
+    assetCode: string,
+    assetData: IUpdateAssetRequest,
+  ): Promise<HttpResponse<IAsset>> => {
+    const { data } = await http.patch(`/assets/${assetCode}`, assetData);
+
+    return data;
+  },
+
   deleteAsset: async (assetId: string): Promise<HttpResponse<void>> => {
     const { data } = await http.delete(`/assets/${assetId}`);
     return data;
   },
 };
+
 
 export default assetApi;

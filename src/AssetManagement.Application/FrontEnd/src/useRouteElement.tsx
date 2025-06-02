@@ -7,6 +7,7 @@ import MainLayout from './layouts/Main';
 import Home from './pages/Home';
 import CreateUser from './pages/User/CreateUser';
 import EditUser from './pages/User/EditUser';
+import UpdateAsset from './pages/Asset/UpdateAsset';
 
 function ProtectedRoute() {
   const { isAuthenticated } = useContext(AppContext);
@@ -38,7 +39,7 @@ export default function useRouteElements() {
     ...OtherRoutes,
   ]);
 
-  return routeElements;``
+  return routeElements;
 }
 
 const ProtectedRoutes: RouteObject[] = [
@@ -99,6 +100,14 @@ const ProtectedRoutes: RouteObject[] = [
         element: (
           <MainLayout>
             <CreateAsset />
+          </MainLayout>
+        ),
+      },
+      {
+        path: path.assetEdit,
+        element: (
+          <MainLayout>
+            <UpdateAsset />
           </MainLayout>
         ),
       },

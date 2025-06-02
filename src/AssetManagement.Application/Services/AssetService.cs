@@ -95,7 +95,8 @@ namespace AssetManagement.Application.Services
                 asset.Category.Name,
                 asset.InstalledDate,
                 asset.Location.GetDisplayName(),
-                asset.Specification);
+                asset.Specification,
+                asset.CategoryId);
 
             return result;
         }

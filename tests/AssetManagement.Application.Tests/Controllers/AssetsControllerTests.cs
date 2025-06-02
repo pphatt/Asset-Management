@@ -113,6 +113,7 @@ public class AssetsControllerTests
     public async Task GetAssetDetail_ReturnsAsset_WhenAuthorized()
     {
         // Arrange
+        var categoryId = Guid.NewGuid();
         var assetId = Guid.NewGuid();
         var expectedAsset = new AssetDetailsDto(
             assetId,
@@ -122,7 +123,8 @@ public class AssetsControllerTests
             "Laptop",
             DateTimeOffset.UtcNow.AddYears(1),
             "HN",
-            "M1 Pro, 16GB RAM, 512GB SSD"
+            "M1 Pro, 16GB RAM, 512GB SSD",
+            categoryId
         );
 
         _assetServiceMock.Setup(s => s.GetAssetByIdAsync(assetId))
@@ -140,6 +142,7 @@ public class AssetsControllerTests
         Assert.Equal(assetId, response.Data?.Id);
         Assert.Equal(expectedAsset.Code, response.Data?.Code);
         Assert.Equal(expectedAsset.Name, response.Data?.Name);
+        Assert.Equal(expectedAsset.CategoryId, categoryId);
 
         _assetServiceMock.Verify();
     }

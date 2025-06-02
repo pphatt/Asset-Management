@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback } from "react";
-import { IAssetParams, ICreateAssetRequest } from "@/types/asset.type";
+import { IAssetParams, ICreateAssetRequest, IUpdateAssetRequest } from "@/types/asset.type";
 import { AssetField, getAssetApiField } from "@/constants/asset-params";
 import assetApi from "@/apis/asset.api";
 import { STORAGE_KEYS } from "@/constants/user-params";
@@ -123,6 +123,36 @@ export function useAsset() {
     });
   }
 
+  function useUpdateAsset() {
+    return useMutation({
+      mutationFn: async ({
+        assetCode: assetId,
+        assetData,
+      }: {
+        assetCode: string;
+        assetData: IUpdateAssetRequest;
+      }) => assetApi.updateAsset(assetId, assetData),
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["asset"] });
+        queryClient.invalidateQueries(
+          { queryKey: ["assets"], exact: false },
+        );
+        setQueryParams((prev) => ({
+          ...prev,
+          // currently keep this as a fixed string (TODO: refactor this)
+          sortBy: "created:desc",
+          pageNumber: 1,
+        }));
+        toast.success("Asset updated successfully");
+        navigate(path.asset);
+      },
+      onError: (err: any) => {
+        const errMsg = err.response?.data?.errors;
+        toast.error(errMsg?.[0] || "Error updating asset");
+      },
+    });
+  }
+
   return {
     useAssetList,
     useAssetStates,
@@ -130,6 +160,7 @@ export function useAsset() {
     getCurrentAdminLocation,
     useCreateAsset,
     useDeleteAsset,
+    useUpdateAsset
   };
 }
 

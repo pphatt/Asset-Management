@@ -46,3 +46,8 @@ export const getStartOfToday = (): Date => {
   today.setHours(0, 0, 0, 0);
   return today;
 };
+
+export const convertToInputFormat = (date: string): string => {
+  const [day, month, year] = date.split('/');
+  return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+}

@@ -131,5 +131,19 @@ namespace AssetManagement.Application.Controllers
             var assignment = await _assignmentService.DeclineAssignmentAsync(id, Guid.Parse(userId));
             return this.ToApiResponse(assignment!, "Assignment declined successfully");
         }
+
+        [HttpGet("my-assignments")]
+        [Authorize]
+        public async Task<ActionResult<ApiResponse<PagedResult<MyAssignmentDto>>>> GetMyAssignments([FromQuery] MyAssignmentQueryParameters queryParams)
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userId is null)
+            {
+                throw new UnauthorizedAccessException("Cannot retrieve user id from claims");
+            }
+            var pagedData = await _assignmentService.GetMyAssignmentsAsync(Guid.Parse(userId), queryParams);
+
+            return this.ToApiResponse(pagedData, message: "Successfully fetched a paginated list of my assignments");
+        }
     }
 }

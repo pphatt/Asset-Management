@@ -1,3 +1,7 @@
+import MyAssignmentList from "@/components/assignment/MyAssignmentList";
+
 export default function Home() {
-  return <div>Home</div>
+  return (
+    <MyAssignmentList />
+  )
 }

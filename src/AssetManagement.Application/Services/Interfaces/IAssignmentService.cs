@@ -15,5 +15,6 @@ namespace AssetManagement.Application.Services.Interfaces
         Task<bool> DeleteAssignmentAsync(Guid id, Guid adminId);
         Task<AssignmentDto?> AcceptAssignmentAsync(Guid id, Guid userId);
         Task<AssignmentDto?> DeclineAssignmentAsync(Guid id, Guid userId);
+        Task<PagedResult<MyAssignmentDto>> GetMyAssignmentsAsync(Guid userId, MyAssignmentQueryParameters queryParams);
     }
 }

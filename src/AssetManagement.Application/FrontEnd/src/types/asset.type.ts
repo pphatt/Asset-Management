@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-empty-object-type */
 import { AssetCategory, AssetState } from "../constants/asset-params";
 import { LocationEnum, UserTypeEnum } from "@/types/user.type.ts";
 
@@ -8,6 +9,22 @@ export type IAssetState =
   | "Waiting for recycling"
   | "Recycled";
 
+export const GetAssetState = (state: IAssetState | undefined) => {
+  switch (state) {
+    case "Assigned":
+      return 0;
+    case "Available":
+      return 1;
+    case "Not available":
+      return 2;
+    case "Waiting for recycling":
+      return 3;
+    case "Recycled":
+      return 4;
+    default:
+      return undefined;
+  }
+}
 export interface IAsset {
   id: string;
   code: string;
@@ -43,6 +60,7 @@ export interface IAssetDetails {
   location: LocationEnum;
   state: IAssetState;
   history: IAssetDetailsHistory[];
+  categoryId?: string;
 }
 
 export interface IAssetDetailsHistory {
@@ -58,4 +76,8 @@ export interface ICreateAssetRequest {
   specifications: string;
   installedDate: string; // Format: YYYY-MM-DD
   state: number;
+}
+
+export interface IUpdateAssetRequest extends ICreateAssetRequest {
+
 }

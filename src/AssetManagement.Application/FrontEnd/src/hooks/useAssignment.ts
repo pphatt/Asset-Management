@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createSearchParams, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import useAssignmentQuery from "@/hooks/useAssignmentQuery.ts";
+import { IMyAssignmentParams } from "@/types/assignment.type";
 
 export function useAssignment() {
   const navigate = useNavigate();
@@ -95,10 +96,62 @@ export function useAssignment() {
     });
   }
 
+  function useDeleteAssignment() {
+    return useMutation({
+      mutationFn: (id: string) => {
+        return assignmentApi.deleteAssignment(id);
+      },
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['assignments'] });
+        toast.success('Assignment deleted successfully');
+      },
+      onError: (err: any) => {
+        const errMsg = err?.response?.data?.errors?.[0];
+        toast.error(errMsg || 'Error deleting assignment');
+      },
+    });
+  }
+
+  function useReplyAssignment() {
+    return useMutation({
+      mutationFn: async ({
+        id,
+        reply,
+      }: {
+        id: string;
+        reply: 'Accept' | 'Decline';
+      }) => {
+        if (reply == 'Accept') {
+          return assignmentApi.acceptAssignment(id);
+        } else if (reply == 'Decline') {
+          return assignmentApi.declineAssignment(id);
+        }
+      },
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['assignments'] });
+        toast.success('Assignment accepted successfully');
+      },
+      onError: (err: any) => {
+        const errMsg = err?.response?.data?.errors?.[0];
+        toast.error(errMsg || 'Error accepting assignment');
+      },
+    });
+  }
+
+  function useGetMyAssignments(params: IMyAssignmentParams) {
+    return useQuery({
+      queryKey: ['my-assignments', params],
+      queryFn: () => assignmentApi.getMyAssignments(params),
+    })
+  }
+
   return {
     useCreateAssignment,
     useUpdateAssignment,
-    useGetAssignmentDetails,
+    useDeleteAssignment,
+    useReplyAssignment,
+    useGetMyAssignments,
+    useGetAssignmentDetails
   };
 }
 

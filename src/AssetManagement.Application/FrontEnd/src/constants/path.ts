@@ -5,6 +5,7 @@ const path = {
   userEdit: "/user/edit/:staffCode",
   asset: '/asset',
   assetCreate: "/asset/create",
+  assetEdit: "/asset/edit/:assetId",
   assignment: '/assignment',
   assignmentCreate: '/assignment/create',
   assignmentEdit: '/assignment/edit/:assignmentId',

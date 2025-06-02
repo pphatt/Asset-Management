@@ -38,8 +38,36 @@ namespace AssetManagement.Application.Services
             return user.Location;
         }
 
-        public async Task<PagedResult<AssignmentDto>> GetAssignmentsAsync(Guid adminId,
-            AssignmentQueryParameters queryParams)
+        public async Task<PagedResult<MyAssignmentDto>> GetMyAssignmentsAsync(Guid userId, MyAssignmentQueryParameters queryParams)
+        {
+            var currentAdminLocation = await GetLocationByUserId(userId);
+
+            // Handling searching, filtering, sorting here
+            IQueryable<Assignment> query = _assignmentRepository.GetAll()
+                .ApplySorting(queryParams.GetSortCriteria());
+
+            // Pagination below here
+            int total = await query.CountAsync();
+
+            var assignments = await query
+                .Where(a => a.AssigneeId.Equals(userId))
+                .Skip((queryParams.PageNumber - 1) * queryParams.PageSize)
+                .Take(queryParams.PageSize)
+                .Select(a => new MyAssignmentDto
+                {
+                    AssignmentId = a.Id,
+                    AssetCode = a.Asset.Code,
+                    AssetName = a.Asset.Name,
+                    AssignedDate = a.AssignedDate.ToString("dd/MM/yyyy"),
+                    State = a.State.GetDisplayName(),
+                    Category = a.Asset.Category.Name
+                })
+                .ToListAsync();
+
+            return new PagedResult<MyAssignmentDto>(assignments, total, queryParams.PageSize, queryParams.PageNumber);
+        }
+
+        public async Task<PagedResult<AssignmentDto>> GetAssignmentsAsync(Guid adminId, AssignmentQueryParameters queryParams)
         {
             var currentAdminLocation = await GetLocationByUserId(adminId);
 
