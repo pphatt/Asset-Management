@@ -96,6 +96,18 @@ export default function Assignment() {
 
   // Handle column sorting
   const handleSort = (key: string) => {
+    // Single column sorting implementation
+    let newSortDirection = "asc";
+
+    // If we're already sorting by this column, toggle the direction
+    if (sortCriteria[key]) {
+      newSortDirection = sortCriteria[key] === "asc" ? "desc" : "asc";
+    }
+
+    // Create the new sort parameter with only this column
+    const newSortBy = `${key}:${newSortDirection}`;
+
+    /* Multi-column sorting implementation (commented out)
     // Copy existing sort criteria
     const newSortCriteria = { ...sortCriteria };
 
@@ -112,6 +124,7 @@ export default function Assignment() {
     const newSortBy = Object.entries(newSortCriteria)
       .map(([field, direction]) => `${field}:${direction}`)
       .join(",");
+    */
 
     navigate({
       pathname: path.assignment,
@@ -124,7 +137,7 @@ export default function Assignment() {
   };
 
   const columns = [
-    { key: "no", label: "No.", sortable: false },
+    { key: "no", label: "No.", sortable: true },
     { key: "assetcode", label: "Asset Code", sortable: true },
     { key: "assetname", label: "Asset Name", sortable: true },
     { key: "assignedto", label: "Assigned to", sortable: true },
@@ -532,8 +545,8 @@ export default function Assignment() {
                             navigate(
                               path.assignmentEdit.replace(
                                 ":assignmentId",
-                                assignment.id,
-                              ),
+                                assignment.id
+                              )
                             );
                           }
                         }}

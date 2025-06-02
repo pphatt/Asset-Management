@@ -39,7 +39,7 @@ export default function useAssignmentDateFilter() {
         setSelectedDate(date);
 
         // Format date for API or remove if null
-        const formattedDate = date ? format(date, "yyyy-MM-dd") : "";
+        const formattedDate = date ? format(date, "yyyy/MM/dd") : "";
 
         const config = {
           ...queryConfig,

@@ -24,7 +24,7 @@ export const schema = yup.object({
 });
 
 export const querySchema = yup.object({
-  searchName: yup.string().required(),
+  searchName: yup.string().optional(),
   state: yup
     .string()
     .required()

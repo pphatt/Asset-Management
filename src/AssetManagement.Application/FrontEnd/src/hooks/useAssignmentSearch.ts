@@ -1,18 +1,18 @@
 import path from "@/constants/path";
 import useQueryConfig from "@/hooks/useAssignmentQuery";
-import { querySchema, QuerySchema } from "@/utils/rules";
+import { querySchema } from "@/utils/rules";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useForm } from "react-hook-form";
 import { createSearchParams, useNavigate } from "react-router-dom";
 
-type FormData = Pick<QuerySchema, "searchName">;
+// type FormData = { searchName: string | undefined };
 const nameSchema = querySchema.pick(["searchName"]);
 
 export default function useAssignmentSearch() {
   const queryConfig = useQueryConfig();
   const navigate = useNavigate();
 
-  const { register, handleSubmit } = useForm<FormData>({
+  const { register, handleSubmit } = useForm({
     defaultValues: {
       searchName: "",
     },
@@ -22,7 +22,7 @@ export default function useAssignmentSearch() {
   const onSubmitSearch = handleSubmit((data) => {
     const config = {
       ...queryConfig,
-      searchTerm: data.searchName,
+      searchTerm: data.searchName ?? "",
     };
     navigate({
       pathname: path.assignment,

@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using AssetManagement.Application.Extensions;
 using AssetManagement.Application.Services.Interfaces;
 using AssetManagement.Application.Validators;
