@@ -23,6 +23,7 @@ export default function useAssignmentSearch() {
     const config = {
       ...queryConfig,
       searchTerm: data.searchName ?? "",
+      pageNumber: "1"
     };
     navigate({
       pathname: path.assignment,

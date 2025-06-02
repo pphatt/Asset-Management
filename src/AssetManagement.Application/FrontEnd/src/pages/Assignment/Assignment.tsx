@@ -646,7 +646,7 @@ export default function Assignment() {
       </table>
 
       {/* Pagination */}
-      {data && data.data.data.paginationMetadata && (
+      {data && data.data.data.items.length > 0 && data.data.data.paginationMetadata && (
         <Pagination
           queryConfig={queryConfig}
           pathName={path.assignment}

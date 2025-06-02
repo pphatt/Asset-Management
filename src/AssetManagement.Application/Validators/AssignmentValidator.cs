@@ -138,13 +138,13 @@ namespace AssetManagement.Application.Validators
             // Validate new assigned date if provided
             if (!string.IsNullOrWhiteSpace(dto.AssignedDate))
             {
-                ValidateAssignedDate(errors, dto.AssignedDate);
+                ValidateAssignedDate(errors, dto.AssignedDate, assignment.AssignedDate);
             }
 
             ThrowIfErrors(errors);
         }
 
-        private static DateTimeOffset ValidateAssignedDate(List<FieldValidationException> errors, string dateString)
+        private static DateTimeOffset ValidateAssignedDate(List<FieldValidationException> errors, string dateString, DateTimeOffset? minDate = null)
         {
             if (!DateTimeOffset.TryParse(dateString, out var date))
             {
@@ -152,8 +152,11 @@ namespace AssetManagement.Application.Validators
                 return default;
             }
 
-            var minDate = DateTimeOffset.Now;
-            if (date.Date < minDate.Date)
+            if (minDate is null)
+            {
+                minDate = DateTimeOffset.Now.Date;
+            }
+            if (date.Date < minDate)
             {
                 errors.Add(new FieldValidationException("AssignedDate", "AssignedDate must be either today or a day in the future"));
                 return default;
@@ -195,7 +198,7 @@ namespace AssetManagement.Application.Validators
             // Check if asset already has an active assignment
             var query = assignmentRepository.GetAll()
                 .Where(a => a.AssetId == assetId &&
-                           (a.State == AssignmentState.WaitingForAcceptance || a.State == AssignmentState.Accepted));
+                           (a.State == AssignmentState.Accepted || a.State == AssignmentState.WaitingForReturning || a.Asset.State != AssetState.Available));
 
             if (excludeAssignmentId.HasValue)
             {
@@ -206,7 +209,7 @@ namespace AssetManagement.Application.Validators
 
             if (existingAssignment is not null)
             {
-                errors.Add(new FieldValidationException("AssetId", "Asset is already assigned and waiting for acceptance or accepted"));
+                errors.Add(new FieldValidationException("AssetId", "Asset is already assigned or accepted"));
             }
         }
 

@@ -128,7 +128,7 @@ export function useAssignment() {
         }
       },
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ['assignments'] });
+        queryClient.invalidateQueries({ queryKey: ['my-assignments'], exact: false });
         toast.success('Assignment accepted successfully');
       },
       onError: (err: any) => {

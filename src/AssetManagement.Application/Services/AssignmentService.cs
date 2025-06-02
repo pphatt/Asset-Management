@@ -81,7 +81,8 @@ namespace AssetManagement.Application.Services
                 .Include(a => a.Asset)
                 .ApplySearch(queryParams.SearchTerm)
                 .ApplyFilters(state: stateFilter, date: dateFilter, location: currentAdminLocation)
-                .ApplySorting(queryParams.GetSortCriteria());
+                .ApplySorting(queryParams.GetSortCriteria())
+                .Where(a => a.IsDeleted != true);
 
             // Pagination below here
             int total = await query.CountAsync();
@@ -299,16 +300,20 @@ namespace AssetManagement.Application.Services
                 throw new InvalidOperationException("Can only accept assignments that are waiting for acceptance");
             }
 
-            assignment.State = AssignmentState.Accepted;
-            assignment.LastModifiedBy = userId;
-            assignment.LastModifiedDate = DateTime.UtcNow;
-
             var asset = await _assetRepository.GetByIdAsync(assignment.AssetId);
             if (asset != null)
             {
+                if (asset.State == AssetState.NotAvailable)
+                {
+                    throw new InvalidOperationException("This asset is already assigned to someone else.");
+                }
                 asset.State = AssetState.Assigned;
                 _assetRepository.Update(asset);
             }
+
+            assignment.State = AssignmentState.Accepted;
+            assignment.LastModifiedBy = userId;
+            assignment.LastModifiedDate = DateTime.UtcNow;
 
             _assignmentRepository.Update(assignment);
             await _assignmentRepository.SaveChangesAsync();
