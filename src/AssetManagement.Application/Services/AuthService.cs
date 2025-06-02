@@ -122,6 +122,8 @@ namespace AssetManagement.Application.Services
             user.IsPasswordUpdated = true;
             _userRepository.Update(user);
 
+            await _userRepository.SaveChangesAsync();
+
             var token = GenerateJwtToken(user);
             var userInfo = MapToUserDto(user);
 

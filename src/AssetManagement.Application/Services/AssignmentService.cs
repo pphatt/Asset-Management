@@ -44,13 +44,13 @@ namespace AssetManagement.Application.Services
 
             // Handling searching, filtering, sorting here
             IQueryable<Assignment> query = _assignmentRepository.GetAll()
-                .ApplySorting(queryParams.GetSortCriteria());
+                .ApplySorting(queryParams.GetSortCriteria())
+                .Where(a => a.AssigneeId.Equals(userId) && a.AssignedDate <= DateTime.UtcNow);
 
             // Pagination below here
             int total = await query.CountAsync();
 
             var assignments = await query
-                .Where(a => a.AssigneeId.Equals(userId))
                 .Skip((queryParams.PageNumber - 1) * queryParams.PageSize)
                 .Take(queryParams.PageSize)
                 .Select(a => new MyAssignmentDto

@@ -3,7 +3,11 @@ import { Controller, useForm } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
 import * as yup from "yup";
 import useAsset from "@/hooks/useAsset.ts";
-import { GetAssetState, ICreateAssetRequest, IUpdateAssetRequest } from "@/types/asset.type.ts";
+import {
+  GetAssetState,
+  ICreateAssetRequest,
+  IUpdateAssetRequest,
+} from "@/types/asset.type.ts";
 import AssetCreateCategoryDropdown from "@/components/asset/AssetCreateCategoryDropdown.tsx";
 import useCategory from "@/hooks/useCategory.ts";
 import React, { useEffect, useRef, useState } from "react";
@@ -25,15 +29,6 @@ const createSchema = (mode: "create" | "edit") => {
         "valid-date",
         "Invalid date format",
         (value) => !isNaN(Date.parse(value)),
-      )
-      .test(
-        "not-future-date",
-        "Installed date cannot be in the future. Please select a different date",
-        (value) => {
-          const selectedDate = new Date(value);
-          const today = new Date();
-          return selectedDate <= today;
-        },
       ),
   };
 
@@ -55,7 +50,6 @@ const createSchema = (mode: "create" | "edit") => {
     });
   }
 };
-
 
 interface AssetFormProps {
   mode: "create" | "edit";
@@ -83,9 +77,7 @@ export const AssetForm: React.FC<AssetFormProps> = ({
   const updateAsset = useUpdateAsset();
 
   const { useCategories } = useCategory();
-  const {
-    data: categoryData,
-  } = useCategories();
+  const { data: categoryData } = useCategories();
 
   const { data: assetData } = useAssetByAssetCode(assetId ?? "");
 
@@ -120,7 +112,9 @@ export const AssetForm: React.FC<AssetFormProps> = ({
     }
 
     if (categoryData && assetData?.categoryId) {
-      const category = categoryData.find(cat => cat.id === assetData.categoryId);
+      const category = categoryData.find(
+        (cat) => cat.id === assetData.categoryId,
+      );
       if (category) {
         setSelectedCategory(category);
       }
@@ -139,9 +133,8 @@ export const AssetForm: React.FC<AssetFormProps> = ({
 
       updateAsset.mutate({
         assetCode: assetData?.code ?? "",
-        assetData: assetUpdateData
+        assetData: assetUpdateData,
       });
-
     } else {
       const assetData: ICreateAssetRequest = {
         name: data.name,
@@ -296,7 +289,9 @@ export const AssetForm: React.FC<AssetFormProps> = ({
               defaultValue={1}
               control={control}
               render={({ field }) => (
-                <div className={`col-span-8 flex space-x-6 ${mode === 'edit' ? 'flex-col space-y-2' : ''}`}>
+                <div
+                  className={`col-span-8 flex space-x-6 ${mode === "edit" ? "flex-col space-y-2" : ""}`}
+                >
                   {getStateOptions().map((option) => (
                     <div key={option.value} className="flex items-center">
                       <input
@@ -329,10 +324,11 @@ export const AssetForm: React.FC<AssetFormProps> = ({
           <button
             type="submit"
             disabled={isSubmitDisabled}
-            className={`px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors ${isSubmitDisabled
-              ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-              : "bg-primary text-white hover:bg-primary-dark focus:ring-primary"
-              }`}
+            className={`px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors ${
+              isSubmitDisabled
+                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                : "bg-primary text-white hover:bg-primary-dark focus:ring-primary"
+            }`}
           >
             {isSubmitting || createAssetMutation.isPending
               ? "Saving..."

@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 interface PaginationProps {
   currentPage: number;
@@ -17,7 +17,7 @@ const Pagination: React.FC<PaginationProps> = ({
   onPageChange,
   isLoading,
 }) => {
-  if (totalPages <= 1) return null;
+  if (totalPages < 1) return null;
 
   // Tạo mảng số trang sẽ hiển thị dựa trên trang hiện tại và tổng số trang
   const getPageNumbers = () => {
@@ -32,7 +32,7 @@ const Pagination: React.FC<PaginationProps> = ({
 
     // Nếu có khoảng cách giữa trang đầu và trang bắt đầu, hiển thị dấu "..."
     if (startPage > 2) {
-      pageNumbers.push('...');
+      pageNumbers.push("...");
     }
 
     // Thêm các trang ở giữa (liền kề trang hiện tại)
@@ -42,7 +42,7 @@ const Pagination: React.FC<PaginationProps> = ({
 
     // Nếu có khoảng cách giữa trang kết thúc và trang cuối, hiển thị dấu "..."
     if (endPage < totalPages - 1) {
-      pageNumbers.push('...');
+      pageNumbers.push("...");
     }
 
     // Luôn hiển thị trang cuối nếu tổng số trang > 1
@@ -56,24 +56,28 @@ const Pagination: React.FC<PaginationProps> = ({
   return (
     <div className="flex justify-end mt-4">
       <div className="flex items-center space-x-1">
-        {' '}
+        {" "}
         <button
           aria-label="Previous page"
-          className={`px-3 py-1 border border-tertiary rounded-sm ${!hasPreviousPage || currentPage <= 1 || isLoading
-              ? 'opacity-50 cursor-not-allowed'
-              : 'hover:bg-tertiary text-primary'
-            } text-xs mr-1`}
+          className={`px-3 py-1 border border-tertiary rounded-sm ${
+            !hasPreviousPage || currentPage <= 1 || isLoading
+              ? "opacity-50 cursor-not-allowed"
+              : "hover:bg-tertiary text-primary"
+          } text-xs mr-1`}
           onClick={() => onPageChange(currentPage - 1)}
           disabled={!hasPreviousPage || currentPage <= 1 || isLoading}
         >
           Previous
         </button>
         {getPageNumbers().map((page, index) =>
-          typeof page === 'number' ? (
+          typeof page === "number" ? (
             <button
               key={`page-${page}`}
-              className={`px-3 py-1 border border-tertiary rounded-sm text-xs mr-1 ${page === currentPage ? 'bg-primary text-secondary' : 'hover:bg-tertiary'
-                }`}
+              className={`px-3 py-1 border border-tertiary rounded-sm text-xs mr-1 ${
+                page === currentPage
+                  ? "bg-primary text-secondary"
+                  : "hover:bg-tertiary"
+              }`}
               onClick={() => onPageChange(page)}
               disabled={isLoading}
             >
@@ -84,14 +88,15 @@ const Pagination: React.FC<PaginationProps> = ({
             <span key={`ellipsis-${index}`} className="px-2 text-xs">
               {page}
             </span>
-          )
-        )}{' '}
+          ),
+        )}{" "}
         <button
           aria-label="Next page"
-          className={`px-3 py-1 border border-tertiary rounded-sm ${!hasNextPage || currentPage >= totalPages || isLoading
-              ? 'opacity-50 cursor-not-allowed'
-              : 'hover:bg-tertiary text-primary'
-            } text-xs`}
+          className={`px-3 py-1 border border-tertiary rounded-sm ${
+            !hasNextPage || currentPage >= totalPages || isLoading
+              ? "opacity-50 cursor-not-allowed"
+              : "hover:bg-tertiary text-primary"
+          } text-xs`}
           onClick={() => onPageChange(currentPage + 1)}
           disabled={!hasNextPage || currentPage >= totalPages || isLoading}
         >

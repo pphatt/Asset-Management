@@ -214,9 +214,7 @@ export default function Assignment() {
 
   return (
     <div className="w-full max-w-6xl mx-auto px-4 py-6">
-      <h2 className="text-primary text-xl font-normal mb-5">
-        Assignment List
-      </h2>
+      <h2 className="text-primary text-xl font-normal mb-5">Assignment List</h2>
 
       <div className="flex justify-between mb-4">
         <div className="flex gap-2">
@@ -270,7 +268,7 @@ export default function Assignment() {
                         type="checkbox"
                         className="mr-2 h-4 w-4 accent-red-600"
                         checked={selectedState === option.value}
-                        onChange={() => { }} // Keep this empty, handled by the label onClick
+                        onChange={() => {}} // Keep this empty, handled by the label onClick
                         readOnly
                       />
                       <span>{option.label}</span>
@@ -530,10 +528,11 @@ export default function Assignment() {
                   {" "}
                   <div className="flex items-center justify-center space-x-4">
                     <button
-                      className={`text-quaternary ${isAssignmentModifiable(assignment.state)
-                        ? "hover:text-gray-700"
-                        : "opacity-50 cursor-not-allowed"
-                        }`}
+                      className={`text-quaternary ${
+                        isAssignmentModifiable(assignment.state)
+                          ? "hover:text-gray-700"
+                          : "opacity-50 cursor-not-allowed"
+                      }`}
                       disabled={!isAssignmentModifiable(assignment.state)}
                       title={
                         getAssignmentEditMessage(assignment.state) ||
@@ -546,8 +545,8 @@ export default function Assignment() {
                           navigate(
                             path.assignmentEdit.replace(
                               ":assignmentId",
-                              assignment.id
-                            )
+                              assignment.id,
+                            ),
                           );
                         }
                       }}
@@ -575,13 +574,16 @@ export default function Assignment() {
                       </svg>
                     </button>
                     <button
-                      className={`text-primary ${isAssignmentModifiable(assignment.state)
-                        ? "hover:text-red-700"
-                        : "opacity-50 cursor-not-allowed"
-                        }`}
+                      className={`text-primary ${
+                        isAssignmentModifiable(assignment.state)
+                          ? "hover:text-red-700"
+                          : "opacity-50 cursor-not-allowed"
+                      }`}
                       onClick={(e) => {
                         e.stopPropagation();
                         // Delete action
+                        setIsDisabledPopupOpen(true);
+                        setSelectedAssignment(assignment);
                       }}
                     >
                       <svg
@@ -668,5 +670,4 @@ export default function Assignment() {
       />
     </div>
   );
-
 }
