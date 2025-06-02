@@ -28,7 +28,7 @@ const UserSearchDropdown: React.FC<UserSearchDropdownProps> = ({ value, onChange
   const [queryParams, setQueryParams] = useState<IUserParams>({
     searchTerm: '',
     pageNumber: 1,
-    pageSize: 10,
+    pageSize: 5,
     sortBy: 'staffCode:asc',
   });
 

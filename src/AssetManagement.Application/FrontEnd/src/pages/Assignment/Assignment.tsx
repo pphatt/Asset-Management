@@ -10,7 +10,7 @@ import useAssignmentStateFilter from "@/hooks/useAssignmentStateFilter";
 import "@/styles/datepicker.css"; // Import custom styles
 import { IAssignment, IAssignmentParams } from "@/types/assignment.type";
 import {
-  isAssignmentEditable,
+  isAssignmentModifiable,
   getAssignmentEditMessage,
 } from "@/utils/enumConvert";
 import { useQuery } from "@tanstack/react-query";
@@ -256,7 +256,7 @@ export default function Assignment() {
                           type="checkbox"
                           className="mr-2 h-4 w-4 accent-red-600"
                           checked={selectedState === option.value}
-                          onChange={() => {}} // Keep this empty, handled by the label onClick
+                          onChange={() => { }} // Keep this empty, handled by the label onClick
                           readOnly
                         />
                         <span>{option.label}</span>
@@ -516,12 +516,11 @@ export default function Assignment() {
                     {" "}
                     <div className="flex items-center justify-center space-x-4">
                       <button
-                        className={`text-quaternary ${
-                          isAssignmentEditable(assignment.state)
+                        className={`text-quaternary ${isAssignmentModifiable(assignment.state)
                             ? "hover:text-gray-700"
                             : "opacity-50 cursor-not-allowed"
-                        }`}
-                        disabled={!isAssignmentEditable(assignment.state)}
+                          }`}
+                        disabled={!isAssignmentModifiable(assignment.state)}
                         title={
                           getAssignmentEditMessage(assignment.state) ||
                           "Edit assignment"
@@ -529,7 +528,7 @@ export default function Assignment() {
                         onClick={(e) => {
                           e.stopPropagation();
                           // Edit action
-                          if (isAssignmentEditable(assignment.state)) {
+                          if (isAssignmentModifiable(assignment.state)) {
                             navigate(
                               path.assignmentEdit.replace(
                                 ":assignmentId",
@@ -562,7 +561,10 @@ export default function Assignment() {
                         </svg>
                       </button>
                       <button
-                        className="text-primary hover:text-red-700"
+                        className={`text-primary ${isAssignmentModifiable(assignment.state)
+                            ? "hover:text-red-700"
+                            : "opacity-50 cursor-not-allowed"
+                          }`}
                         onClick={(e) => {
                           e.stopPropagation();
                           // Delete action
@@ -592,6 +594,7 @@ export default function Assignment() {
                       </button>
                       <button
                         className="text-blue-600 hover:text-blue-800"
+                        disabled={isAssignmentModifiable(assignment.state)}
                         onClick={(e) => {
                           e.stopPropagation();
                           // Return action

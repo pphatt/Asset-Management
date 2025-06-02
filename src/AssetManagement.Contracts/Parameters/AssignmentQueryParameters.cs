@@ -19,7 +19,7 @@ namespace AssetManagement.Contracts.Parameters
 
         // <summay>
         // The assigned date for filtering
-        // Valid format: dd/MM/yyyy or yyyy/MM/dd
+        // Valid format: MM/dd/yyyy or yyyy/MM/dd
         // </summary>
         public string? Date { get; set; }
 

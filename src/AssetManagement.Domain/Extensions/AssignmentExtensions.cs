@@ -39,7 +39,7 @@ namespace AssetManagement.Domain.Extensions
         public static IQueryable<Assignment> ApplySorting(this IQueryable<Assignment> query, IList<(string property, string order)> sortingCriteria)
         {
             if (sortingCriteria == null || sortingCriteria.Count == 0)
-                return query;
+                return query.OrderBy(a => a.CreatedDate);
 
             IOrderedQueryable<Assignment>? ordered = null;
 

@@ -57,6 +57,10 @@ namespace AssetManagement.Application.Services
 
             // Pagination below here
             int total = await query.CountAsync();
+            // Check if the list is currently sorted by no in descending order
+            bool isNoDescending = queryParams.GetSortCriteria()
+                .Any(s => s.property.Equals("no", StringComparison.OrdinalIgnoreCase) &&
+                         s.order.Equals("desc", StringComparison.OrdinalIgnoreCase));
 
             var assignments = await query
                 .Skip((queryParams.PageNumber - 1) * queryParams.PageSize)
@@ -67,7 +71,9 @@ namespace AssetManagement.Application.Services
                 .Select((a, idx) => new AssignmentDto
                 {
                     Id = a.Id,
-                    No = idx + (queryParams.PageSize * (queryParams.PageNumber - 1)) + 1,
+                    No = isNoDescending ?
+                        total - (idx + (queryParams.PageSize * (queryParams.PageNumber - 1))) :
+                        idx + (queryParams.PageSize * (queryParams.PageNumber - 1)) + 1,
                     AssetCode = a.Asset.Code,
                     AssetName = a.Asset.Name,
                     AssignedBy = a.Assignor.Username,

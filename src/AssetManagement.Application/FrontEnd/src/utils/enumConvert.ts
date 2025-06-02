@@ -33,11 +33,11 @@ export function getLocationDisplay(location: LocationEnum): string {
 }
 
 /**
- * Check if an assignment is in an editable state
+ * Check if an assignment can be edited or deleted
  * @param state The assignment state to check
- * @returns true if the assignment can be edited, false otherwise
+ * @returns true if the assignment can be edited or deleted, false otherwise
  */
-export function isAssignmentEditable(state: AssignmentState): boolean {
+export function isAssignmentModifiable(state: AssignmentState): boolean {
   return state === ASSIGNMENT_STATE.WAITING_FOR_ACCEPTANCE;
 }
 
@@ -47,7 +47,7 @@ export function isAssignmentEditable(state: AssignmentState): boolean {
  * @returns A message explaining edit permissions, or empty string if editable
  */
 export function getAssignmentEditMessage(state: AssignmentState): string {
-  if (isAssignmentEditable(state)) {
+  if (isAssignmentModifiable(state)) {
     return '';
   }
   return "Only assignments with 'Waiting for acceptance' state can be edited";

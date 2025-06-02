@@ -29,7 +29,7 @@ const AssetSearchDropdown: React.FC<AssetSearchDropdownProps> = ({ value, onChan
   const [queryParams, setQueryParams] = useState<IAssetParams>({
     searchTerm: '',
     pageNumber: 1,
-    pageSize: 10,
+    pageSize: 5,
     sortBy: 'code:asc',
     assetStates: ['Available'],
   });

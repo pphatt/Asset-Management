@@ -126,7 +126,10 @@ export const AssetForm: React.FC<AssetFormProps> = ({
         <div className="space-y-5">
           {/* Name */}
           <div className="grid grid-cols-12 items-center">
-            <label className="col-span-4 font-medium text-gray-700">Name</label>
+            <label className="col-span-4 font-medium text-gray-700">
+              Name
+              <span className="ml-0.5 text-red-500">*</span>
+            </label>
             <div className="col-span-8">
               <input
                 type="text"
@@ -151,6 +154,7 @@ export const AssetForm: React.FC<AssetFormProps> = ({
           <div className="grid grid-cols-12 items-center">
             <label className="col-span-4 font-medium text-gray-700">
               Category
+              <span className="ml-0.5 text-red-500">*</span>
             </label>
             <div className="col-span-8">
               <AssetCreateCategoryDropdown
@@ -177,6 +181,7 @@ export const AssetForm: React.FC<AssetFormProps> = ({
           <div className="grid grid-cols-12 items-center">
             <label className="col-span-4 font-medium text-gray-700">
               Specification
+              <span className="ml-0.5 text-red-500">*</span>
             </label>
             <div className="col-span-8">
               <textarea
@@ -204,6 +209,7 @@ export const AssetForm: React.FC<AssetFormProps> = ({
               className="col-span-4 font-medium text-gray-700"
             >
               Installed Date
+              <span className="ml-0.5 text-red-500">*</span>
             </label>
             <div className="col-span-8">
               <input
@@ -228,6 +234,7 @@ export const AssetForm: React.FC<AssetFormProps> = ({
           <div className="grid grid-cols-12 items-center">
             <label className="col-span-4 font-medium text-gray-700">
               State
+              <span className="ml-0.5 text-red-500">*</span>
             </label>
             <Controller
               name="state"
