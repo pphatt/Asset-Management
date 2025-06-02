@@ -5,14 +5,14 @@ import { AssetField, getAssetApiField } from "@/constants/asset-params";
 import assetApi from "@/apis/asset.api";
 import { STORAGE_KEYS } from "@/constants/user-params";
 import { useNavigate } from "react-router-dom";
-import useUserFilterState from "@/hooks/useUserFilterState.ts";
+import useAssetFilterState from "@/hooks/useAssetFilterState.ts";
 import { toast } from "react-toastify";
 import path from "@/constants/path.ts";
 
 export function useAsset() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [_, setQueryParams] = useUserFilterState();
+  const [_, setQueryParams] = useAssetFilterState();
 
   const getCurrentAdminLocation = useCallback(() => {
     const user = JSON.parse(

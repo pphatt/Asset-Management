@@ -1,13 +1,15 @@
-import assignmentApi from '@/apis/assingment.api';
-import path from '@/constants/path';
-import { IAssignmentCreateUpdateRequest } from '@/types/assingment.type';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
-import { toast } from 'react-toastify';
+import assignmentApi from "@/apis/assingment.api";
+import path from "@/constants/path";
+import { IAssignmentCreateUpdateRequest } from "@/types/assingment.type";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { createSearchParams, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import useAssignmentQuery from "@/hooks/useAssignmentQuery.ts";
 
 export function useAssignment() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const queryConfig = useAssignmentQuery();
 
   /**
    * Create a new assignment
@@ -21,13 +23,20 @@ export function useAssignment() {
         return assignmentApi.createAssignment(payload);
       },
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ['assignments'] });
-        toast.success('Assignment created successfully');
-        navigate(path.assignment);
+        queryClient.invalidateQueries({ queryKey: ["assignments"] });
+        toast.success("Assignment created successfully");
+        navigate({
+          pathname: path.assignment,
+          search: createSearchParams({
+            ...queryConfig,
+            sortBy: "created:desc",
+            pageNumber: "1",
+          }).toString(),
+        });
       },
       onError: (err: any) => {
         const errMsg = err?.response?.data?.errors?.[0];
-        toast.error(errMsg || 'Error creating assignment');
+        toast.error(errMsg || "Error creating assignment");
       },
     });
   }
@@ -39,30 +48,45 @@ export function useAssignment() {
    */
   function useUpdateAssignment() {
     return useMutation({
-      mutationFn: ({ id, payload }: { id: string; payload: IAssignmentCreateUpdateRequest }) => {
+      mutationFn: ({
+        id,
+        payload,
+      }: {
+        id: string;
+        payload: IAssignmentCreateUpdateRequest;
+      }) => {
         return assignmentApi.updateAssignment(id, payload);
       },
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ['assignments'] });
-        toast.success('Assignment updated successfully');
-        navigate(path.assignment);
+        queryClient.invalidateQueries({ queryKey: ["assignments"] });
+        toast.success("Assignment updated successfully");
+        navigate({
+          pathname: path.assignment,
+          search: createSearchParams({
+            ...queryConfig,
+            sortBy: "updated:desc",
+            pageNumber: "1",
+          }).toString(),
+        });
       },
       onError: (err: any) => {
         const errMsg = err?.response?.data?.errors?.[0];
-        toast.error(errMsg || 'Error updating assignment');
+        toast.error(errMsg || "Error updating assignment");
       },
     });
   }
   function useGetAssignmentDetails(id: string) {
     return useQuery({
-      queryKey: ['assignment', id],
+      queryKey: ["assignment", id],
       queryFn: async () => {
-        if (!id) throw new Error('Assignment ID is required');
+        if (!id) throw new Error("Assignment ID is required");
         const response = await assignmentApi.getAssignmentDetails(id);
         if (response.success && response.data) {
           return response.data;
         }
-        throw new Error(response.message || 'Failed to fetch assignment details');
+        throw new Error(
+          response.message || "Failed to fetch assignment details",
+        );
       },
       enabled: !!id,
       staleTime: 0, // Always fetch fresh data

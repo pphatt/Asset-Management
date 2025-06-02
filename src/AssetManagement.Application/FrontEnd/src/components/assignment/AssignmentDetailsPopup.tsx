@@ -1,7 +1,9 @@
 import { IAssignment } from "@/types/assignment.type";
+import { useQuery } from "@tanstack/react-query";
+import assignmentApi from "@/apis/assigment.api.ts";
 
 interface AssignmentDetailsPopupProps {
-  assignment: IAssignment | null;
+  assignment: IAssignment;
   isOpen: boolean;
   onClose: () => void;
 }
@@ -11,7 +13,22 @@ export default function AssignmentDetailsPopup({
   isOpen,
   onClose,
 }: AssignmentDetailsPopupProps) {
-  if (!isOpen || !assignment) return null;
+  const { data: fetchedAssignment, isLoading } = useQuery({
+    queryKey: ["assigment", assignment.id],
+    queryFn: async () => {
+      if (!assignment.id) throw new Error("Assignment Id is required");
+
+      const response = await assignmentApi.getAssigmentDetails(assignment.id);
+
+      if (response.success && response.data) {
+        return response.data;
+      }
+
+      throw new Error(response.message || "Failed to fetch assigment");
+    },
+  });
+
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 bg-opacity-5 border-black-50 flex items-center justify-center z-50">
@@ -48,36 +65,40 @@ export default function AssignmentDetailsPopup({
         </div>
 
         {/* Content */}
-        <div className="p-6 border-1 border-black rounded-b-md">
-          <div
-            style={{ gridTemplateColumns: "1fr 4fr" }}
-            className="grid gap-4"
-          >
-            <div className="text-gray-600">Asset Code</div>
-            <div>{assignment.assetCode}</div>
+        {isLoading || !fetchedAssignment ? (
+          <div>Loading...</div>
+        ) : (
+          <div className="p-6 border-1 border-black rounded-b-md">
+            <div
+              style={{ gridTemplateColumns: "1fr 4fr" }}
+              className="grid gap-4"
+            >
+              <div className="text-gray-600">Asset Code</div>
+              <div>{fetchedAssignment.assetCode}</div>
 
-            <div className="text-gray-600">Asset Name</div>
-            <div>{assignment.assetName}</div>
+              <div className="text-gray-600">Asset Name</div>
+              <div>{fetchedAssignment.assetName}</div>
 
-            <div className="text-gray-600">Specification</div>
-            <div>Core i5, 8GB RAM, 750 GB HDD, Windows 8</div>
+              <div className="text-gray-600">Specification</div>
+              <div>Core i5, 8GB RAM, 750 GB HDD, Windows 8</div>
 
-            <div className="text-gray-600">Assigned to</div>
-            <div>{assignment.assignedTo}</div>
+              <div className="text-gray-600">Assigned to</div>
+              <div>{fetchedAssignment.assignedTo}</div>
 
-            <div className="text-gray-600">Assigned by</div>
-            <div>{assignment.assignedBy}</div>
+              <div className="text-gray-600">Assigned by</div>
+              <div>{fetchedAssignment.assignedBy}</div>
 
-            <div className="text-gray-600">Assigned Date</div>
-            <div>{assignment.assignedDate}</div>
+              <div className="text-gray-600">Assigned Date</div>
+              <div>{fetchedAssignment.assignedDate}</div>
 
-            <div className="text-gray-600">State</div>
-            <div>{assignment.state}</div>
+              <div className="text-gray-600">State</div>
+              <div>{fetchedAssignment.state}</div>
 
-            <div className="text-gray-600">Note</div>
-            <div>{assignment.note || "Empty"}</div>
+              <div className="text-gray-600">Note</div>
+              <div>{fetchedAssignment.note || "Empty"}</div>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

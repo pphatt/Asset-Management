@@ -7,7 +7,11 @@ export interface IAssignment {
   assignedBy: string;
   assignedDate: string;
   state: AssignmentState;
-  note?: string; // Add optional note field
+}
+
+export interface IAssignmentDetails extends IAssignment {
+  specifications: string;
+  note: string;
 }
 
 export type AssignmentState =
