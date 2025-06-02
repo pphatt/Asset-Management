@@ -12,6 +12,7 @@ import { ICategory } from "@/types/category.type.ts";
 const schema = yup.object().shape({
   name: yup
     .string()
+    .trim()
     .required("Asset's Name is required")
     .max(30, "Asset's Name can't be more than 30 characters long"),
   category: yup.string().required("Asset's Category is required"),
@@ -80,7 +81,7 @@ export const AssetForm: React.FC<AssetFormProps> = ({
     formState: { errors, isSubmitting, isValid },
   } = useForm<FormData>({
     resolver: yupResolver(schema),
-    mode: "onBlur",
+    mode: "onChange",
     defaultValues: {
       name: "",
       category: "",

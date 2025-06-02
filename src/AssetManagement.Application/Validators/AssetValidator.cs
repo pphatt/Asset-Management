@@ -7,13 +7,15 @@ public static class AssetValidator
 {
     public static void ValidateAsset(CreateAssetRequestDto asset)
     {
-        var error = new List<FieldValidationException>();
+        var errors = new List<FieldValidationException>();
 
-        AddErrorIfEmpty(error, asset.Name, "Name", "Name is required");
-        AddErrorIfEmpty(error, asset.Specifications, "Specifications", "Specifications is required");
-        AddErrorIfEmpty(error, asset.CategoryId.ToString(), "Category", "Category is required");
-        AddErrorIfEmpty(error, asset.InstalledDate, "Installed Date", "Installed Date is required");
-        AddErrorIfInvalidEnum(error, asset.State, "State", "Invalid state");
+        AddErrorIfEmpty(errors, asset.Name, "Name", "Name is required");
+        AddErrorIfEmpty(errors, asset.Specifications, "Specifications", "Specifications is required");
+        AddErrorIfEmpty(errors, asset.CategoryId.ToString(), "Category", "Category is required");
+        AddErrorIfEmpty(errors, asset.InstalledDate, "Installed Date", "Installed Date is required");
+        AddErrorIfInvalidEnum(errors, asset.State, "State", "Invalid state");
+
+        ThrowIfErrors(errors);
     }
 
     public static void ValidateUpdateAsset(UpdateAssetRequestDto dto)
