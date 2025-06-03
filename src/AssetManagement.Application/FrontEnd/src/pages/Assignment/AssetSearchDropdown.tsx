@@ -98,7 +98,7 @@ const AssetSearchDropdown: React.FC<AssetSearchDropdownProps> = ({ value, onChan
   };
 
   const selectedAsset = assetData?.items.find((asset) => asset.id === selectedAssetId) || null;
-  const displayValue = selectedAsset ? `${selectedAsset.name} (${selectedAsset.code})` : '';
+  const displayValue = selectedAsset ? `${selectedAsset.name}` : '';
 
   const columns = [
     { key: 'code', label: 'Asset Code', sortable: true },

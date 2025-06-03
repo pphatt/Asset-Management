@@ -29,7 +29,7 @@ const assignmentSchema = yup.object().shape({
   assetId: yup.string().required('Asset ID is required'),
   assigneeId: yup.string().required('Assignee ID is required'),
   assignedDate: yup.string().required('Assigned Date is required'),
-  note: yup.string().required('Note is required'),
+  note: yup.string().default(''),
 });
 
 /**

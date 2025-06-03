@@ -101,7 +101,7 @@ const UserSearchDropdown: React.FC<UserSearchDropdownProps> = ({ value, onChange
   const selectedUser = userData?.items.find((user) => user.id === selectedUserId) || null;
 
   const getFullName = (user: IUser) => `${user.firstName} ${user.lastName}`;
-  const displayValue = selectedUser ? `${getFullName(selectedUser)} (${selectedUser.staffCode})` : '';
+  const displayValue = selectedUser ? `${getFullName(selectedUser)}` : '';
 
   const columns = [
     { key: 'staffCode', label: 'Staff Code', sortable: true },
