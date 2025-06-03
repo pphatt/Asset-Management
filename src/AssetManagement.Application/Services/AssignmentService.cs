@@ -71,7 +71,7 @@ namespace AssetManagement.Application.Services
         {
             var currentAdminLocation = await GetLocationByUserId(adminId);
 
-            var stateFilter = AssignmentValidator.ParseState(queryParams.State);
+            var stateFilters = AssignmentValidator.ParseStates(queryParams.States);
             var dateFilter = AssignmentValidator.ParseDate(queryParams.Date);
 
             // Handling searching, filtering, sorting here
@@ -80,7 +80,7 @@ namespace AssetManagement.Application.Services
                 .Include(a => a.Assignor)
                 .Include(a => a.Asset)
                 .ApplySearch(queryParams.SearchTerm)
-                .ApplyFilters(state: stateFilter, date: dateFilter, location: currentAdminLocation)
+                .ApplyFilters(states: stateFilters, date: dateFilter, location: currentAdminLocation)
                 .ApplySorting(queryParams.GetSortCriteria())
                 .Where(a => a.IsDeleted != true);
 

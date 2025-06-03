@@ -19,13 +19,13 @@ namespace AssetManagement.Domain.Extensions
                 u.Assignee.Username.Trim().ToLower().Contains(normalizedSearchTerm));
         }
 
-        public static IQueryable<Assignment> ApplyFilters(this IQueryable<Assignment> query, AssignmentState? state, DateTimeOffset? date, Location location)
+        public static IQueryable<Assignment> ApplyFilters(this IQueryable<Assignment> query, IList<AssignmentState>? states, DateTimeOffset? date, Location location)
         {
             query = query.Where(a => a.Asset.Location == location);
 
-            if (state.HasValue)
+            if (states is not null && states.Any())
             {
-                query = query.Where(a => a.State == state);
+                query = query.Where(a => states.Contains(a.State));
             }
 
             if (date.HasValue)
@@ -39,7 +39,7 @@ namespace AssetManagement.Domain.Extensions
         public static IQueryable<Assignment> ApplySorting(this IQueryable<Assignment> query, IList<(string property, string order)> sortingCriteria)
         {
             if (sortingCriteria == null || sortingCriteria.Count == 0)
-                return query.OrderBy(a => a.CreatedDate);
+                return query.OrderBy(a => a.AssignedDate);
 
             IOrderedQueryable<Assignment>? ordered = null;
 

@@ -1,3 +1,4 @@
+using System.Security.Cryptography.X509Certificates;
 using AssetManagement.Contracts.DTOs.Requests;
 using AssetManagement.Contracts.Exceptions;
 using AssetManagement.Domain.Enums;
@@ -8,13 +9,20 @@ namespace AssetManagement.Application.Validators
 {
     public static class AssignmentValidator
     {
-        public static AssignmentState? ParseState(string? stateString)
+        public static IList<AssignmentState> ParseStates(IList<string>? stateStrings)
         {
-            if (string.IsNullOrEmpty(stateString))
-                return null;
-            if (Enum.TryParse<AssignmentState>(stateString, true, out var state))
-                return state;
-            throw new ArgumentException("Invalid state for filtering. Valid values are 'Accepted' or 'WaitingForAcceptance'.");
+            IList<AssignmentState> states = new List<AssignmentState>();
+            if (stateStrings is not null)
+            {
+                foreach (var stateString in stateStrings)
+                {
+                    if (!string.IsNullOrEmpty(stateString) && Enum.TryParse<AssignmentState>(stateString, true, out var state))
+                    {
+                        states.Add(state);
+                    }
+                }
+            }
+            return states;
         }
 
         public static DateTimeOffset? ParseDate(string? dateString)

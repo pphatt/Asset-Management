@@ -1,3 +1,4 @@
+using AssetManagement.Contracts.Enums;
 using AssetManagement.Data.Helpers.Hashing;
 using AssetManagement.Domain.Entities;
 using AssetManagement.Domain.Enums;
@@ -30,6 +31,7 @@ namespace AssetManagement.Data.Helpers.Seeding
                 await SeedCategoriesAsync();
                 await SeedAssetsAsync();
                 await SeedAssignmentsAsync();
+                await SeedReturnRequestsAsync();
             }
             catch (Exception ex)
             {
@@ -400,6 +402,45 @@ namespace AssetManagement.Data.Helpers.Seeding
             await _dbContext.SaveChangesAsync();
 
             _logger.LogInformation("Seeded {Count} assignments", assignments.Count);
+        }
+
+        private async Task SeedReturnRequestsAsync()
+        {
+            if (_dbContext.ReturnRequests.Any())
+            {
+                _logger.LogInformation("Return requests already seeded.");
+                return;
+            }
+
+            _logger.LogInformation("Seeding return requests...");
+
+            var acceptedAssignments = await _dbContext.Assignments
+                .Where(a => a.State == AssignmentState.Accepted)
+                .ToListAsync();
+
+            var returnRequests = new List<ReturnRequest>();
+            for (int i = 0; i < acceptedAssignments.Count; i++)
+            {
+                var assignment = acceptedAssignments[i];
+                var state = i == 0 ? ReturnRequestState.WaitingForReturning : ReturnRequestState.Completed;
+
+                var returnRequest = new ReturnRequest
+                {
+                    Id = Guid.NewGuid(),
+                    AssignmentId = assignment.Id,
+                    RequesterId = assignment.AssigneeId,
+                    AcceptorId = assignment.AssignorId,
+                    ReturnedDate = assignment.AssignedDate.AddDays(5),
+                    State = state,
+                    CreatedDate = fixedCreatedDate
+                };
+                returnRequests.Add(returnRequest);
+            }
+
+            await _dbContext.ReturnRequests.AddRangeAsync(returnRequests);
+            await _dbContext.SaveChangesAsync();
+
+            _logger.LogInformation("Seeded {Count} return requests", returnRequests.Count);
         }
     }
 }

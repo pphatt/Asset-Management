@@ -8,21 +8,20 @@ namespace AssetManagement.Data.Migrations
 {
     /// <inheritdoc />
     [ExcludeFromCodeCoverage]
-    public partial class AddAssignmentEntity : Migration
+    public partial class AddReturnRequestEntity : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Assignments",
+                name: "ReturnRequests",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    AssetId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    AssignorId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    AssigneeId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    AssignedDate = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
-                    Note = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    AssignmentId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    RequesterId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    AcceptorId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ReturnedDate = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     State = table.Column<int>(type: "int", nullable: false),
                     CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
@@ -34,48 +33,48 @@ namespace AssetManagement.Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Assignments", x => x.Id);
+                    table.PrimaryKey("PK_ReturnRequests", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Assignments_Assets_AssetId",
-                        column: x => x.AssetId,
-                        principalTable: "Assets",
+                        name: "FK_ReturnRequests_Assignments_AssignmentId",
+                        column: x => x.AssignmentId,
+                        principalTable: "Assignments",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Assignments_Users_AssigneeId",
-                        column: x => x.AssigneeId,
+                        name: "FK_ReturnRequests_Users_AcceptorId",
+                        column: x => x.AcceptorId,
                         principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_Assignments_Users_AssignorId",
-                        column: x => x.AssignorId,
+                        name: "FK_ReturnRequests_Users_RequesterId",
+                        column: x => x.RequesterId,
                         principalTable: "Users",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Assignments_AssetId",
-                table: "Assignments",
-                column: "AssetId");
+                name: "IX_ReturnRequests_AcceptorId",
+                table: "ReturnRequests",
+                column: "AcceptorId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Assignments_AssigneeId",
-                table: "Assignments",
-                column: "AssigneeId");
+                name: "IX_ReturnRequests_AssignmentId",
+                table: "ReturnRequests",
+                column: "AssignmentId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Assignments_AssignorId",
-                table: "Assignments",
-                column: "AssignorId");
+                name: "IX_ReturnRequests_RequesterId",
+                table: "ReturnRequests",
+                column: "RequesterId");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Assignments");
+                name: "ReturnRequests");
         }
     }
 }

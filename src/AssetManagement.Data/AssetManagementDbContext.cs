@@ -16,6 +16,7 @@ public class AssetManagementDbContext : DbContext
     public DbSet<User> Users { get; set; }
     public DbSet<Category> Categories { get; set; }
     public DbSet<Assignment> Assignments { get; set; }
+    public DbSet<ReturnRequest> ReturnRequests { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -36,6 +37,18 @@ public class AssetManagementDbContext : DbContext
             .HasOne(a => a.Assignee)
             .WithMany(u => u.Assignments)
             .HasForeignKey(a => a.AssigneeId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<ReturnRequest>()
+            .HasOne(rr => rr.Acceptor)
+            .WithMany()
+            .HasForeignKey(rr => rr.AcceptorId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<ReturnRequest>()
+            .HasOne(rr => rr.Requester)
+            .WithMany()
+            .HasForeignKey(rr => rr.RequesterId)
             .OnDelete(DeleteBehavior.Restrict);
 
         #region Seeding Data

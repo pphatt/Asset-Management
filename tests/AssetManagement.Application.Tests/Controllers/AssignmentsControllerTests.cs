@@ -138,7 +138,7 @@ namespace AssetManagement.Application.Tests.Controllers
             var queryParams = new AssignmentQueryParameters
             {
                 SearchTerm = "laptop",
-                State = "Accepted",
+                States = new List<string>(["Accepted"]),
                 Date = "01/01/2024",
                 SortBy = "assetcode:asc,assigneddate:desc",
                 PageNumber = 2,

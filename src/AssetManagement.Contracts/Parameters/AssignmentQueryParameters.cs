@@ -15,7 +15,7 @@ namespace AssetManagement.Contracts.Parameters
         // <summary>
         // The assignment state for filtering (2 options: Accepted, Waiting for acceptance)
         // </summary>
-        public string? State { get; set; }
+        public IList<string>? States { get; set; }
 
         // <summay>
         // The assigned date for filtering
