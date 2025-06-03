@@ -1,6 +1,6 @@
-import { UserType } from '../constants/user-params';
+import { UserType } from "../constants/user-params";
 
-export type IUserType = 'Admin' | 'Staff';
+export type IUserType = "Admin" | "Staff";
 
 export enum LocationEnum {
   HCM = 1,
@@ -27,6 +27,7 @@ export interface IUser {
   joinedDate: string; // Format: ISO 8601
   type: IUserType;
   isPasswordUpdated?: boolean;
+  hasAssignment?: boolean;
 }
 
 export interface IUserDetails {
@@ -68,4 +69,4 @@ export interface IUserParams {
   location?: string;
 }
 
-export type Role = 'Staff' | 'Admin';
+export type Role = "Staff" | "Admin";

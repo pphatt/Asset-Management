@@ -47,6 +47,7 @@ namespace AssetManagement.Application.Services
             }
 
             IQueryable<User> query = _userRepository.GetAll()
+                .Include(x => x.Assignments)
                 .ApplySearch(queryParams.SearchTerm)
                 .ApplyFilters(queryParams.UserType, user.Location)
                 .ApplySorting(queryParams.GetSortCriteria())
@@ -66,6 +67,7 @@ namespace AssetManagement.Application.Services
                     StaffCode = u.StaffCode,
                     Type = u.Type.ToString(),
                     Username = u.Username,
+                    HasAssignment = u.Assignments.Count > 0,
                 })
                 .ToListAsync();
 

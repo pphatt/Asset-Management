@@ -1,24 +1,24 @@
-import path from '@/constants/path';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { USER_TYPES, UserType } from '../../constants/user-params';
-import { useUser } from '../../hooks/useUser';
-import useUserFilterState from '../../hooks/useUserFilterState';
-import { IUserDetails, IUser } from '../../types/user.type';
-import ActiveFilters from './ActiveFilters';
-import DisableUserPopup from './DisableUserPopup';
-import Pagination from '../common/Pagination';
-import UserDetailsPopup from './UserDetailsPopup';
-import UserTable from './UserTable';
-import UserTypeDropdown from './UserTypeDropdown';
+import path from "@/constants/path";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { USER_TYPES, UserType } from "../../constants/user-params";
+import { useUser } from "../../hooks/useUser";
+import useUserFilterState from "../../hooks/useUserFilterState";
+import { IUserDetails, IUser } from "../../types/user.type";
+import ActiveFilters from "./ActiveFilters";
+import DisableUserPopup from "./DisableUserPopup";
+import Pagination from "../common/Pagination";
+import UserDetailsPopup from "./UserDetailsPopup";
+import UserTable from "./UserTable";
+import UserTypeDropdown from "./UserTypeDropdown";
 
 const UserList: React.FC = () => {
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState<UserType>(USER_TYPES.ALL);
   const [showTypeDropdown, setShowTypeDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   // View user details
-  const [selectedStaffCode, setSelectedStaffCode] = useState<string>('');
+  const [selectedStaffCode, setSelectedStaffCode] = useState<string>("");
   const [selectedUser, setSelectedUser] = useState<IUserDetails | null>(null);
   const [isDetailsPopupOpen, setIsDetailsPopupOpen] = useState(false);
 
@@ -75,7 +75,7 @@ const UserList: React.FC = () => {
         userType: type,
       }));
     },
-    [setQueryParams]
+    [setQueryParams],
   );
 
   /**
@@ -88,17 +88,18 @@ const UserList: React.FC = () => {
   const handleSort = useCallback(
     (key: string) => {
       setQueryParams((prev) => {
-        const currentSortParts = prev.sortBy?.split(':') || [];
+        const currentSortParts = prev.sortBy?.split(":") || [];
         const currentKey = currentSortParts[0];
-        const currentDirection = currentSortParts[1] || 'asc';
-        const newDirection = currentKey === key && currentDirection === 'asc' ? 'desc' : 'asc';
+        const currentDirection = currentSortParts[1] || "asc";
+        const newDirection =
+          currentKey === key && currentDirection === "asc" ? "desc" : "asc";
         return {
           ...prev,
           sortBy: `${key}:${newDirection}`,
         };
       });
     },
-    [setQueryParams]
+    [setQueryParams],
   );
 
   /**
@@ -115,7 +116,7 @@ const UserList: React.FC = () => {
         pageNumber: page,
       }));
     },
-    [setQueryParams]
+    [setQueryParams],
   );
 
   const handleViewUserDetails = useCallback((staffCode: string) => {
@@ -140,7 +141,7 @@ const UserList: React.FC = () => {
    * @technique UseCallback
    */
   const handleEditUser = useCallback((staffCode: string) => {
-    navigate(path.userEdit.replace(':staffCode', staffCode));
+    navigate(path.userEdit.replace(":staffCode", staffCode));
   }, []);
 
   /**
@@ -155,14 +156,16 @@ const UserList: React.FC = () => {
       setUserToDelete(staffCode);
       // Find the user in the current list
       if (usersData?.items) {
-        const user = usersData.items.find((user) => user.staffCode === staffCode);
+        const user = usersData.items.find(
+          (user) => user.staffCode === staffCode,
+        );
         if (user) {
           setTargetUser(user as IUser);
         }
       }
       setConfirmDeleteModal(true);
     },
-    [usersData?.items]
+    [usersData?.items],
   );
 
   /**
@@ -212,8 +215,8 @@ const UserList: React.FC = () => {
    * @technique UseCallback
    */
   const handleClearSearch = () => {
-    setSearchTerm('');
-    setQueryParams((prev) => ({ ...prev, searchTerm: '' }));
+    setSearchTerm("");
+    setQueryParams((prev) => ({ ...prev, searchTerm: "" }));
   };
 
   useEffect(() => {
@@ -223,7 +226,7 @@ const UserList: React.FC = () => {
         firstName: fetchedUserDetails.firstName,
         lastName: fetchedUserDetails.lastName,
         username: fetchedUserDetails.username,
-        dateOfBirth: fetchedUserDetails.dateOfBirth || '',
+        dateOfBirth: fetchedUserDetails.dateOfBirth || "",
         gender: fetchedUserDetails.gender,
         joinedDate: fetchedUserDetails.joinedDate,
         type: fetchedUserDetails.type,
@@ -234,15 +237,15 @@ const UserList: React.FC = () => {
       setIsDetailsPopupOpen(true);
 
       // Reset the selectedStaffCode to prevent re-fetching
-      setSelectedStaffCode('');
+      setSelectedStaffCode("");
     }
   }, [fetchedUserDetails, selectedStaffCode]);
 
   // Handle API errors
   useEffect(() => {
     if (isUserDetailsError && selectedStaffCode) {
-      console.error('Error fetching user details:', userDetailsError);
-      setSelectedStaffCode(''); // Reset on error
+      console.error("Error fetching user details:", userDetailsError);
+      setSelectedStaffCode(""); // Reset on error
     }
   }, [isUserDetailsError, userDetailsError, selectedStaffCode]);
 
@@ -258,14 +261,14 @@ const UserList: React.FC = () => {
           dropdownRef={dropdownRef as React.RefObject<HTMLDivElement>}
         />
         <div className="flex items-center">
-          {' '}
+          {" "}
           <div className="flex items-center justify-between">
             <input
               type="text"
-              placeholder='Search...'
+              placeholder="Search..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+              onKeyDown={(e) => e.key === "Enter" && handleSearch()}
               className="w-[200px] h-[34px] text-sm py-1.5 px-2 border border-quaternary rounded-l bg-white"
             />
             <button
@@ -312,8 +315,15 @@ const UserList: React.FC = () => {
       {isErrorUsers && (
         <div className="bg-red-100 text-red-700 p-3 mb-4 rounded border border-red-300">
           <p className="font-semibold">Error loading users:</p>
-          <p>{errorUsers instanceof Error ? errorUsers.message : 'Unknown error occurred'}</p>
-          <button className="text-sm text-red-600 underline mt-1" onClick={() => refetchUsers()}>
+          <p>
+            {errorUsers instanceof Error
+              ? errorUsers.message
+              : "Unknown error occurred"}
+          </p>
+          <button
+            className="text-sm text-red-600 underline mt-1"
+            onClick={() => refetchUsers()}
+          >
             Try again
           </button>
         </div>
@@ -331,17 +341,17 @@ const UserList: React.FC = () => {
           onViewDetails={handleViewUserDetails}
           isDeleting={isDeleting}
         />
-
-        {/* Disable User Popup */}
-        {confirmDeleteModal && targetUser && (
-          <DisableUserPopup
-            isOpen={true}
-            onClose={closeDeleteModal}
-            onConfirm={confirmDeleteUser}
-            targetUser={targetUser}
-          />
-        )}
       </div>
+
+      {/* Disable User Popup */}
+      {confirmDeleteModal && targetUser && (
+        <DisableUserPopup
+          isOpen={true}
+          onClose={closeDeleteModal}
+          onConfirm={confirmDeleteUser}
+          targetUser={targetUser}
+        />
+      )}
 
       {/* Pagination */}
       {!isLoadingUsers && usersData && usersData.paginationMetadata && (

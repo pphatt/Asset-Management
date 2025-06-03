@@ -10,5 +10,6 @@ namespace AssetManagement.Contracts.DTOs
         public DateTimeOffset JoinedDate { get; set; }
         public string? Type { get; set; }
         public bool? IsPasswordUpdated { get; set; }
+        public bool? HasAssignment { get; set; }
     }
 }
