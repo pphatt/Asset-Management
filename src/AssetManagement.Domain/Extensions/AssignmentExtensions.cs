@@ -30,7 +30,7 @@ namespace AssetManagement.Domain.Extensions
 
             if (date.HasValue)
             {
-                query = query.Where(a => Equals(a.AssignedDate, date));
+                query = query.Where(a => Equals(a.AssignedDate.Date, date.Value.Date));
             }
 
             return query;
