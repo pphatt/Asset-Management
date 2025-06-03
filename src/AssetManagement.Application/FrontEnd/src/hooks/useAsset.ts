@@ -120,6 +120,10 @@ export function useAsset() {
           throw new Error(response.message || "Failed to delete asset");
         }
       },
+      onError: (err: any) => {
+        const errMsg = err.response?.data?.errors;
+        toast.error(errMsg?.[0] || "Error deleting asset");
+      }
     });
   }
 

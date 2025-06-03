@@ -1,5 +1,3 @@
-using System.Runtime.CompilerServices;
-
 namespace AssetManagement.Contracts.Exceptions;
 public class AppException : Exception
 {

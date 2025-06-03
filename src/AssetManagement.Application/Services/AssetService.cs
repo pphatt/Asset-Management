@@ -224,16 +224,21 @@ namespace AssetManagement.Application.Services
             else if (asset.IsDeleted == true)
             {
                 throw new InvalidOperationException($"Asset is already deleted");
-            } 
+            }
             else
             {
+                if (asset.State == AssetState.Assigned)
+                {
+                    throw new InvalidOperationException("Cannot delete this asset since it is already assigned to somebody");
+                }
+
                 asset.DeletedBy = deletedBy;
                 asset.DeletedDate = DateTime.UtcNow;
                 asset.IsDeleted = true;
-                
+
                 _assetRepository.Update(asset);
                 await _assetRepository.SaveChangesAsync();
-                return asset.Code;  
+                return asset.Code;
             }
         }
     }

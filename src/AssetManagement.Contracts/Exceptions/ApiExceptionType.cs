@@ -212,7 +212,7 @@ public static class ApiExceptionTypes
         /// <remarks>
         /// This exception indicates a 409 Conflict HTTP status code and is used to signal that the request could not be completed due to a conflict with the current state of the target resource.
         /// </remarks>
-        protected ConflictException(string message)
+        public ConflictException(string message)
             : base(message, StatusCodes.Status409Conflict, "CONFLICT")
         {
         }

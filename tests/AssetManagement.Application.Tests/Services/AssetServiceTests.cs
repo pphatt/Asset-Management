@@ -1346,7 +1346,8 @@ public class AssetServiceTests
             Id = assetId,
             Code = "A001",
             Name = "Test Asset",
-            IsDeleted = false
+            IsDeleted = false,
+            State = AssetState.NotAvailable
         };
 
         _assetRepository.Setup(repo => repo.GetByIdAsync(assetId))

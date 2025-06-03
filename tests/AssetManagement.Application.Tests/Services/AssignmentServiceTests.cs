@@ -664,7 +664,7 @@ namespace AssetManagement.Application.Tests.Services
 
             // Act & Assert
             var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => _assignmentService.DeleteAssignmentAsync(assignmentId, adminId));
-            Assert.Equal("Can only delete assignments that are waiting for acceptance", exception.Message);
+            Assert.Equal("You can only delete assignments that are waiting for acceptance", exception.Message);
         }
         #endregion
 

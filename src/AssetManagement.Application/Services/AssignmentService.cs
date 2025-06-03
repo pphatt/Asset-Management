@@ -5,6 +5,7 @@ using AssetManagement.Contracts.Common.Pagination;
 using AssetManagement.Contracts.DTOs;
 using AssetManagement.Contracts.DTOs.Requests;
 using AssetManagement.Contracts.Parameters;
+using AssetManagement.Contracts.Exceptions;
 using AssetManagement.Domain.Entities;
 using AssetManagement.Domain.Enums;
 using AssetManagement.Domain.Extensions;
@@ -260,7 +261,13 @@ namespace AssetManagement.Application.Services
             // Only allow deletion of waiting assignments
             if (assignment.State != AssignmentState.WaitingForAcceptance)
             {
-                throw new InvalidOperationException("Can only delete assignments that are waiting for acceptance");
+                throw new InvalidOperationException("You can only delete assignments that are waiting for acceptance");
+            }
+
+            // Throw exception if this assignment is already deleted
+            if (assignment.IsDeleted == true)
+            {
+                throw new ApiExceptionTypes.ConflictException("This assignment is already deleted by someone else.");
             }
 
             // Update asset state back to Available
@@ -277,7 +284,7 @@ namespace AssetManagement.Application.Services
             assignment.DeletedDate = DateTime.UtcNow;
 
             _assignmentRepository.Update(assignment);
-            await _assetRepository.SaveChangesAsync();
+            await _assignmentRepository.SaveChangesAsync();
             return true;
         }
 

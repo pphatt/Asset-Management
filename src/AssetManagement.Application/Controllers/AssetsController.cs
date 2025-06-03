@@ -86,7 +86,7 @@ public class AssetsController : ControllerBase
         };
     }
 
-    [HttpDelete("{assetId:Guid}")]
+    [HttpDelete("{assetId:guid}")]
     [Authorize(Roles = "Admin")]
     public async Task<ActionResult<ApiResponse<string>>> Delete(Guid assetId)
     {
