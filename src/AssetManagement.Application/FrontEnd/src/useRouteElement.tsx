@@ -27,8 +27,9 @@ const CreateAsset = lazy(() => import("./pages/Asset/CreateAsset"));
 const User = lazy(() => import("./pages/User"));
 const Assignment = lazy(() => import("./pages/Assignment"));
 const NotFound = lazy(() => import("./pages/NotFound"));
+const Report = lazy(() => import("./pages/Report"));
 
-// AssignmentTemp components
+// Assignment components
 const CreateAssignment = lazy(() => import('./pages/Assignment/CreateAssignment'));
 const EditAssignment = lazy(() => import('./pages/Assignment/EditAssignment'));
 
@@ -126,6 +127,14 @@ const ProtectedRoutes: RouteObject[] = [
             <EditAssignment />
           </MainLayout>
         ),
+      },
+      {
+        path: path.report,
+        element: (
+          <MainLayout>
+            <Report />
+          </MainLayout>
+        )
       },
     ],
   },

@@ -1334,7 +1334,8 @@ public class AssetServiceTests
             e.Message == "Invalid state value");
     }
     #endregion
-    
+
+    #region DeleteAsset
     [Fact]
     public async Task DeleteAssetAsync_MarksAssetAsDeletedAndReturnsCode_WhenAssetExists()
     {
@@ -1410,4 +1411,122 @@ public class AssetServiceTests
         _assetRepository.Verify(repo => repo.GetByIdAsync(assetId), Times.Once());
         _assetRepository.Verify(repo => repo.Update(It.IsAny<Asset>()), Times.Never());
     }
+    #endregion
+
+    #region GetAssetReport
+    [Fact]
+    public async Task GetAssetReportAsync_FiltersByAdminLocation()
+    {
+        // Arrange
+        var adminId = Guid.NewGuid();
+        var user = CreateAdminUser(adminId);
+        var assets = new List<Asset>
+        {
+            new Asset { Id = Guid.NewGuid(), Location = Location.HCM, Category = new Category { Name = "Cat1" }, State = AssetState.Available, IsDeleted = false },
+            new Asset { Id = Guid.NewGuid(), Location = Location.HN, Category = new Category { Name = "Cat1" }, State = AssetState.Available, IsDeleted = false },
+            new Asset { Id = Guid.NewGuid(), Location = Location.HCM, Category = new Category { Name = "Cat2" }, State = AssetState.Assigned, IsDeleted = false },
+            new Asset { Id = Guid.NewGuid(), Location = Location.HCM, Category = new Category { Name = "Cat1" }, State = AssetState.Available, IsDeleted = true }
+        };
+
+        _userRepository.Setup(r => r.GetByIdAsync(adminId)).ReturnsAsync(user);
+        _assetRepository.Setup(r => r.GetAll()).Returns(assets.BuildMock());
+        var service = new AssetService(_assetRepository.Object, _categoryRepository.Object, _userRepository.Object);
+        var queryParams = new AssetReportQueryParameters();
+
+        // Act
+        var report = await service.GetAssetReportAsync(adminId, queryParams);
+
+        // Assert
+        Assert.Equal(2, report.Count);
+        Assert.Contains(report, r => r.Category == "Cat1" && r.Total == 1 && r.Available == 1);
+        Assert.Contains(report, r => r.Category == "Cat2" && r.Total == 1 && r.Assigned == 1);
+    }
+
+    [Fact]
+    public async Task GetAssetReportAsync_GroupsAndCountsCorrectly()
+    {
+        // Arrange
+        var adminId = Guid.NewGuid();
+        var user = CreateAdminUser(adminId);
+        var assets = new List<Asset>
+        {
+            new Asset { Id = Guid.NewGuid(), Location = Location.HCM, Category = new Category { Name = "Cat1" }, State = AssetState.Available, IsDeleted = false },
+            new Asset { Id = Guid.NewGuid(), Location = Location.HCM, Category = new Category { Name = "Cat1" }, State = AssetState.Assigned, IsDeleted = false },
+            new Asset { Id = Guid.NewGuid(), Location = Location.HCM, Category = new Category { Name = "Cat2" }, State = AssetState.Recycled, IsDeleted = false }
+        };
+
+        _userRepository.Setup(r => r.GetByIdAsync(adminId)).ReturnsAsync(user);
+        _assetRepository.Setup(r => r.GetAll()).Returns(assets.BuildMock());
+        var service = new AssetService(_assetRepository.Object, _categoryRepository.Object, _userRepository.Object);
+        var queryParams = new AssetReportQueryParameters();
+
+        // Act
+        var report = await service.GetAssetReportAsync(adminId, queryParams);
+
+        // Assert
+        Assert.Equal(2, report.Count);
+        Assert.Contains(report, r => r.Category == "Cat1" && r.Total == 2 && r.Available == 1 && r.Assigned == 1);
+        Assert.Contains(report, r => r.Category == "Cat2" && r.Total == 1 && r.Recycled == 1);
+    }
+
+    [Fact]
+    public async Task GetAssetReportAsync_AppliesSorting()
+    {
+        // Arrange
+        var adminId = Guid.NewGuid();
+        var user = CreateAdminUser(adminId);
+        var assets = new List<Asset>
+        {
+            new Asset { Id = Guid.NewGuid(), Location = Location.HCM, Category = new Category { Name = "CatB" }, State = AssetState.Available, IsDeleted = false },
+            new Asset { Id = Guid.NewGuid(), Location = Location.HCM, Category = new Category { Name = "CatA" }, State = AssetState.Assigned, IsDeleted = false }
+        };
+
+        _userRepository.Setup(r => r.GetByIdAsync(adminId)).ReturnsAsync(user);
+        _assetRepository.Setup(r => r.GetAll()).Returns(assets.BuildMock());
+        var service = new AssetService(_assetRepository.Object, _categoryRepository.Object, _userRepository.Object);
+        var queryParams = new AssetReportQueryParameters { SortBy = "Category", SortOrder = "asc" };
+
+        // Act
+        var report = await service.GetAssetReportAsync(adminId, queryParams);
+
+        // Assert
+        Assert.Equal(2, report.Count);
+        Assert.Equal("CatA", report[0].Category);
+        Assert.Equal("CatB", report[1].Category);
+    }
+
+    [Fact]
+    public async Task GetAssetReportAsync_NoAssets_ReturnsEmptyList()
+    {
+        // Arrange
+        var adminId = Guid.NewGuid();
+        var user = CreateAdminUser(adminId);
+        var assets = new List<Asset>();
+
+        _userRepository.Setup(r => r.GetByIdAsync(adminId)).ReturnsAsync(user);
+        _assetRepository.Setup(r => r.GetAll()).Returns(assets.BuildMock());
+        var service = new AssetService(_assetRepository.Object, _categoryRepository.Object, _userRepository.Object);
+        var queryParams = new AssetReportQueryParameters();
+
+        // Act
+        var report = await service.GetAssetReportAsync(adminId, queryParams);
+
+        // Assert
+        Assert.Empty(report);
+    }
+
+    [Fact]
+    public async Task GetAssetReportAsync_InvalidAdminId_ThrowsException()
+    {
+        // Arrange
+        var adminId = Guid.NewGuid();
+        _userRepository.Setup(r => r.GetByIdAsync(adminId)).ReturnsAsync((User?)null);
+
+        var service = new AssetService(_assetRepository.Object, _categoryRepository.Object, _userRepository.Object);
+        var queryParams = new AssetReportQueryParameters();
+
+        // Act & Assert
+        await Assert.ThrowsAsync<KeyNotFoundException>(() => service.GetAssetReportAsync(adminId, queryParams));
+    }
+    #endregion
 }

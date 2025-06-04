@@ -7,6 +7,7 @@ import {
   IUpdateAssetRequest,
 } from "@/types/asset.type";
 import http from "../utils/http";
+import { IAssetReport, IAssetReportParams } from "@/types/report.type";
 
 const assetApi = {
   getAssets: async (
@@ -48,7 +49,11 @@ const assetApi = {
     const { data } = await http.delete(`/assets/${assetId}`);
     return data;
   },
-};
 
+  getReport: async (params: IAssetReportParams = {}): Promise<HttpResponse<IAssetReport[]>> => {
+    const { data } = await http.get("/assets/report", { params });
+    return data;
+  }
+};
 
 export default assetApi;

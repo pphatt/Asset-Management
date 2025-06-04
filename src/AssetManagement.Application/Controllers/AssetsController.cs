@@ -99,5 +99,17 @@ public class AssetsController : ControllerBase
             Data = deletedAsset,
         };
     }
-    
+
+    [HttpGet("report")]
+    [Authorize(Roles = "Admin")]
+    public async Task<ActionResult<ApiResponse<List<AssetReportDto>>>> GetReport([FromQuery] AssetReportQueryParameters queryParams)
+    {
+        var adminId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (adminId is null)
+        {
+            throw new UnauthorizedAccessException("Cannot retrieve user id from claims");
+        }
+        var report = await _assetService.GetAssetReportAsync(Guid.Parse(adminId), queryParams);
+        return this.ToApiResponse(report, "Successfully fetched asset report");
+    }
 }

@@ -1,6 +1,4 @@
-using System;
 using System.Security.Claims;
-using System.Threading.Tasks;
 using AssetManagement.Application.Controllers;
 using AssetManagement.Application.Services.Interfaces;
 using AssetManagement.Contracts.Common;
@@ -14,7 +12,6 @@ using AssetManagement.Contracts.Parameters;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
-using Xunit;
 
 namespace AssetManagement.Application.Tests.Controllers;
 
@@ -48,10 +45,10 @@ public class AssetsControllerTests
     private ClaimsPrincipal CreateUserPrincipal(string userId, string role = "Admin")
     {
         var claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.NameIdentifier, userId),
-                new Claim(ClaimTypes.Role, role)
-            };
+        {
+            new Claim(ClaimTypes.NameIdentifier, userId),
+            new Claim(ClaimTypes.Role, role)
+        };
         var identity = new ClaimsIdentity(claims, "TestAuthType");
         return new ClaimsPrincipal(identity);
     }
@@ -148,65 +145,65 @@ public class AssetsControllerTests
     }
 
     [Fact]
-public async Task Delete_ReturnsOkResponse_WhenAssetIsDeletedSuccessfully()
-{
-    // Arrange
-    var assetId = Guid.NewGuid();
-    var adminId = Guid.NewGuid();
-    var assetCode = "A001";
-
-    _assetServiceMock.Setup(s => s.DeleteAssetAsync(adminId, assetId))
-        .ReturnsAsync(assetCode)
-        .Verifiable();
-
-    // Set up ClaimsPrincipal for admin
-    var claims = new[]
+    public async Task Delete_ReturnsOkResponse_WhenAssetIsDeletedSuccessfully()
     {
+        // Arrange
+        var assetId = Guid.NewGuid();
+        var adminId = Guid.NewGuid();
+        var assetCode = "A001";
+
+        _assetServiceMock.Setup(s => s.DeleteAssetAsync(adminId, assetId))
+            .ReturnsAsync(assetCode)
+            .Verifiable();
+
+        // Set up ClaimsPrincipal for admin
+        var claims = new[]
+        {
         new Claim(ClaimTypes.NameIdentifier, adminId.ToString()),
         new Claim(ClaimTypes.Role, "Admin")
     };
-    var identity = new ClaimsIdentity(claims, "mock"); // Ensure authentication type is set
-    var user = new ClaimsPrincipal(identity);
-    _controller.ControllerContext.HttpContext = new DefaultHttpContext { User = user };
+        var identity = new ClaimsIdentity(claims, "mock"); // Ensure authentication type is set
+        var user = new ClaimsPrincipal(identity);
+        _controller.ControllerContext.HttpContext = new DefaultHttpContext { User = user };
 
-    // Verify user is authenticated and has Admin role
-    Console.WriteLine($"IsAuthenticated: {user.Identity.IsAuthenticated}, Roles: {string.Join(", ", user.Claims.Select(c => c.Type + ": " + c.Value))}");
+        // Verify user is authenticated and has Admin role
+        Console.WriteLine($"IsAuthenticated: {user.Identity?.IsAuthenticated}, Roles: {string.Join(", ", user.Claims.Select(c => c.Type + ": " + c.Value))}");
 
-    // Act
-    var result = await _controller.Delete(assetId);
+        // Act
+        var result = await _controller.Delete(assetId);
 
-    // Assert
-    Assert.NotNull(result);
-    var actionResult = Assert.IsType<ActionResult<ApiResponse<string>>>(result);
+        // Assert
+        Assert.NotNull(result);
+        var actionResult = Assert.IsType<ActionResult<ApiResponse<string>>>(result);
 
-    if (actionResult.Result == null && actionResult.Value != null)
-    {
-        // If the method returns ApiResponse<string> directly, it�s wrapped in OkObjectResult
-        var apiResponse = Assert.IsType<ApiResponse<string>>(actionResult.Value);
-        Assert.True(apiResponse.Success);
-        Assert.Equal("Successfully deleted asset.", apiResponse.Message);
-        Assert.Equal(assetCode, apiResponse.Data);
-        Assert.Empty(apiResponse.Errors);
-    }
-    else
-    {
-        if (actionResult.Result == null)
+        if (actionResult.Result == null && actionResult.Value != null)
         {
-            Assert.Fail($"actionResult.Result is null. Actual result type: {result.GetType().Name}, Value: {result}");
+            // If the method returns ApiResponse<string> directly, it�s wrapped in OkObjectResult
+            var apiResponse = Assert.IsType<ApiResponse<string>>(actionResult.Value);
+            Assert.True(apiResponse.Success);
+            Assert.Equal("Successfully deleted asset.", apiResponse.Message);
+            Assert.Equal(assetCode, apiResponse.Data);
+            Assert.Empty(apiResponse.Errors);
+        }
+        else
+        {
+            if (actionResult.Result == null)
+            {
+                Assert.Fail($"actionResult.Result is null. Actual result type: {result.GetType().Name}, Value: {result}");
+            }
+
+            var okResult = Assert.IsType<OkObjectResult>(actionResult.Result);
+            Assert.Equal(200, okResult.StatusCode);
+
+            var apiResponse = Assert.IsType<ApiResponse<string>>(okResult.Value);
+            Assert.True(apiResponse.Success);
+            Assert.Equal("Successfully deleted asset.", apiResponse.Message);
+            Assert.Equal(assetCode, apiResponse.Data);
+            Assert.Empty(apiResponse.Errors);
         }
 
-        var okResult = Assert.IsType<OkObjectResult>(actionResult.Result);
-        Assert.Equal(200, okResult.StatusCode);
-
-        var apiResponse = Assert.IsType<ApiResponse<string>>(okResult.Value);
-        Assert.True(apiResponse.Success);
-        Assert.Equal("Successfully deleted asset.", apiResponse.Message);
-        Assert.Equal(assetCode, apiResponse.Data);
-        Assert.Empty(apiResponse.Errors);
+        _assetServiceMock.Verify();
     }
-
-    _assetServiceMock.Verify();
-}
     [Fact]
     public async Task Delete_ThrowsUnauthorizedAccessException_WhenAdminIdIsMissing()
     {
@@ -512,5 +509,35 @@ public async Task Delete_ReturnsOkResponse_WhenAssetIsDeletedSuccessfully()
         // Act & Assert
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() =>
             _controller.Update(assetCode, request));
+    }
+
+    [Fact]
+    public async Task GetReport_CallsServiceWithCorrectParameters()
+    {
+        // Arrange
+        var adminId = Guid.NewGuid();
+        var report = new List<AssetReportDto>
+        {
+            new AssetReportDto { Category = "Cat1", Total = 2, Available = 1, Assigned = 1, Recycled = 1, NotAvailable = 2, WaitingForRecycling = 0 },
+            new AssetReportDto { Category = "Cat2", Total = 1, Available = 0, Assigned = 0, Recycled = 1, NotAvailable = 3, WaitingForRecycling = 1 }
+        };
+
+        _assetServiceMock.Setup(s => s.GetAssetReportAsync(adminId, It.IsAny<AssetReportQueryParameters>())).ReturnsAsync(report);
+
+        var claimsPrincipal = CreateUserPrincipal(adminId.ToString(), "Admin");
+        ApplyUserToController(claimsPrincipal);
+
+        var queryParams = new AssetReportQueryParameters { SortBy = "Category", SortOrder = "asc" };
+
+        // Act
+        var result = await _controller.GetReport(queryParams);
+
+        // Assert
+        var okResult = Assert.IsType<OkObjectResult>(result.Result);
+        var apiResponse = Assert.IsType<ApiResponse<List<AssetReportDto>>>(okResult.Value);
+        Assert.True(apiResponse.Success);
+        Assert.Equal("Successfully fetched asset report", apiResponse.Message);
+        Assert.Equal(report, apiResponse.Data);
+        _assetServiceMock.Verify(s => s.GetAssetReportAsync(adminId, It.Is<AssetReportQueryParameters>(qp => qp.SortBy == "Category" && qp.SortOrder == "asc")), Times.Once());
     }
 }

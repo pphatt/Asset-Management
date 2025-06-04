@@ -241,5 +241,31 @@ namespace AssetManagement.Application.Services
                 return asset.Code;
             }
         }
+
+        public async Task<List<AssetReportDto>> GetAssetReportAsync(Guid adminId, AssetReportQueryParameters queryParams)
+        {
+            var currentAdminLocation = await GetLocationByUserId(adminId.ToString());
+
+            var reportData = await _assetRepository.GetAll()
+                .AsNoTracking()
+                .Include(a => a.Category)
+                .Where(a => a.Location == currentAdminLocation && a.IsDeleted != true)
+                .GroupBy(a => a.Category.Name)
+                .Select(g => new AssetReportDto
+                {
+                    Category = g.Key,
+                    Total = g.Count(),
+                    Assigned = g.Count(a => a.State == AssetState.Assigned),
+                    Available = g.Count(a => a.State == AssetState.Available),
+                    NotAvailable = g.Count(a => a.State == AssetState.NotAvailable),
+                    Recycled = g.Count(a => a.State == AssetState.Recycled),
+                    WaitingForRecycling = g.Count(a => a.State == AssetState.WaitingForRecycling),
+                })
+                .AsQueryable()
+                .ApplySorting(queryParams.GetSortCriteria().Property, queryParams.GetSortCriteria().Order)
+                .ToListAsync();
+
+            return reportData;
+        }
     }
 }

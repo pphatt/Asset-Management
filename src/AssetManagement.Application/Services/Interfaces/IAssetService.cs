@@ -10,10 +10,10 @@ namespace AssetManagement.Application.Services.Interfaces
     {
         Task<PagedResult<AssetDto>> GetAssetsAsync(string adminId, AssetQueryParameters queryParams);
         Task<AssetDetailsDto> GetAssetByIdAsync(Guid id);
+        Task<List<AssetReportDto>> GetAssetReportAsync(Guid adminId, AssetReportQueryParameters queryParams);
+
         Task<CreateAssetResponseDto> CreateAssetAsync(CreateAssetRequestDto request, string adminId);
         Task<string> UpdateAssetAsync(string adminId, string assetCode, UpdateAssetRequestDto assetUpdateDto);
-        
         Task<string> DeleteAssetAsync(Guid deletedBy, Guid id);
-        
     }
 }
