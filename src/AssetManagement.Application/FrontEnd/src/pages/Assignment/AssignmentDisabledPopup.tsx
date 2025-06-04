@@ -23,14 +23,14 @@ const AssignmentDisabledPopup: React.FC<AssignmentDisabledPopupProps> = ({
   if (!isOpen) return null;
 
   return (
-    <>
+    <div className="fixed inset-0 z-50">
       <div
-        className="absolute inset-0 blur-sm bg-white/50 cursor-not-allowed"
+        className="absolute inset-0 backdrop-blur-sm bg-white/50 cursor-not-allowed"
         onClick={(e) => e.stopPropagation()}
       />
 
       <div
-        className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 bg-white border border-black shadow-xl rounded-md"
+        className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white border border-black shadow-xl rounded-md"
         style={{
           width: "500px",
           boxShadow: "0 2px 8px rgba(0, 0, 0, 0.15)",
@@ -60,7 +60,7 @@ const AssignmentDisabledPopup: React.FC<AssignmentDisabledPopupProps> = ({
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 

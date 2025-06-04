@@ -5,7 +5,7 @@ interface ReplyAssignmentPopupProps {
   isOpen: boolean;
   onClose: () => void;
   assignmentId: string;
-  reply: 'Accept' | 'Decline';
+  reply: "Accept" | "Decline";
 }
 
 const ReplyAssignmentPopup: React.FC<ReplyAssignmentPopupProps> = ({
@@ -26,14 +26,14 @@ const ReplyAssignmentPopup: React.FC<ReplyAssignmentPopupProps> = ({
   if (!isOpen) return null;
 
   return (
-    <>
+    <div className="fixed inset-0 z-50">
       <div
-        className="absolute inset-0 blur-sm bg-white/50 cursor-not-allowed"
+        className="absolute inset-0 backdrop-blur-sm bg-white/50 cursor-not-allowed"
         onClick={(e) => e.stopPropagation()}
       />
 
       <div
-        className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 bg-white border border-black shadow-xl rounded-md"
+        className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white border border-black shadow-xl rounded-md"
         style={{
           width: "500px",
           boxShadow: "0 2px 8px rgba(0, 0, 0, 0.15)",
@@ -46,7 +46,9 @@ const ReplyAssignmentPopup: React.FC<ReplyAssignmentPopupProps> = ({
 
         {/* Message section */}
         <div className="px-10 py-5">
-          <p className="mb-6">Do you want to {reply.toLowerCase()} this assignment?</p>
+          <p className="mb-6">
+            Do you want to {reply.toLowerCase()} this assignment?
+          </p>
           <div className="flex gap-4">
             <button
               onClick={onConfirm}
@@ -63,7 +65,7 @@ const ReplyAssignmentPopup: React.FC<ReplyAssignmentPopupProps> = ({
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 
