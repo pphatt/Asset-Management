@@ -25,10 +25,15 @@ export const schema = yup.object({
 
 export const querySchema = yup.object({
   searchName: yup.string().optional(),
-  state: yup
-    .string()
-    .required()
-    .oneOf(["All", "Accepted", "WaitingForAcceptance"]),
+  states: yup
+    .array()
+    .of(
+      yup
+        .string()
+        .required()
+        .oneOf(["Accepted", "Declined", "Returned", "Waiting for acceptance"])
+    )
+    .default([]),
 });
 
 export type Schema = yup.InferType<typeof schema>;

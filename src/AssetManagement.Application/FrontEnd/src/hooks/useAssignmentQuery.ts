@@ -10,7 +10,7 @@ export default function useAssignmentQuery() {
       pageNumber: queryParams.pageNumber || "1",
       pageSize: queryParams.pageSize || "5",
       sortBy: queryParams.sortBy,
-      state: queryParams.state,
+      states: queryParams.states,
       date: queryParams.date,
     },
     isUndefined

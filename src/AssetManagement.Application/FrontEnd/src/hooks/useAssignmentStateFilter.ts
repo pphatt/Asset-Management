@@ -1,80 +1,100 @@
-import { ASSIGNMENT_STATE } from '@/constants/assignment-params';
-import path from '@/constants/path';
-import useQueryConfig from '@/hooks/useAssignmentQuery';
-import { querySchema, QuerySchema } from '@/utils/rules';
-import { yupResolver } from '@hookform/resolvers/yup';
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { createSearchParams, useNavigate } from 'react-router-dom';
+import { ASSIGNMENT_STATE } from "@/constants/assignment-params";
+import path from "@/constants/path";
+import useQueryConfig from "@/hooks/useAssignmentQuery";
+import { querySchema } from "@/utils/rules";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { useMemo } from "react";
+import { useForm } from "react-hook-form";
+import { createSearchParams, useNavigate } from "react-router-dom";
 
-type FormData = Pick<QuerySchema, 'state'>;
-const nameSchema = querySchema.pick(['state']);
+type FormData = {
+  states: string[];
+};
+
+const nameSchema = querySchema.pick(["states"]);
+
+// Format state for display
+const formatStateForDisplay = (state: string) => {
+  if (state === "WaitingForAcceptance")
+    return ASSIGNMENT_STATE.WAITING_FOR_ACCEPTANCE;
+  return state;
+};
+
+// Format state for API
+const formatStateForApi = (state: string) => {
+  if (state === ASSIGNMENT_STATE.WAITING_FOR_ACCEPTANCE)
+    return "WaitingForAcceptance";
+  return state;
+};
 
 export default function useAssignmentStateFilter() {
   const queryConfig = useQueryConfig();
   const navigate = useNavigate();
-  const [isOpen, setIsOpen] = useState(false);
 
-  const { register, handleSubmit } = useForm<FormData>({
+  // Parse the current state from URL
+  const initialStates = useMemo(() => {
+    if (!queryConfig.states) return [];
+    return Array.isArray(queryConfig.states)
+      ? queryConfig.states.map(formatStateForDisplay)
+      : [queryConfig.states].map(formatStateForDisplay);
+  }, [queryConfig.states]);
+
+  const { setValue } = useForm<FormData>({
     defaultValues: {
-      state: queryConfig.state || '',
+      states: initialStates,
     },
     resolver: yupResolver(nameSchema),
   });
 
-  const onStateChange = handleSubmit((data) => {
-    const config = {
-      ...queryConfig,
-      state: data.state === 'All' ? '' : data.state,
-      pageNumber: '1',
-    };
-
-    navigate({
-      pathname: path.assignment,
-      search: createSearchParams(config).toString(),
-    });
-  });
-  const getSelectedState = () => {
-    if (!queryConfig.state) return 'All';
-    if (queryConfig.state === 'WaitingForAcceptance') return ASSIGNMENT_STATE.WAITING_FOR_ACCEPTANCE;
-    return queryConfig.state;
-  };
-
-  const currentState = getSelectedState();
+  // Handle individual state checkbox changes
   const handleStateChange = (stateValue: string) => {
-    const newState = currentState === stateValue ? 'All' : stateValue;
-    const newApiState = newState === 'All' ? '' : newState === ASSIGNMENT_STATE.WAITING_FOR_ACCEPTANCE ? 'WaitingForAcceptance' : newState;
+    const currentStates = [...initialStates];
+    const stateIndex = currentStates.indexOf(stateValue);
 
-    const config = {
-      ...queryConfig,
-      state: newApiState,
-      pageNumber: '1',
-    };
-
-    if (currentState !== stateValue) {
-      setIsOpen(false);
+    if (stateIndex === -1) {
+      // Add state if not already selected
+      currentStates.push(stateValue);
+    } else {
+      // Remove state if already selected
+      currentStates.splice(stateIndex, 1);
     }
 
+    // Update form value
+    setValue("states", currentStates);
+
+    // Convert states to API format for URL
+    const apiStates = currentStates.map(formatStateForApi);
+
+    const config = {
+      ...queryConfig,
+      states: apiStates,
+      pageNumber: "1",
+    };
+
     navigate({
       pathname: path.assignment,
       search: createSearchParams(config).toString(),
     });
   };
 
-  const toggleDropdown = () => setIsOpen((prev) => !prev);
   const stateOptions = [
-    { value: 'All', label: 'All' },
-    { value: ASSIGNMENT_STATE.ACCEPTED, label: 'Accepted' },
-    { value: ASSIGNMENT_STATE.WAITING_FOR_ACCEPTANCE, label: 'Waiting for acceptance' },
+    { value: "All", label: "All" },
+    { value: "Accepted", label: "Accepted" },
+    {
+      value: ASSIGNMENT_STATE.WAITING_FOR_ACCEPTANCE,
+      label: "Waiting for acceptance",
+    },
   ];
 
+  // Check if a state is currently selected
+  const isStateSelected = (stateValue: string) => {
+    return initialStates.includes(stateValue);
+  };
+
   return {
-    register,
-    onStateChange,
     handleStateChange,
-    toggleDropdown,
-    isOpen,
     stateOptions,
-    selectedState: currentState,
+    isStateSelected,
+    selectedStates: initialStates,
   };
 }

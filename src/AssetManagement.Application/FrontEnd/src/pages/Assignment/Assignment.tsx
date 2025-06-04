@@ -31,16 +31,12 @@ export default function Assignment() {
     useState<IAssignment | null>(null);
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [isDisabledPopupOpen, setIsDisabledPopupOpen] = useState(false);
+  const [isStateDropdownOpen, setIsStateDropdownOpen] = useState(false);
   const queryConfig = useAssignmentQuery();
   const navigate = useNavigate();
   const { onSubmitSearch, register: searchRegister } = useAssignmentSearch();
-  const {
-    handleStateChange,
-    toggleDropdown,
-    isOpen,
-    stateOptions,
-    selectedState,
-  } = useAssignmentStateFilter();
+  const { handleStateChange, stateOptions, isStateSelected, selectedStates } =
+    useAssignmentStateFilter();
 
   const {
     selectedDate,
@@ -52,6 +48,7 @@ export default function Assignment() {
   } = useAssignmentDateFilter();
 
   const datePickerRef = useRef<HTMLDivElement>(null);
+  const stateDropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -66,6 +63,20 @@ export default function Assignment() {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [setIsDatePickerOpen]);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        stateDropdownRef.current &&
+        !stateDropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsStateDropdownOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const { data, isLoading } = useQuery({
     queryKey: ["assignments", queryConfig],
@@ -218,20 +229,24 @@ export default function Assignment() {
 
       <div className="flex justify-between mb-4">
         <div className="flex gap-2">
-          {/* State dropdown (existing code) */}
-          <div className="relative">
+          {/* State dropdown (updated for multiple selection) */}
+          <div className="relative" ref={stateDropdownRef}>
             <div className="flex items-center justify-between w-[240px]">
               <input
                 type="text"
                 readOnly
                 placeholder="State"
-                value={selectedState}
+                value={
+                  selectedStates.length > 0
+                    ? `Selected (${selectedStates.length})`
+                    : "All"
+                }
                 className="w-full h-[34px] text-sm py-1.5 px-2 border border-quaternary rounded-l bg-white cursor-pointer"
-                onClick={toggleDropdown}
+                onClick={() => setIsStateDropdownOpen(!isStateDropdownOpen)}
               />
               <button
                 type="button"
-                onClick={toggleDropdown}
+                onClick={() => setIsStateDropdownOpen(!isStateDropdownOpen)}
                 className="flex items-center justify-center h-[34px] w-[34px] border border-l-0 border-quaternary rounded-r bg-white hover:bg-gray-50"
               >
                 <svg
@@ -252,7 +267,7 @@ export default function Assignment() {
               </button>
             </div>
 
-            {isOpen && (
+            {isStateDropdownOpen && (
               <div className="absolute top-full left-0 mt-1 w-[240px] bg-white border border-gray-200 rounded shadow-lg z-50">
                 <div className="py-1">
                   {stateOptions.map((option) => (
@@ -267,8 +282,8 @@ export default function Assignment() {
                       <input
                         type="checkbox"
                         className="mr-2 h-4 w-4 accent-red-600"
-                        checked={selectedState === option.value}
-                        onChange={() => {}} // Keep this empty, handled by the label onClick
+                        checked={isStateSelected(option.value)}
+                        onChange={() => {}} // Empty handler as we're handling it in the label
                         readOnly
                       />
                       <span>{option.label}</span>
@@ -545,8 +560,8 @@ export default function Assignment() {
                           navigate(
                             path.assignmentEdit.replace(
                               ":assignmentId",
-                              assignment.id,
-                            ),
+                              assignment.id
+                            )
                           );
                         }
                       }}
@@ -585,7 +600,6 @@ export default function Assignment() {
                         setIsDisabledPopupOpen(true);
                         setSelectedAssignment(assignment);
                       }}
-                      disabled={!isAssignmentModifiable(assignment.state)}
                     >
                       <svg
                         width="14"
@@ -647,13 +661,15 @@ export default function Assignment() {
       </table>
 
       {/* Pagination */}
-      {data && data.data.data.items.length > 0 && data.data.data.paginationMetadata && (
-        <Pagination
-          queryConfig={queryConfig}
-          pathName={path.assignment}
-          totalPage={data?.data.data.paginationMetadata.totalPages}
-        />
-      )}
+      {data &&
+        data.data.data.items.length > 0 &&
+        data.data.data.paginationMetadata && (
+          <Pagination
+            queryConfig={queryConfig}
+            pathName={path.assignment}
+            totalPage={data?.data.data.paginationMetadata.totalPages}
+          />
+        )}
 
       {/* Assignment Details Popup */}
       {selectedAssignment && (
