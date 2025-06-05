@@ -10,7 +10,7 @@ namespace AssetManagement.Domain.Entities
         public Guid RequesterId { get; set; }
         public User Requester { get; set; } = null!;
 
-        public Guid AcceptorId { get; set; }
+        public Guid? AcceptorId { get; set; }
         public User Acceptor { get; set; } = null!;
 
         public DateTimeOffset ReturnedDate { get; set; }

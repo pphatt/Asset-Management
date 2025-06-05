@@ -20,6 +20,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { createSearchParams, NavLink, useNavigate } from "react-router-dom";
 import AssignmentDisabledPopup from "./AssignmentDisabledPopup";
+import AssignmentReturnPopup from "./AssignmentReturnPopup";
 
 export type QueryConfig = {
   [key in keyof IAssignmentParams]: string;
@@ -31,6 +32,7 @@ export default function Assignment() {
     useState<IAssignment | null>(null);
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [isDisabledPopupOpen, setIsDisabledPopupOpen] = useState(false);
+  const [isReturnPopupOpen, setIsReturnPopupOpen] = useState(false);
   const [isStateDropdownOpen, setIsStateDropdownOpen] = useState(false);
   const queryConfig = useAssignmentQuery();
   const navigate = useNavigate();
@@ -77,6 +79,20 @@ export default function Assignment() {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  // Handle browser back/forward navigation to close popups
+  useEffect(() => {
+    const handlePopState = () => {
+      setIsPopupOpen(false);
+      setIsDisabledPopupOpen(false);
+      setIsReturnPopupOpen(false);
+      setIsStateDropdownOpen(false);
+      setIsDatePickerOpen(false);
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [setIsDatePickerOpen]);
 
   const { data, isLoading } = useQuery({
     queryKey: ["assignments", queryConfig],
@@ -512,10 +528,10 @@ export default function Assignment() {
         </thead>
         <tbody>
           {assignments && assignments.length > 0 ? (
-            assignments.map((assignment, index) => (
+            assignments.map((assignment) => (
               <tr
                 className="hover:bg-gray-50 cursor-pointer"
-                key={index}
+                key={assignment.id}
                 onClick={() => handleRowClick(assignment)}
               >
                 <td className="py-2 relative after:absolute after:bottom-0 after:left-0 after:w-[calc(100%-20px)] after:h-[1px] after:bg-gray-300">
@@ -623,12 +639,18 @@ export default function Assignment() {
                         />
                       </svg>
                     </button>
+                    {/* Return assignment icon */}
                     <button
-                      className="text-blue-600 hover:text-blue-800"
-                      disabled={isAssignmentModifiable(assignment.state)}
+                      className={`text-blue-600 hover:text-blue-800 ${
+                        assignment.state !== "Accepted"
+                          ? "opacity-50 cursor-not-allowed"
+                          : ""
+                      }`}
+                      disabled={assignment.state !== "Accepted"}
                       onClick={(e) => {
                         e.stopPropagation();
-                        // Return action
+                        setIsReturnPopupOpen(true);
+                        setSelectedAssignment(assignment);
                       }}
                     >
                       <svg
@@ -681,9 +703,15 @@ export default function Assignment() {
       )}
 
       <AssignmentDisabledPopup
-        assignmentId={selectedAssignment?.id || ""}
+        assignmentId={selectedAssignment?.id ?? ""}
         isOpen={isDisabledPopupOpen}
         onClose={() => setIsDisabledPopupOpen(false)}
+      />
+
+      <AssignmentReturnPopup
+        assignmentId={selectedAssignment?.id ?? ""}
+        isOpen={isReturnPopupOpen}
+        onClose={() => setIsReturnPopupOpen(false)}
       />
     </div>
   );

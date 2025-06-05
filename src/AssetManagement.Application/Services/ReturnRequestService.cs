@@ -9,6 +9,10 @@ using AssetManagement.Domain.Enums;
 using AssetManagement.Domain.Extensions;
 using AssetManagement.Domain.Interfaces.Repositories;
 using Microsoft.EntityFrameworkCore;
+using static AssetManagement.Contracts.Exceptions.ApiExceptionTypes;
+using AssetManagement.Contracts.Enums;
+using AssetManagement.Contracts.DTOs.Responses;
+using AssetManagement.Contracts.DTOs.Requests;
 
 namespace AssetManagement.Application.Services
 {
@@ -16,11 +20,19 @@ namespace AssetManagement.Application.Services
     {
         private readonly IReturnRequestRepository _returnRequestRepository;
         private readonly IUserRepository _userRepository;
+        private readonly IAssignmentRepository _assignmentRepository;
 
-        public ReturnRequestService(IReturnRequestRepository returnRequestRepository, IUserRepository userRepository)
+        public ReturnRequestService(IReturnRequestRepository returnRequestRepository,
+            IUserRepository userRepository,
+            IAssignmentRepository assignmentRepository)
         {
+            ArgumentNullException.ThrowIfNull(returnRequestRepository);
+            ArgumentNullException.ThrowIfNull(userRepository);
+            ArgumentNullException.ThrowIfNull(assignmentRepository);
+
             _returnRequestRepository = returnRequestRepository;
             _userRepository = userRepository;
+            _assignmentRepository = assignmentRepository;
         }
 
         private async Task<Location> GetLocationByUserId(Guid userId)
@@ -78,6 +90,85 @@ namespace AssetManagement.Application.Services
                 }).ToList();
 
             return new PagedResult<ReturnRequestDto>(items, total, queryParams.PageSize, queryParams.PageNumber);
+        }
+
+        public async Task<CreateReturnRequestResponseDto> CreateReturnRequestAsync(string assignmentId, 
+            string requesterId, 
+            string role)
+        {
+            CreateReturningRequestValidator.Validate(new CreateReturnRequestDto
+            {
+                AssignmentId = assignmentId,
+            });
+
+            if (role == UserType.Admin.ToString())
+            {
+                var assignment = await _assignmentRepository.GetAll()
+                    .AsNoTracking()
+                    .Include(a => a.Asset)
+                    .FirstOrDefaultAsync(a => a.Id == Guid.Parse(assignmentId) && a.IsDeleted != true)
+                    ?? throw new KeyNotFoundException("Assignment does not exist");
+
+                if (assignment.State != AssignmentState.Accepted)
+                    throw new ConflictException($"Cannot return the asset with assignment's state is: {assignment.State.GetDisplayName()}");
+                
+                assignment.State = AssignmentState.WaitingForReturning;
+                _assignmentRepository.Update(assignment);
+                await _assignmentRepository.SaveChangesAsync();
+
+                var returningRequest = new ReturnRequest
+                {
+                    Id = Guid.NewGuid(),
+                    AssignmentId = assignment.Id,
+                    RequesterId = Guid.Parse(requesterId),
+                    CreatedBy = Guid.Parse(requesterId),
+                    CreatedDate = DateTime.UtcNow,
+                    State = ReturnRequestState.WaitingForReturning,
+                };
+                await _returnRequestRepository.AddAsync(returningRequest);
+                await _returnRequestRepository.SaveChangesAsync();
+
+                return new CreateReturnRequestResponseDto
+                {
+                    AssetCode = assignment.Asset.Code,
+                    AssignmentStatus = assignment.State.GetDisplayName(),
+                };
+            }
+            else
+            {
+                var assignment = await _assignmentRepository.GetAll()
+                    .AsNoTracking()
+                    .Include(a => a.Asset)
+                    .FirstOrDefaultAsync(a => a.Id == Guid.Parse(assignmentId) 
+                        && a.AssigneeId == Guid.Parse(requesterId)
+                        && a.IsDeleted != true)
+                    ?? throw new KeyNotFoundException("Assignment does not exist");
+
+                if (assignment.State != AssignmentState.Accepted)
+                    throw new ConflictException($"Cannot return the asset with assignment's state is: {assignment.State.GetDisplayName()}");
+                
+                assignment.State = AssignmentState.WaitingForReturning;
+                _assignmentRepository.Update(assignment);
+                await _assignmentRepository.SaveChangesAsync();
+
+                var returningRequest = new ReturnRequest
+                {
+                    Id = Guid.NewGuid(),
+                    AssignmentId = assignment.Id,
+                    RequesterId = Guid.Parse(requesterId),
+                    CreatedBy = Guid.Parse(requesterId),
+                    CreatedDate = DateTime.UtcNow,
+                    State = ReturnRequestState.WaitingForReturning,
+                };
+                await _returnRequestRepository.AddAsync(returningRequest);
+                await _returnRequestRepository.SaveChangesAsync();
+
+                return new CreateReturnRequestResponseDto
+                {
+                    AssetCode = assignment.Asset.Code,
+                    AssignmentStatus = assignment.State.GetDisplayName(),
+                };
+            }
         }
     }
 }

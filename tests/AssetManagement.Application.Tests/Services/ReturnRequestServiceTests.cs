@@ -6,6 +6,7 @@ using AssetManagement.Domain.Enums;
 using AssetManagement.Domain.Interfaces.Repositories;
 using MockQueryable;
 using Moq;
+using static AssetManagement.Contracts.Exceptions.ApiExceptionTypes;
 
 namespace AssetManagement.Application.Tests.Services
 {
@@ -13,6 +14,7 @@ namespace AssetManagement.Application.Tests.Services
     {
         private readonly Mock<IReturnRequestRepository> _mockReturnRequestRepository;
         private readonly Mock<IUserRepository> _mockUserRepository;
+        private readonly Mock<IAssignmentRepository> _mockAssignmentRepository;
         private readonly ReturnRequestService _service;
         private readonly Guid _adminId = Guid.NewGuid();
         private readonly Location _location = Location.HN;
@@ -22,7 +24,11 @@ namespace AssetManagement.Application.Tests.Services
         {
             _mockReturnRequestRepository = new Mock<IReturnRequestRepository>();
             _mockUserRepository = new Mock<IUserRepository>();
-            _service = new ReturnRequestService(_mockReturnRequestRepository.Object, _mockUserRepository.Object);
+            _mockAssignmentRepository = new Mock<IAssignmentRepository>();
+            _service = new ReturnRequestService(_mockReturnRequestRepository.Object, 
+                _mockUserRepository.Object,
+                _mockAssignmentRepository.Object
+            );
 
             // Sample data setup
             var asset1 = new Asset { Id = Guid.NewGuid(), Code = "A001", Name = "Laptop", Location = _location };
@@ -179,5 +185,133 @@ namespace AssetManagement.Application.Tests.Services
             // Act & Assert
             await Assert.ThrowsAsync<KeyNotFoundException>(() => _service.GetReturnRequestsAsync(_adminId, new ReturnRequestQueryParameters()));
         }
+
+        #region Create return request tests
+
+        [Fact]
+        public async Task CreateReturnRequestAsync_ReturnsResponse_WhenAssignmentIsAccepted_AndRoleIsAdmin()
+        {
+            var assignmentId = Guid.NewGuid().ToString();
+            var requesterId = Guid.NewGuid().ToString();
+            var asset = new Asset { Id = Guid.NewGuid(), Code = "A001", Name = "Laptop" };
+            var assignment = new Assignment
+            {
+                Id = Guid.Parse(assignmentId),
+                Asset = asset,
+                State = AssignmentState.Accepted,
+                IsDeleted = false
+            };
+
+            var assignments = new List<Assignment> { assignment }.AsQueryable().BuildMock();
+            _mockAssignmentRepository.Setup(r => r.GetAll()).Returns(assignments);
+            _mockAssignmentRepository.Setup(r => r.Update(It.IsAny<Assignment>()));
+            _mockAssignmentRepository.Setup(r => r.SaveChangesAsync()).ReturnsAsync(true);
+            _mockReturnRequestRepository.Setup(r => r.AddAsync(It.IsAny<ReturnRequest>())).Returns(Task.CompletedTask);
+            _mockReturnRequestRepository.Setup(r => r.SaveChangesAsync()).ReturnsAsync(true);
+
+            var result = await _service.CreateReturnRequestAsync(assignmentId, requesterId, "Admin");
+
+            Assert.NotNull(result);
+            Assert.Equal(asset.Code, result.AssetCode);
+            Assert.Equal("Waiting for returning", result.AssignmentStatus);
+            _mockAssignmentRepository.Verify(r => r.Update(It.Is<Assignment>(a => a.State == AssignmentState.WaitingForReturning)), Times.Once);
+            _mockReturnRequestRepository.Verify(r => r.AddAsync(It.IsAny<ReturnRequest>()), Times.Once);
+        }
+
+        [Fact]
+        public async Task CreateReturnRequestAsync_ReturnsResponse_WhenAssignmentIsAccepted_AndRoleIsUser()
+        {
+            var assignmentId = Guid.NewGuid().ToString();
+            var requesterId = Guid.NewGuid().ToString();
+            var asset = new Asset { Id = Guid.NewGuid(), Code = "A002", Name = "Monitor" };
+            var assignment = new Assignment
+            {
+                Id = Guid.Parse(assignmentId),
+                Asset = asset,
+                State = AssignmentState.Accepted,
+                AssigneeId = Guid.Parse(requesterId),
+                IsDeleted = false
+            };
+
+            var assignments = new List<Assignment> { assignment }.AsQueryable().BuildMock();
+            _mockAssignmentRepository.Setup(r => r.GetAll()).Returns(assignments);
+            _mockAssignmentRepository.Setup(r => r.Update(It.IsAny<Assignment>()));
+            _mockAssignmentRepository.Setup(r => r.SaveChangesAsync()).ReturnsAsync(true);
+            _mockReturnRequestRepository.Setup(r => r.AddAsync(It.IsAny<ReturnRequest>())).Returns(Task.CompletedTask);
+            _mockReturnRequestRepository.Setup(r => r.SaveChangesAsync()).ReturnsAsync(true);
+
+            var result = await _service.CreateReturnRequestAsync(assignmentId, requesterId, "User");
+
+            Assert.NotNull(result);
+            Assert.Equal(asset.Code, result.AssetCode);
+            Assert.Equal("Waiting for returning", result.AssignmentStatus);
+            _mockAssignmentRepository.Verify(r => r.Update(It.Is<Assignment>(a => a.State == AssignmentState.WaitingForReturning)), Times.Once);
+            _mockReturnRequestRepository.Verify(r => r.AddAsync(It.IsAny<ReturnRequest>()), Times.Once);
+        }
+
+        [Fact]
+        public async Task CreateReturnRequestAsync_ThrowsKeyNotFoundException_WhenAssignmentNotFound_AdminRole()
+        {
+            var assignmentId = Guid.NewGuid().ToString();
+            var requesterId = Guid.NewGuid().ToString();
+            var assignments = new List<Assignment>().AsQueryable().BuildMock();
+            _mockAssignmentRepository.Setup(r => r.GetAll()).Returns(assignments);
+
+            await Assert.ThrowsAsync<KeyNotFoundException>(() => _service.CreateReturnRequestAsync(assignmentId, requesterId, "Admin"));
+        }
+
+        [Fact]
+        public async Task CreateReturnRequestAsync_ThrowsKeyNotFoundException_WhenAssignmentNotFound_UserRole()
+        {
+            var assignmentId = Guid.NewGuid().ToString();
+            var requesterId = Guid.NewGuid().ToString();
+            var assignments = new List<Assignment>().AsQueryable().BuildMock();
+            _mockAssignmentRepository.Setup(r => r.GetAll()).Returns(assignments);
+
+            await Assert.ThrowsAsync<KeyNotFoundException>(() => _service.CreateReturnRequestAsync(assignmentId, requesterId, "User"));
+        }
+
+        [Fact]
+        public async Task CreateReturnRequestAsync_ThrowsConflictException_WhenAssignmentStateIsNotAccepted_AdminRole()
+        {
+            var assignmentId = Guid.NewGuid().ToString();
+            var requesterId = Guid.NewGuid().ToString();
+            var asset = new Asset { Id = Guid.NewGuid(), Code = "A003", Name = "Keyboard" };
+            var assignment = new Assignment
+            {
+                Id = Guid.Parse(assignmentId),
+                Asset = asset,
+                State = AssignmentState.WaitingForReturning,
+                IsDeleted = false
+            };
+
+            var assignments = new List<Assignment> { assignment }.AsQueryable().BuildMock();
+            _mockAssignmentRepository.Setup(r => r.GetAll()).Returns(assignments);
+
+            await Assert.ThrowsAsync<ConflictException>(() => _service.CreateReturnRequestAsync(assignmentId, requesterId, "Admin"));
+        }
+
+        [Fact]
+        public async Task CreateReturnRequestAsync_ThrowsConflictException_WhenAssignmentStateIsNotAccepted_UserRole()
+        {
+            var assignmentId = Guid.NewGuid().ToString();
+            var requesterId = Guid.NewGuid().ToString();
+            var asset = new Asset { Id = Guid.NewGuid(), Code = "A004", Name = "Mouse" };
+            var assignment = new Assignment
+            {
+                Id = Guid.Parse(assignmentId),
+                Asset = asset,
+                State = AssignmentState.WaitingForReturning,
+                AssigneeId = Guid.Parse(requesterId),
+                IsDeleted = false
+            };
+
+            var assignments = new List<Assignment> { assignment }.AsQueryable().BuildMock();
+            _mockAssignmentRepository.Setup(r => r.GetAll()).Returns(assignments);
+
+            await Assert.ThrowsAsync<ConflictException>(() => _service.CreateReturnRequestAsync(assignmentId, requesterId, "User"));
+        }
+
+        #endregion
     }
 }

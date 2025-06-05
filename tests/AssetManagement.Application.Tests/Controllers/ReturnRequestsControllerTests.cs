@@ -1,13 +1,15 @@
-using Moq;
-using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
-using Microsoft.AspNetCore.Http;
-using AssetManagement.Application.Services.Interfaces;
 using AssetManagement.Application.Controllers;
-using AssetManagement.Contracts.Parameters;
+using AssetManagement.Application.Services.Interfaces;
+using AssetManagement.Contracts.Common;
 using AssetManagement.Contracts.Common.Pagination;
 using AssetManagement.Contracts.DTOs;
-using AssetManagement.Contracts.Common;
+using AssetManagement.Contracts.DTOs.Requests;
+using AssetManagement.Contracts.DTOs.Responses;
+using AssetManagement.Contracts.Parameters;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Moq;
+using System.Security.Claims;
 
 namespace AssetManagement.Application.Tests.Controllers
 {
@@ -73,5 +75,73 @@ namespace AssetManagement.Application.Tests.Controllers
             // Act & Assert
             await Assert.ThrowsAsync<UnauthorizedAccessException>(() => _controller.Get(new ReturnRequestQueryParameters()));
         }
+
+        #region Create asset's returning request tests
+
+        [Fact]
+        public async Task Create_ReturnsOk_WithApiResponse_WhenRequestIsValid()
+        {
+            var request = new CreateReturnRequestDto { AssignmentId = "assignment-guid" };
+            var responseDto = new CreateReturnRequestResponseDto 
+            { 
+                AssetCode = "A001", 
+                AssignmentStatus = "Waiting for returning" 
+            };
+            var role = "Admin";
+            var claims = new List<Claim>
+            {
+                new(ClaimTypes.NameIdentifier, _adminId.ToString()),
+                new(ClaimTypes.Role, role)
+            };
+            var identity = new ClaimsIdentity(claims, "TestAuthType");
+            var claimsPrincipal = new ClaimsPrincipal(identity);
+            ApplyUserToController(claimsPrincipal);
+
+            _serviceMock.Setup(s => s.CreateReturnRequestAsync(request.AssignmentId, 
+                _adminId.ToString(), role))
+                .ReturnsAsync(responseDto);
+
+            var result = await _controller.Create(request);
+
+            var actionResult = Assert.IsType<ActionResult<ApiResponse<CreateReturnRequestResponseDto>>>(result);
+            var okObjectResult = Assert.IsType<OkObjectResult>(actionResult.Result);
+            var apiResponse = Assert.IsType<ApiResponse<CreateReturnRequestResponseDto>>(okObjectResult.Value);
+            Assert.True(apiResponse.Success);
+            Assert.Equal("Successfully created a returning request", apiResponse.Message);
+            Assert.Equal(responseDto.AssetCode, apiResponse.Data!.AssetCode);
+            Assert.Equal(responseDto.AssignmentStatus, apiResponse.Data.AssignmentStatus);
+        }
+
+        [Fact]
+        public async Task Create_ThrowsUnauthorizedAccessException_WhenUserIdIsMissing()
+        {
+            var claims = new List<Claim>
+            {
+                new(ClaimTypes.Role, "Admin")
+            };
+            var identity = new ClaimsIdentity(claims, "TestAuthType");
+            var claimsPrincipal = new ClaimsPrincipal(identity);
+            ApplyUserToController(claimsPrincipal);
+
+            await Assert.ThrowsAsync<UnauthorizedAccessException>(() => 
+                _controller.Create(new CreateReturnRequestDto { AssignmentId = "assignment-guid" }));
+        }
+
+        [Fact]
+        public async Task Create_ThrowsUnauthorizedAccessException_WhenRoleIsMissing()
+        {
+            var claims = new List<Claim>
+            {
+                new(ClaimTypes.NameIdentifier, _adminId.ToString())
+            };
+            var identity = new ClaimsIdentity(claims, "TestAuthType");
+            var claimsPrincipal = new ClaimsPrincipal(identity);
+            ApplyUserToController(claimsPrincipal);
+
+            await Assert.ThrowsAsync<UnauthorizedAccessException>(() 
+                => _controller.Create(new CreateReturnRequestDto { AssignmentId = "assignment-guid" }));
+        }
+
+        #endregion
     }
 }
