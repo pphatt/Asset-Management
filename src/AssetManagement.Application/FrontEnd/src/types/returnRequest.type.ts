@@ -27,3 +27,8 @@ export interface IReturnRequestParams {
   pageNumber?: number;
   pageSize?: number;
 }
+
+export interface ICreateReturnRequestResponse {
+    assetCode: string;
+    assignmentStatus: string;
+}

@@ -23,6 +23,15 @@ export interface AssignmentFormProps {
   initialData?: IAssignmentCreateUpdateRequest;
   onSubmitForm?: (data: IAssignmentCreateUpdateRequest) => void;
   isExternalSubmitting?: boolean;
+  selectedAssetInfo?: {
+    id: string;
+    code: string;
+    name: string;
+  };
+  selectedUserInfo?: {
+    id: string;
+    username: string;
+  };
 }
 
 const assignmentSchema = yup.object().shape({
@@ -35,7 +44,14 @@ const assignmentSchema = yup.object().shape({
 /**
  * AssignmentForm component
  */
-const AssignmentForm: React.FC<AssignmentFormProps> = ({ mode, initialData, onSubmitForm, isExternalSubmitting = false }) => {
+const AssignmentForm: React.FC<AssignmentFormProps> = ({
+  mode,
+  initialData,
+  onSubmitForm,
+  isExternalSubmitting = false,
+  selectedAssetInfo,
+  selectedUserInfo,
+}) => {
   const navigate = useNavigate();
   const [isFormSubmitted, setIsFormSubmitted] = useState(false);
 
@@ -122,6 +138,7 @@ const AssignmentForm: React.FC<AssignmentFormProps> = ({ mode, initialData, onSu
                   value={field.value}
                   onChange={field.onChange}
                   mode={mode}
+                  selectedUserInfo={selectedUserInfo}
                   className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-primary hover:border-gray-400 transition-colors"
                 />
               )}
@@ -137,6 +154,7 @@ const AssignmentForm: React.FC<AssignmentFormProps> = ({ mode, initialData, onSu
                   value={field.value}
                   onChange={field.onChange}
                   mode={mode}
+                  selectedAssetInfo={selectedAssetInfo}
                   className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-primary hover:border-gray-400 transition-colors"
                 />
               )}

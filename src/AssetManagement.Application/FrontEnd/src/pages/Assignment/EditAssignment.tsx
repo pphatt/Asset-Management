@@ -12,6 +12,9 @@ const EditAssignment: React.FC = () => {
   const navigate = useNavigate();
   const [initialData, setInitialData] = useState<IAssignmentCreateUpdateRequest | undefined>(undefined);
 
+  const [selectedAssetInfo, setSelectedAssetInfo] = useState<{ id: string; name: string; code: string } | undefined>(undefined);
+  const [selectedUserInfo, setSelectedUserInfo] = useState<{ id: string; username: string } | undefined>(undefined);
+
   const { useUpdateAssignment, useGetAssignmentDetails } = useAssignment();
   const { mutate: updateAssignmentMutation, isPending: isSubmitting } = useUpdateAssignment();
   const { data: assignmentData, isLoading: isLoadingAssignment, error, refetch } = useGetAssignmentDetails(assignmentId || '');
@@ -21,19 +24,16 @@ const EditAssignment: React.FC = () => {
       refetch();
     }
   }, [assignmentId, refetch]);
+
   useEffect(() => {
     if (assignmentData) {
       try {
-        // Check if assignment is in an editable state
         if (assignmentData.state !== 'Waiting for acceptance') {
           toast.error("This assignment cannot be edited because it's not in 'Waiting for acceptance' state");
           navigate(path.assignment);
           return;
         }
 
-        // Log raw date value to see format
-
-        // Sử dụng hàm parseAndFormatDate để xử lý ngày tháng
         const formattedDate = parseAndFormatDate(assignmentData.assignedDate);
 
         setInitialData({
@@ -41,6 +41,18 @@ const EditAssignment: React.FC = () => {
           assigneeId: assignmentData.assignedToId,
           assignedDate: formattedDate,
           note: assignmentData.note || '',
+        });
+
+        setSelectedAssetInfo({
+          id: assignmentData.assetId,
+          name: assignmentData.assetName,
+          code: assignmentData.assetCode,
+        });
+
+        // Set selected user info for pre-selection in dropdown
+        setSelectedUserInfo({
+          id: assignmentData.assignedToId,
+          username: assignmentData.assignedTo,
         });
       } catch (error) {
         console.error('Error formatting assignment data:', error);
@@ -77,7 +89,14 @@ const EditAssignment: React.FC = () => {
 
   return (
     <div className="container mx-auto p-4">
-      <AssignmentForm mode="edit" initialData={initialData} onSubmitForm={handleSubmit} isExternalSubmitting={isSubmitting} />
+      <AssignmentForm
+        mode="edit"
+        initialData={initialData}
+        onSubmitForm={handleSubmit}
+        isExternalSubmitting={isSubmitting}
+        selectedAssetInfo={selectedAssetInfo}
+        selectedUserInfo={selectedUserInfo}
+      />
     </div>
   );
 };

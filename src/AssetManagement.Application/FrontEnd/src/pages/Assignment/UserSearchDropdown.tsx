@@ -11,19 +11,32 @@ interface UserSearchDropdownProps {
   value: string | null;
   onChange: (value: string | null) => void;
   mode: 'create' | 'edit';
+  selectedUserInfo?: {
+    id: string;
+    username: string;
+  };
   className?: string;
 }
 
-const UserSearchDropdown: React.FC<UserSearchDropdownProps> = ({ value, onChange, className }) => {
+const UserSearchDropdown: React.FC<UserSearchDropdownProps> = ({ value, onChange, className, selectedUserInfo, mode }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedUserId, setSelectedUserId] = useState<string | null>(value);
   const [tempSelectedUserId, setTempSelectedUserId] = useState<string | null>(null);
+  const [displayName, setDisplayName] = useState<string>('');
   const modalRef = useRef<HTMLDivElement>(null!);
   const inputRef = useRef<HTMLInputElement>(null);
   const [sortBy, setSortBy] = useState<string>('staffCode:asc');
 
   const debouncedSearchTerm = useDebounce(searchTerm, 100);
+
+  // Khởi tạo searchTerm với username nếu đang ở chế độ edit và có selectedUserInfo
+  useEffect(() => {
+    if (mode === 'edit' && selectedUserInfo && selectedUserInfo.username) {
+      // Đặt term tìm kiếm để khi mở dropdown sẽ hiển thị user đã chọn
+      setSearchTerm(selectedUserInfo.username);
+    }
+  }, [mode, selectedUserInfo]);
 
   const [queryParams, setQueryParams] = useState<IUserParams>({
     searchTerm: '',
@@ -33,14 +46,33 @@ const UserSearchDropdown: React.FC<UserSearchDropdownProps> = ({ value, onChange
   });
 
   const { useUsersList } = useUser();
-  const { data: userData, isLoading } = useUsersList(queryParams); // Close modal when clicking outside
+  const { data: userData, isLoading } = useUsersList(queryParams);
+
+  // Close modal when clicking outside
   useClickOutside(modalRef, () => setIsModalOpen(false));
+
+  // Xử lý khi giá trị value thay đổi
   useEffect(() => {
     if (value) {
       setSelectedUserId(value);
       setTempSelectedUserId(value);
     }
   }, [value]);
+
+  // Xử lý hiển thị giá trị khi ở chế độ edit
+  useEffect(() => {
+    if (mode === 'edit' && selectedUserInfo) {
+      if (selectedUserInfo.id === selectedUserId) {
+        // Sử dụng thông tin từ selectedUserInfo để hiển thị
+        setDisplayName(selectedUserInfo.username);
+
+        // Đảm bảo value được set đúng
+        if (!value && selectedUserInfo.id) {
+          onChange(selectedUserInfo.id);
+        }
+      }
+    }
+  }, [mode, selectedUserInfo, selectedUserId, onChange, value]);
 
   useEffect(() => {
     setQueryParams((prev) => ({
@@ -57,6 +89,7 @@ const UserSearchDropdown: React.FC<UserSearchDropdownProps> = ({ value, onChange
       pageNumber: 1,
     }));
   };
+
   const handleInputClick = () => {
     setTempSelectedUserId(selectedUserId);
     setIsModalOpen(true);
@@ -75,19 +108,29 @@ const UserSearchDropdown: React.FC<UserSearchDropdownProps> = ({ value, onChange
       sortBy: newSortBy,
     }));
   };
+
   const handleSelectUser = (userId: string) => {
     setTempSelectedUserId(userId);
   };
+
   const handleSaveSelection = () => {
     if (tempSelectedUserId) {
       setSelectedUserId(tempSelectedUserId);
       onChange(tempSelectedUserId);
+
+      // Cập nhật tên hiển thị từ user được chọn
+      const selectedUser = userData?.items.find((user) => user.id === tempSelectedUserId);
+      if (selectedUser) {
+        setDisplayName(getFullName(selectedUser));
+      }
+
       setIsModalOpen(false);
     }
   };
 
   const handleClearSelection = () => {
     setSelectedUserId(null);
+    setDisplayName('');
     onChange(null);
   };
 
@@ -98,16 +141,22 @@ const UserSearchDropdown: React.FC<UserSearchDropdownProps> = ({ value, onChange
     }));
   };
 
-  const selectedUser = userData?.items.find((user) => user.id === selectedUserId) || null;
+  const selectedUser = userData?.items.find((user) => user.id === selectedUserId);
 
   const getFullName = (user: IUser) => `${user.firstName} ${user.lastName}`;
-  const displayValue = selectedUser ? `${getFullName(selectedUser)}` : '';
+
+  // Quyết định giá trị hiển thị ưu tiên theo thứ tự:
+  // 1. Nếu có selectedUser trong dữ liệu hiện tại => hiển thị thông tin từ đó
+  // 2. Nếu không có trong dữ liệu hiện tại nhưng có displayName đã được set (từ selectedUserInfo) => hiển thị displayName
+  // 3. Nếu không có cả hai => hiển thị chuỗi rỗng
+  const displayValue = selectedUser ? getFullName(selectedUser) : displayName || '';
 
   const columns = [
     { key: 'staffCode', label: 'Staff Code', sortable: true },
     { key: 'fullName', label: 'Full Name', sortable: true },
     { key: 'type', label: 'Type', sortable: true },
   ];
+
   return (
     <div className="relative">
       <div className="flex items-center">
@@ -119,7 +168,7 @@ const UserSearchDropdown: React.FC<UserSearchDropdownProps> = ({ value, onChange
           readOnly
           className={`w-full py-2 px-3 border border-quaternary rounded ${className}`}
         />
-        {selectedUser && (
+        {selectedUserId && (
           <button
             className="absolute right-10 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
             onClick={handleClearSelection}

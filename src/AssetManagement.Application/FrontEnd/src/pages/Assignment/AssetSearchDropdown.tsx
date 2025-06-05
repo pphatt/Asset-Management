@@ -8,22 +8,36 @@ import Pagination from '../../components/common/Pagination';
 import useDebounce from '../../hooks/useDebounce';
 
 interface AssetSearchDropdownProps {
-  value: string | null;
-  onChange: (value: string | null) => void;
+  value: string;
+  onChange: (value: string) => void;
   mode: 'create' | 'edit';
+  selectedAssetInfo?: {
+    id: string;
+    name: string;
+    code: string;
+  };
   className?: string;
 }
 
-const AssetSearchDropdown: React.FC<AssetSearchDropdownProps> = ({ value, onChange, className }) => {
+const AssetSearchDropdown: React.FC<AssetSearchDropdownProps> = ({ value, onChange, className, selectedAssetInfo, mode }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedAssetId, setSelectedAssetId] = useState<string | null>(value);
   const [tempSelectedAssetId, setTempSelectedAssetId] = useState<string | null>(null);
+  const [displayName, setDisplayName] = useState<string>('');
   const modalRef = useRef<HTMLDivElement>(null!);
   const inputRef = useRef<HTMLInputElement>(null);
   const [sortBy, setSortBy] = useState<string>('code:asc');
 
   const debouncedSearchTerm = useDebounce(searchTerm, 100);
+
+  // Khởi tạo searchTerm với asset code nếu đang ở chế độ edit và có selectedAssetInfo
+  useEffect(() => {
+    if (mode === 'edit' && selectedAssetInfo && selectedAssetInfo.code) {
+      // Đặt term tìm kiếm để khi mở dropdown sẽ hiển thị asset đã chọn
+      setSearchTerm(selectedAssetInfo.code);
+    }
+  }, [mode, selectedAssetInfo]);
 
   // Query params for assets
   const [queryParams, setQueryParams] = useState<IAssetParams>({
@@ -40,12 +54,28 @@ const AssetSearchDropdown: React.FC<AssetSearchDropdownProps> = ({ value, onChan
   // Close modal when clicking outside
   useClickOutside(modalRef, () => setIsModalOpen(false));
 
+  // Xử lý khi giá trị value thay đổi
   useEffect(() => {
     if (value) {
       setSelectedAssetId(value);
       setTempSelectedAssetId(value);
     }
   }, [value]);
+
+  // Xử lý hiển thị giá trị khi ở chế độ edit
+  useEffect(() => {
+    if (mode === 'edit' && selectedAssetInfo) {
+      if (selectedAssetInfo.id === selectedAssetId) {
+        // Sử dụng thông tin từ selectedAssetInfo để hiển thị
+        setDisplayName(`${selectedAssetInfo.code} - ${selectedAssetInfo.name}`);
+
+        // Đảm bảo value được set đúng
+        if (!value && selectedAssetInfo.id) {
+          onChange(selectedAssetInfo.id);
+        }
+      }
+    }
+  }, [mode, selectedAssetInfo, selectedAssetId, onChange, value]);
 
   const handleSearch = () => {
     setQueryParams((prev) => ({
@@ -77,17 +107,26 @@ const AssetSearchDropdown: React.FC<AssetSearchDropdownProps> = ({ value, onChan
   const handleSelectAsset = (assetId: string) => {
     setTempSelectedAssetId(assetId);
   };
+
   const handleSaveSelection = () => {
     if (tempSelectedAssetId) {
       setSelectedAssetId(tempSelectedAssetId);
       onChange(tempSelectedAssetId);
+
+      // Cập nhật tên hiển thị từ asset được chọn
+      const selectedAsset = assetData?.items.find((asset) => asset.id === tempSelectedAssetId);
+      if (selectedAsset) {
+        setDisplayName(`${selectedAsset.code} - ${selectedAsset.name}`);
+      }
+
       setIsModalOpen(false);
     }
   };
 
   const handleClearSelection = () => {
     setSelectedAssetId(null);
-    onChange(null);
+    setDisplayName('');
+    onChange(''); // Thay vì null, truyền chuỗi rỗng để tương thích với kiểu dữ liệu string
   };
 
   const handlePageChange = (page: number) => {
@@ -97,8 +136,13 @@ const AssetSearchDropdown: React.FC<AssetSearchDropdownProps> = ({ value, onChan
     }));
   };
 
-  const selectedAsset = assetData?.items.find((asset) => asset.id === selectedAssetId) || null;
-  const displayValue = selectedAsset ? `${selectedAsset.name}` : '';
+  const selectedAsset = assetData?.items.find((asset) => asset.id === selectedAssetId);
+
+  // Quyết định giá trị hiển thị ưu tiên theo thứ tự:
+  // 1. Nếu có selectedAsset trong dữ liệu hiện tại => hiển thị thông tin từ đó
+  // 2. Nếu không có trong dữ liệu hiện tại nhưng có displayName đã được set (từ selectedAssetInfo) => hiển thị displayName
+  // 3. Nếu không có cả hai => hiển thị chuỗi rỗng
+  const displayValue = selectedAsset ? `${selectedAsset.code} - ${selectedAsset.name}` : displayName || '';
 
   const columns = [
     { key: 'code', label: 'Asset Code', sortable: true },

@@ -1,6 +1,7 @@
 import {
   IReturnRequest,
-  IReturnRequestParams,
+  IReturnRequestParams, 
+  ICreateReturnRequestResponse
 } from "@/types/returnRequest.type";
 import http from "@/utils/http";
 
@@ -15,10 +16,10 @@ const returnRequestApi = {
           }
       );
   },
-  createReturnRequest: async (assignmentId: string) => {
-    const response = await http.post("/returnrequests", { assignmentId });
-    return response.data;
-  },
+    createReturnRequest: async (assignmentId: string): Promise<HttpResponse<ICreateReturnRequestResponse>> => {
+        const response = await http.post('/returnrequests', { assignmentId });
+        return response.data;
+    },
 };
 
 export default returnRequestApi;

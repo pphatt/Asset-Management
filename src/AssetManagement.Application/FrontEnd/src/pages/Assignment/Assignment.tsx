@@ -632,6 +632,7 @@ export default function Assignment() {
                         setIsDisabledPopupOpen(true);
                         setSelectedAssignment(assignment);
                       }}
+                      disabled={!isAssignmentModifiable(assignment.state)}
                     >
                       <svg
                         width="14"

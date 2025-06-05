@@ -1,25 +1,33 @@
-import { IMyAssignment } from "@/types/assignment.type";
-import { useState } from "react";
-import ReplyAssignmentPopup from "./ReplyAssignmentPopup";
-import { Check } from "lucide-react";
-import useAssignment from "@/hooks/useAssignment";
-import Pagination from "../common/Pagination";
+import useAssignment from '@/hooks/useAssignment';
+import { IMyAssignment } from '@/types/assignment.type';
+import { Check } from 'lucide-react';
+import { useState } from 'react';
+import useReturnRequest from '../../hooks/useReturnRequest';
+import Pagination from '../common/Pagination';
+import ReplyAssignmentPopup from './ReplyAssignmentPopup';
+import ReturnRequestPopup from './ReturnRequestPopup';
 
 export const AssignmentTable: React.FC = () => {
   const columns = [
-    { key: "assetCode", label: "Asset Code", sortable: true },
-    { key: "assetName", label: "Asset Name", sortable: true },
-    { key: "category", label: "Category", sortable: true },
-    { key: "asignedDate", label: "Assigned Date", sortable: true },
-    { key: "state", label: "State", sortable: true },
+    { key: 'assetCode', label: 'Asset Code', sortable: true },
+    { key: 'assetName', label: 'Asset Name', sortable: true },
+    { key: 'category', label: 'Category', sortable: true },
+    { key: 'asignedDate', label: 'Assigned Date', sortable: true },
+    { key: 'state', label: 'State', sortable: true },
   ];
-  const [sortBy, setSortBy] = useState<string>("");
-  const [direction, setDirection] = useState<"asc" | "desc" | "">("");
+  const [sortBy, setSortBy] = useState<string>('');
+  const [direction, setDirection] = useState<'asc' | 'desc' | ''>('');
   const [isDisablePopupOpen, setIsDisablePopupOpen] = useState(false);
-  const [reply, setReply] = useState<"Accept" | "Decline">("Accept");
-  const [selectedAssignment, setSelectedAssignment] =
-    useState<IMyAssignment | null>(null);
+  const [returnRequestState, setReturnRequestState] = useState({
+    isPopupOpen: false,
+    assignmentId: '',
+  });
+  const [reply, setReply] = useState<'Accept' | 'Decline'>('Accept');
+  const [selectedAssignment, setSelectedAssignment] = useState<IMyAssignment | null>(null);
   const { useGetMyAssignments } = useAssignment();
+  const { useCreateReturnRequest } = useReturnRequest();
+  const { mutate: createReturnRequest, isPending: isCreatingReturnRequest } = useCreateReturnRequest();
+
   const [page, setPage] = useState(1);
   const { data: myAssignments, isPending: isLoading } = useGetMyAssignments({
     pageNumber: page,
@@ -34,14 +42,14 @@ export const AssignmentTable: React.FC = () => {
   const handleSort = (key: string) => {
     let newDirection = direction;
     switch (direction) {
-      case "asc":
-      case "":
-        newDirection = "desc";
-        setDirection("desc");
+      case 'asc':
+      case '':
+        newDirection = 'desc';
+        setDirection('desc');
         break;
-      case "desc":
-        newDirection = "asc";
-        setDirection("asc");
+      case 'desc':
+        newDirection = 'asc';
+        setDirection('asc');
         break;
     }
 
@@ -49,14 +57,29 @@ export const AssignmentTable: React.FC = () => {
     setSortBy(newSortBy);
   };
 
-  const handleReplyAssignment = (
-    assignment: IMyAssignment,
-    reply: "Accept" | "Decline",
-    isOpen: boolean,
-  ) => {
+  const handleReplyAssignment = (assignment: IMyAssignment, reply: 'Accept' | 'Decline', isOpen: boolean) => {
     setSelectedAssignment(assignment);
     setReply(reply);
     setIsDisablePopupOpen(isOpen);
+  };
+
+  const handleReturnRequest = (assignmentId: string) => {
+    setReturnRequestState({
+      isPopupOpen: true,
+      assignmentId,
+    });
+  };
+
+  const confirmReturnRequest = () => {
+    createReturnRequest(returnRequestState.assignmentId);
+    closeReturnRequestPopup();
+  };
+
+  const closeReturnRequestPopup = () => {
+    setReturnRequestState((prev) => ({
+      ...prev,
+      isPopupOpen: false,
+    }));
   };
 
   return (
@@ -68,45 +91,28 @@ export const AssignmentTable: React.FC = () => {
               <th
                 key={col.key}
                 className={`text-left relative py-2 after:absolute after:bottom-0 after:left-0 after:w-[calc(100%-20px)] after:h-[2px] ${
-                  sortBy?.startsWith(`${col.key}:`)
-                    ? "after:bg-gray-600 font-semibold"
-                    : "after:bg-gray-400 font-medium"
-                } ${col.sortable ? "cursor-pointer" : ""}`}
+                  sortBy?.startsWith(`${col.key}:`) ? 'after:bg-gray-600 font-semibold' : 'after:bg-gray-400 font-medium'
+                } ${col.sortable ? 'cursor-pointer select-none' : 'cursor-default select-none'}`}
                 onClick={col.sortable ? () => handleSort(col.key) : undefined}
               >
                 {col.label}
                 {col.sortable && (
                   <svg
-                    className={`inline-block ml-1 w-3 h-3 ${
-                      sortBy?.startsWith(`${col.key}:`) ? "text-primary" : ""
-                    }`}
+                    className={`inline-block ml-1 w-3 h-3 ${sortBy?.startsWith(`${col.key}:`) ? 'text-primary' : ''}`}
                     viewBox="0 0 24 24"
                     fill="none"
                   >
-                    {sortBy?.startsWith(`${col.key}:`) &&
-                    sortBy?.endsWith(":desc") ? (
-                      <path
-                        d="M18 15L12 9L6 15"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
+                    {sortBy?.startsWith(`${col.key}:`) && sortBy?.endsWith(':desc') ? (
+                      <path d="M18 15L12 9L6 15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                     ) : (
-                      <path
-                        d="M6 9L12 15L18 9"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
+                      <path d="M6 9L12 15L18 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                     )}
                   </svg>
                 )}
               </th>
             ))}
 
-            <th className="text-center relative w-16">
+            <th className="text-center relative w-16 select-none">
               <span className="sr-only">Actions</span>
             </th>
           </tr>
@@ -115,69 +121,64 @@ export const AssignmentTable: React.FC = () => {
           {myAssignments && myAssignments.items?.length > 0 ? (
             myAssignments?.items.map((assignment) => (
               <tr key={assignment.assignmentId}>
-                <td className="py-2 relative w-[100px] after:absolute after:bottom-0 after:left-0 after:w-[calc(100%-20px)] after:h-[1px] after:bg-gray-300">
+                <td className="py-2 relative w-[100px] after:absolute after:bottom-0 after:left-0 after:w-[calc(100%-20px)] after:h-[1px] after:bg-gray-300 select-text">
                   {assignment.assetCode}
                 </td>
-                <td className="py-2 relative w-[180px] after:absolute after:bottom-0 after:left-0 after:w-[calc(100%-20px)] after:h-[1px] after:bg-gray-300">
+                <td className="py-2 relative w-[180px] after:absolute after:bottom-0 after:left-0 after:w-[calc(100%-20px)] after:h-[1px] after:bg-gray-300 select-text">
                   {assignment.assetName}
                 </td>
-                <td className="py-2 relative w-[120px] after:absolute after:bottom-0 after:left-0 after:w-[calc(100%-20px)] after:h-[1px] after:bg-gray-300">
+                <td className="py-2 relative w-[120px] after:absolute after:bottom-0 after:left-0 after:w-[calc(100%-20px)] after:h-[1px] after:bg-gray-300 select-text">
                   {assignment.category}
                 </td>
-                <td className="py-2 relative w-[80px] after:absolute after:bottom-0 after:left-0 after:w-[calc(100%-20px)] after:h-[1px] after:bg-gray-300">
+                <td className="py-2 relative w-[80px] after:absolute after:bottom-0 after:left-0 after:w-[calc(100%-20px)] after:h-[1px] after:bg-gray-300 select-text">
                   {assignment.assignedDate}
                 </td>
-                <td className="py-2 relative w-[80px] after:absolute after:bottom-0 after:left-0 after:w-[calc(100%-20px)] after:h-[1px] after:bg-gray-300">
+                <td className="py-2 relative w-[80px] after:absolute after:bottom-0 after:left-0 after:w-[calc(100%-20px)] after:h-[1px] after:bg-gray-300 select-text">
                   {assignment.state}
                 </td>
                 <td className="py-2 relative">
                   <div className="flex items-center justify-center space-x-4">
                     <button
-                      className={`text-quaternary hover:text-gray-700 ${assignment.state !== "Waiting for acceptance" ? "opacity-50" : "cursor-pointer"}`}
+                      className={`text-quaternary hover:text-gray-700 ${
+                        assignment.state !== 'Waiting for acceptance' ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+                      }`}
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleReplyAssignment(assignment, "Accept", true);
+                        handleReplyAssignment(assignment, 'Accept', true);
                       }}
-                      disabled={assignment.state !== "Waiting for acceptance"}
+                      disabled={assignment.state !== 'Waiting for acceptance'}
+                      tabIndex={assignment.state !== 'Waiting for acceptance' ? -1 : 0}
                     >
                       <Check className="size-4" color="red" />
                     </button>
                     <button
-                      className={`text-primary hover:text-red-700 ${assignment.state !== "Waiting for acceptance" ? "opacity-50" : "cursor-pointer"}`}
+                      className={`text-primary hover:text-red-700 ${
+                        assignment.state !== 'Waiting for acceptance' ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+                      }`}
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleReplyAssignment(assignment, "Decline", true);
+                        handleReplyAssignment(assignment, 'Decline', true);
                       }}
-                      disabled={assignment.state !== "Waiting for acceptance"}
+                      disabled={assignment.state !== 'Waiting for acceptance'}
+                      tabIndex={assignment.state !== 'Waiting for acceptance' ? -1 : 0}
                     >
-                      <svg
-                        width="14"
-                        height="14"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        color="black"
-                      >
-                        <path
-                          d="M18 6L6 18"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                        <path
-                          d="M6 6L18 18"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" color="black">
+                        <path d="M18 6L6 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        <path d="M6 6L18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                       </svg>
                     </button>
                     <button
-                      className="text-blue-600 hover:text-blue-800"
+                      className={`text-blue-600 hover:text-blue-800 ${
+                        assignment.state === 'Accepted' ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'
+                      }`}
                       onClick={(e) => {
                         e.stopPropagation();
+                        if (assignment.state === 'Accepted' && assignment.assignmentId) {
+                          handleReturnRequest(assignment.assignmentId);
+                        }
                       }}
+                      disabled={assignment.state !== 'Accepted' || isCreatingReturnRequest}
+                      tabIndex={assignment.state !== 'Accepted' ? -1 : 0}
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -223,8 +224,14 @@ export const AssignmentTable: React.FC = () => {
       <ReplyAssignmentPopup
         isOpen={isDisablePopupOpen}
         onClose={() => setIsDisablePopupOpen(false)}
-        assignmentId={selectedAssignment?.assignmentId || ""}
+        assignmentId={selectedAssignment?.assignmentId || ''}
         reply={reply}
+      />
+      <ReturnRequestPopup
+        isOpen={returnRequestState.isPopupOpen}
+        onClose={closeReturnRequestPopup}
+        onConfirm={confirmReturnRequest}
+        isLoading={isCreatingReturnRequest}
       />
     </>
   );

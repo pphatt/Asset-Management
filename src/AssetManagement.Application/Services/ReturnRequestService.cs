@@ -111,7 +111,7 @@ namespace AssetManagement.Application.Services
 
                 if (assignment.State != AssignmentState.Accepted)
                     throw new ConflictException($"Cannot return the asset with assignment's state is: {assignment.State.GetDisplayName()}");
-                
+
                 assignment.State = AssignmentState.WaitingForReturning;
                 _assignmentRepository.Update(assignment);
                 await _assignmentRepository.SaveChangesAsync();
@@ -146,7 +146,7 @@ namespace AssetManagement.Application.Services
 
                 if (assignment.State != AssignmentState.Accepted)
                     throw new ConflictException($"Cannot return the asset with assignment's state is: {assignment.State.GetDisplayName()}");
-                
+
                 assignment.State = AssignmentState.WaitingForReturning;
                 _assignmentRepository.Update(assignment);
                 await _assignmentRepository.SaveChangesAsync();
