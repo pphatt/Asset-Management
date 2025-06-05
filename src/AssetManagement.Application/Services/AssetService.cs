@@ -22,15 +22,17 @@ namespace AssetManagement.Application.Services
     {
         private readonly IAssetRepository _assetRepository;
         private readonly ICategoryRepository _categoryRepository;
+        private readonly IAssignmentRepository _assignmentRepository;
         private readonly IUserRepository _userRepository;
 
         public AssetService(IAssetRepository assetRepository,
             ICategoryRepository categoryRepository,
-            IUserRepository userRepository)
+            IUserRepository userRepository, IAssignmentRepository assignmentRepository)
         {
             _assetRepository = assetRepository;
             _categoryRepository = categoryRepository;
             _userRepository = userRepository;
+            _assignmentRepository = assignmentRepository;
         }
 
         private async Task<Location> GetLocationByUserId(string userId)
@@ -176,6 +178,21 @@ namespace AssetManagement.Application.Services
             if (existingAsset == null)
             {
                 throw new KeyNotFoundException($"Cannot find asset with id {assetCode}");
+            }
+            
+            if (existingAsset.State == AssetState.Assigned)
+            {
+                throw new InvalidOperationException("Cannot edit this asset since it is already assigned to somebody");
+            }
+            
+            var assignmentQuery = _assignmentRepository.GetAll();
+                
+            var hasActiveAssignments = await assignmentQuery
+                .AnyAsync(a => a.AssetId == existingAsset.Id && a.State == AssignmentState.WaitingForAcceptance);
+                
+            if (hasActiveAssignments)
+            {
+                throw new InvalidOperationException("Cannot edit this asset since there are assignments waiting for acceptance.");
             }
 
             AssetValidator.ValidateUpdateAsset(request);

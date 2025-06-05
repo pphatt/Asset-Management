@@ -17,6 +17,7 @@ public class AssetServiceTests
     private readonly Mock<IAssetRepository> _assetRepository;
     private readonly Mock<ICategoryRepository> _categoryRepository;
     private readonly Mock<IUserRepository> _userRepository;
+    private readonly Mock<IAssignmentRepository> _assignmentRepository;
     private readonly AssetService _assetService;
 
     public AssetServiceTests()
@@ -24,8 +25,8 @@ public class AssetServiceTests
         _assetRepository = new Mock<IAssetRepository>();
         _categoryRepository = new Mock<ICategoryRepository>();
         _userRepository = new Mock<IUserRepository>();
-        _userRepository = new Mock<IUserRepository>();
-        _assetService = new AssetService(_assetRepository.Object, _categoryRepository.Object, _userRepository.Object);
+        _assignmentRepository = new Mock<IAssignmentRepository>();
+        _assetService = new AssetService(_assetRepository.Object, _categoryRepository.Object, _userRepository.Object, _assignmentRepository.Object);
     }
 
     #region Helpers
@@ -1020,6 +1021,101 @@ public class AssetServiceTests
     }
 
     [Fact]
+    public async Task UpdateAssetAsync_ThrowsInvalidOperationException_WhereAssetStateIsAssigned()
+    {
+        // Arrange
+        var adminId = Guid.NewGuid().ToString();
+        var assetCode = "A001";
+        var categoryId = Guid.NewGuid();
+        var existingAsset = new Asset
+        {
+            Id = Guid.NewGuid(),
+            Code = assetCode,
+            Name = "Old Laptop",
+            State = AssetState.Assigned,
+            CategoryId = Guid.NewGuid(),
+            Specification = "Old Specs",
+            InstalledDate = new DateTime(2022, 1, 1),
+            LastModifiedDate = DateTime.UtcNow.AddDays(-10)
+        };
+
+        var request = new UpdateAssetRequestDto
+        {
+            Name = "New Laptop",
+            State = AssetStateDto.NotAvailable,
+            CategoryId = categoryId,
+            Specification = "New Specs",
+            InstalledDate = "2023-02-15"
+        };
+
+        _assetRepository.Setup(r => r.GetByCodeAsync(assetCode))
+            .ReturnsAsync(existingAsset);
+
+        // Act
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
+            () => _assetService.UpdateAssetAsync(adminId, assetCode, request));
+
+        Assert.Equal("Cannot edit this asset since it is already assigned to somebody", exception.Message);
+
+        _assetRepository.Verify(r => r.Update(It.IsAny<Asset>()), Times.Never());
+        _assetRepository.Verify(r => r.SaveChangesAsync(), Times.Never());
+    }
+    
+    [Fact]
+    public async Task UpdateAssetAsync_ThrowsInvalidOperationException_WhereExistAssignmentWithStateIsWaitingForAcceptance()
+    {
+        // Arrange
+        var adminId = Guid.NewGuid().ToString();
+        var assetCode = "A001";
+        var categoryId = Guid.NewGuid();
+        var existingAsset = new Asset
+        {
+            Id = Guid.NewGuid(),
+            Code = assetCode,
+            Name = "Old Laptop",
+            State = AssetState.Available,
+            CategoryId = Guid.NewGuid(),
+            Specification = "Old Specs",
+            InstalledDate = new DateTime(2022, 1, 1),
+            LastModifiedDate = DateTime.UtcNow.AddDays(-10)
+        };
+
+        var request = new UpdateAssetRequestDto
+        {
+            Name = "New Laptop",
+            State = AssetStateDto.NotAvailable,
+            CategoryId = categoryId,
+            Specification = "New Specs",
+            InstalledDate = "2023-02-15"
+        };
+
+        _assetRepository.Setup(r => r.GetByCodeAsync(assetCode))
+            .ReturnsAsync(existingAsset);
+
+        var assignments = new List<Assignment>
+        {
+            new()
+            {
+                Id = Guid.NewGuid(),
+                AssetId = existingAsset.Id,
+                State = AssignmentState.WaitingForAcceptance
+            }
+        };
+
+        _assignmentRepository.Setup(repo => repo.GetAll())
+            .Returns(assignments.AsQueryable().BuildMock());
+        
+        // Act
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
+            () => _assetService.UpdateAssetAsync(adminId, assetCode, request));
+        
+        Assert.Equal("Cannot edit this asset since there are assignments waiting for acceptance.", exception.Message);
+        
+        _assetRepository.Verify(r => r.Update(It.IsAny<Asset>()), Times.Never());
+        _assetRepository.Verify(r => r.SaveChangesAsync(), Times.Never());
+    }
+    
+    [Fact]
     public async Task UpdateAssetAsync_UpdatesOnlyProvidedFields_WhenPartialRequestProvided()
     {
         // Arrange
@@ -1422,7 +1518,7 @@ public class AssetServiceTests
 
         _userRepository.Setup(r => r.GetByIdAsync(adminId)).ReturnsAsync(user);
         _assetRepository.Setup(r => r.GetAll()).Returns(assets.BuildMock());
-        var service = new AssetService(_assetRepository.Object, _categoryRepository.Object, _userRepository.Object);
+        var service = _assetService;
         var queryParams = new AssetReportQueryParameters();
 
         // Act
@@ -1449,7 +1545,7 @@ public class AssetServiceTests
 
         _userRepository.Setup(r => r.GetByIdAsync(adminId)).ReturnsAsync(user);
         _assetRepository.Setup(r => r.GetAll()).Returns(assets.BuildMock());
-        var service = new AssetService(_assetRepository.Object, _categoryRepository.Object, _userRepository.Object);
+        var service = _assetService;
         var queryParams = new AssetReportQueryParameters();
 
         // Act
@@ -1475,7 +1571,7 @@ public class AssetServiceTests
 
         _userRepository.Setup(r => r.GetByIdAsync(adminId)).ReturnsAsync(user);
         _assetRepository.Setup(r => r.GetAll()).Returns(assets.BuildMock());
-        var service = new AssetService(_assetRepository.Object, _categoryRepository.Object, _userRepository.Object);
+        var service = _assetService;
         var queryParams = new AssetReportQueryParameters { SortBy = "Category", SortOrder = "asc" };
 
         // Act
@@ -1497,7 +1593,7 @@ public class AssetServiceTests
 
         _userRepository.Setup(r => r.GetByIdAsync(adminId)).ReturnsAsync(user);
         _assetRepository.Setup(r => r.GetAll()).Returns(assets.BuildMock());
-        var service = new AssetService(_assetRepository.Object, _categoryRepository.Object, _userRepository.Object);
+        var service = _assetService;
         var queryParams = new AssetReportQueryParameters();
 
         // Act
@@ -1514,7 +1610,7 @@ public class AssetServiceTests
         var adminId = Guid.NewGuid();
         _userRepository.Setup(r => r.GetByIdAsync(adminId)).ReturnsAsync((User?)null);
 
-        var service = new AssetService(_assetRepository.Object, _categoryRepository.Object, _userRepository.Object);
+        var service = _assetService;
         var queryParams = new AssetReportQueryParameters();
 
         // Act & Assert
