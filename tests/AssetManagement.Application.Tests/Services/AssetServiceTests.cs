@@ -995,6 +995,19 @@ public class AssetServiceTests
         };
 
         var category = new Category { Id = categoryId, Name = "New Category" };
+        
+        var assignments = new List<Assignment>
+        {
+            new()
+            {
+                Id = Guid.NewGuid(),
+                AssetId = existingAsset.Id,
+                State = AssignmentState.Accepted
+            }
+        };
+
+        _assignmentRepository.Setup(repo => repo.GetAll())
+            .Returns(assignments.AsQueryable().BuildMock());
 
         _assetRepository.Setup(r => r.GetByCodeAsync(assetCode))
             .ReturnsAsync(existingAsset);
@@ -1143,6 +1156,19 @@ public class AssetServiceTests
             // Specification not provided
             // InstalledDate not provided
         };
+        
+        var assignments = new List<Assignment>
+        {
+            new()
+            {
+                Id = Guid.NewGuid(),
+                AssetId = existingAsset.Id,
+                State = AssignmentState.Accepted
+            }
+        };
+
+        _assignmentRepository.Setup(repo => repo.GetAll())
+            .Returns(assignments.AsQueryable().BuildMock());
 
         _assetRepository.Setup(r => r.GetByCodeAsync(assetCode))
             .ReturnsAsync(existingAsset);
@@ -1215,6 +1241,19 @@ public class AssetServiceTests
             Name = "New Name",
             CategoryId = nonExistentCategoryId
         };
+        
+        var assignments = new List<Assignment>
+        {
+            new()
+            {
+                Id = Guid.NewGuid(),
+                AssetId = existingAsset.Id,
+                State = AssignmentState.Accepted
+            }
+        };
+
+        _assignmentRepository.Setup(repo => repo.GetAll())
+            .Returns(assignments.AsQueryable().BuildMock());
 
         _assetRepository.Setup(r => r.GetByCodeAsync(assetCode))
             .ReturnsAsync(existingAsset);
@@ -1237,6 +1276,7 @@ public class AssetServiceTests
 
         var existingAsset = new Asset
         {
+            Id = Guid.NewGuid(),
             Code = assetCode,
             Name = "Asset",
             State = AssetState.Available
@@ -1247,6 +1287,19 @@ public class AssetServiceTests
             Name = "Valid Asset Name",
             State = AssetStateDto.Recycled
         };
+        
+        var assignments = new List<Assignment>
+        {
+            new()
+            {
+                Id = Guid.NewGuid(),
+                AssetId = existingAsset.Id,
+                State = AssignmentState.Accepted
+            }
+        };
+        
+        _assignmentRepository.Setup(repo => repo.GetAll())
+            .Returns(assignments.AsQueryable().BuildMock());
 
         _assetRepository.Setup(r => r.GetByCodeAsync(assetCode))
             .ReturnsAsync(existingAsset);
@@ -1273,7 +1326,8 @@ public class AssetServiceTests
         {
             Code = assetCode,
             Name = "Original Asset",
-            InstalledDate = new DateTimeOffset(2023, 12, 25, 0, 0, 0, TimeSpan.Zero)
+            InstalledDate = new DateTimeOffset(2023, 12, 25, 0, 0, 0, TimeSpan.Zero),
+            State = AssetState.Available
         };
 
         var request = new UpdateAssetRequestDto
@@ -1281,10 +1335,23 @@ public class AssetServiceTests
             Name = "Valid Asset Name",
             InstalledDate = dateString
         };
-
+        
+        var assignments = new List<Assignment>
+        {
+            new()
+            {
+                Id = Guid.NewGuid(),
+                AssetId = existingAsset.Id,
+                State = AssignmentState.Accepted
+            }
+        };
+        
+        _assignmentRepository.Setup(repo => repo.GetAll())
+            .Returns(assignments.AsQueryable().BuildMock());
+        
         _assetRepository.Setup(r => r.GetByCodeAsync(assetCode))
             .ReturnsAsync(existingAsset);
-
+        
         // Act
         await _assetService.UpdateAssetAsync(adminId, assetCode, request);
 
@@ -1301,6 +1368,7 @@ public class AssetServiceTests
 
         var existingAsset = new Asset
         {
+            Id = Guid.NewGuid(),
             Code = assetCode,
             Name = "Asset",
             State = AssetState.NotAvailable
@@ -1311,6 +1379,19 @@ public class AssetServiceTests
             Name = "Valid Asset Name",
             State = AssetStateDto.Available
         };
+        
+        var assignments = new List<Assignment>
+        {
+            new()
+            {
+                Id = Guid.NewGuid(),
+                AssetId = existingAsset.Id,
+                State = AssignmentState.Accepted
+            }
+        };
+
+        _assignmentRepository.Setup(repo => repo.GetAll())
+            .Returns(assignments.AsQueryable().BuildMock());
 
         _assetRepository.Setup(r => r.GetByCodeAsync(assetCode))
             .ReturnsAsync(existingAsset);
@@ -1343,6 +1424,19 @@ public class AssetServiceTests
             Name = "Valid Asset Name",
             State = AssetStateDto.Assigned
         };
+        
+        var assignments = new List<Assignment>
+        {
+            new()
+            {
+                Id = Guid.NewGuid(),
+                AssetId = existingAsset.Id,
+                State = AssignmentState.Accepted
+            }
+        };
+
+        _assignmentRepository.Setup(repo => repo.GetAll())
+            .Returns(assignments.AsQueryable().BuildMock());
 
         _assetRepository.Setup(r => r.GetByCodeAsync(assetCode))
             .ReturnsAsync(existingAsset);
@@ -1375,6 +1469,19 @@ public class AssetServiceTests
             Name = "Valid Asset Name",
             State = AssetStateDto.WaitingForRecycling
         };
+        
+        var assignments = new List<Assignment>
+        {
+            new()
+            {
+                Id = Guid.NewGuid(),
+                AssetId = existingAsset.Id,
+                State = AssignmentState.Accepted
+            }
+        };
+
+        _assignmentRepository.Setup(repo => repo.GetAll())
+            .Returns(assignments.AsQueryable().BuildMock());
 
         _assetRepository.Setup(r => r.GetByCodeAsync(assetCode))
             .ReturnsAsync(existingAsset);
@@ -1410,6 +1517,19 @@ public class AssetServiceTests
             Name = "Valid Asset Name",
             State = invalidStateValue
         };
+        
+        var assignments = new List<Assignment>
+        {
+            new()
+            {
+                Id = Guid.NewGuid(),
+                AssetId = existingAsset.Id,
+                State = AssignmentState.Accepted
+            }
+        };
+
+        _assignmentRepository.Setup(repo => repo.GetAll())
+            .Returns(assignments.AsQueryable().BuildMock());
 
         _assetRepository.Setup(r => r.GetByCodeAsync(assetCode))
             .ReturnsAsync(existingAsset);
