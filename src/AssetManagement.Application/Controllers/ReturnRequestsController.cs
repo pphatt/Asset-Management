@@ -51,5 +51,20 @@ namespace AssetManagement.Application.Controllers
             
             return this.ToApiResponse(response, "Successfully created a returning request");
         }
+        
+        [HttpDelete("{returnRequestId}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<ActionResult<ApiResponse<ReturnRequestDto>>> CancelReturnRequest(Guid returnRequestId)
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userId is null)
+            {
+                throw new UnauthorizedAccessException("Cannot retrieve user id from claims");
+            }
+
+            var returnRequest = await _returnRequestService.CancelReturnRequestAsync(returnRequestId, Guid.Parse(userId));
+
+            return this.ToApiResponse(returnRequest, "Successfully cancelled the return request");
+        }
     }
 }

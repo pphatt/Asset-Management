@@ -76,6 +76,49 @@ namespace AssetManagement.Application.Tests.Controllers
             await Assert.ThrowsAsync<UnauthorizedAccessException>(() => _controller.Get(new ReturnRequestQueryParameters()));
         }
 
+        [Fact]
+        public async Task CancelReturnRequest_ReturnsOk_WithReturnRequestDto()
+        {
+            // Arrange
+            var returnRequestId = Guid.NewGuid();
+            var returnRequestDto = new ReturnRequestDto { Id = returnRequestId, AssetCode = "A123" };
+            _serviceMock.Setup(s => s.CancelReturnRequestAsync(returnRequestId, _adminId)).ReturnsAsync(returnRequestDto);
+
+            var claimsPrincipal = CreateUserPrincipal();
+            ApplyUserToController(claimsPrincipal);
+
+            // Act
+            var result = await _controller.CancelReturnRequest(returnRequestId);
+
+            // Assert
+            var okResult = Assert.IsType<ActionResult<ApiResponse<ReturnRequestDto>>>(result);
+            var okObjectResult = Assert.IsType<OkObjectResult>(okResult.Result);
+            var apiResponse = Assert.IsType<ApiResponse<ReturnRequestDto>>(okObjectResult.Value);
+            Assert.True(apiResponse.Success);
+            Assert.Equal("Successfully cancelled the return request", apiResponse.Message);
+            Assert.Equal(returnRequestDto, apiResponse.Data);
+        }
+
+        [Fact]
+        public async Task CancelReturnRequest_WithNoUserIdClaim_ThrowsUnauthorizedAccessException()
+        {
+            // Arrange
+            var returnRequestId = Guid.NewGuid();
+
+            // Setup controller with ClaimsPrincipal that has no NameIdentifier claim
+            var user = new ClaimsPrincipal(new ClaimsIdentity(new Claim[] {
+                new Claim(ClaimTypes.Role, "Admin")
+            }));
+
+            _controller.ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext { User = user }
+            };
+
+            // Act & Assert
+            await Assert.ThrowsAsync<UnauthorizedAccessException>(
+                async () => await _controller.CancelReturnRequest(returnRequestId));
+        }
         #region Create asset's returning request tests
 
         [Fact]

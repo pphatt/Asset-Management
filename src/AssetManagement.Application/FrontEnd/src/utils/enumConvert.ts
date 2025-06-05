@@ -1,35 +1,37 @@
 import { ASSIGNMENT_STATE } from '@/constants/assignment-params';
+import { RETURN_REQUEST_STATE } from '@/constants/return-request-params';
 import { AssignmentState } from '@/types/assignment.type';
+import { ReturnRequestState } from '@/types/returnRequest.type';
 import { GenderEnum, LocationEnum, UserTypeEnum } from '@/types/user.type';
 
 // Map enum to string
 export const GenderDisplay: Record<GenderEnum, string> = {
-  [GenderEnum.Male]: 'Male',
-  [GenderEnum.Female]: 'Female',
+    [GenderEnum.Male]: 'Male',
+    [GenderEnum.Female]: 'Female',
 };
 
 export const UserTypeDisplay: Record<UserTypeEnum, string> = {
-  [UserTypeEnum.Admin]: 'Admin',
-  [UserTypeEnum.Staff]: 'Staff',
+    [UserTypeEnum.Admin]: 'Admin',
+    [UserTypeEnum.Staff]: 'Staff',
 };
 export const LocationDisplay: Record<LocationEnum, string> = {
-  [LocationEnum.HCM]: 'HCM',
-  [LocationEnum.DN]: 'DN',
-  [LocationEnum.HN]: 'HN',
+    [LocationEnum.HCM]: 'HCM',
+    [LocationEnum.DN]: 'DN',
+    [LocationEnum.HN]: 'HN',
 };
 /**
  * Map enum to string
  */
 export function getGenderDisplay(gender: GenderEnum): string {
-  return GenderDisplay[gender] || 'Unknown';
+    return GenderDisplay[gender] || 'Unknown';
 }
 
 export function getUserTypeDisplay(type: UserTypeEnum): string {
-  return UserTypeDisplay[type] || 'Unknown';
+    return UserTypeDisplay[type] || 'Unknown';
 }
 
 export function getLocationDisplay(location: LocationEnum): string {
-  return LocationDisplay[location] || 'Unknown';
+    return LocationDisplay[location] || 'Unknown';
 }
 
 /**
@@ -38,7 +40,11 @@ export function getLocationDisplay(location: LocationEnum): string {
  * @returns true if the assignment can be edited or deleted, false otherwise
  */
 export function isAssignmentModifiable(state: AssignmentState): boolean {
-  return state === ASSIGNMENT_STATE.WAITING_FOR_ACCEPTANCE;
+    return state === ASSIGNMENT_STATE.WAITING_FOR_ACCEPTANCE;
+}
+
+export function isReturnRequestReturn(state: ReturnRequestState): boolean {
+    return state === RETURN_REQUEST_STATE.WAITING_FOR_RETURNING;
 }
 
 /**
@@ -47,10 +53,10 @@ export function isAssignmentModifiable(state: AssignmentState): boolean {
  * @returns A message explaining edit permissions, or empty string if editable
  */
 export function getAssignmentEditMessage(state: AssignmentState): string {
-  if (isAssignmentModifiable(state)) {
-    return '';
-  }
-  return "Only assignments with 'Waiting for acceptance' state can be edited";
+    if (isAssignmentModifiable(state)) {
+        return '';
+    }
+    return "Only assignments with 'Waiting for acceptance' state can be edited";
 }
 
 /**
@@ -59,8 +65,8 @@ export function getAssignmentEditMessage(state: AssignmentState): string {
  * @returns A formatted string label for display
  */
 export function getAssignmentStateLabel(state: AssignmentState): string {
-  // The values are already human-readable, but we could add custom formatting here
-  return state;
+    // The values are already human-readable, but we could add custom formatting here
+    return state;
 }
 
 /**
@@ -69,28 +75,31 @@ export function getAssignmentStateLabel(state: AssignmentState): string {
  * @param targetState The state to check against
  * @returns true if the states match
  */
-export function isAssignmentState(currentState: AssignmentState, targetState: AssignmentState): boolean {
-  return currentState === targetState;
+export function isAssignmentState(
+    currentState: AssignmentState,
+    targetState: AssignmentState
+): boolean {
+    return currentState === targetState;
 }
 
 /**
  * Map string to enum
  */
 export function parseGenderEnum(gender: string): GenderEnum {
-  return gender === 'Male' ? GenderEnum.Male : GenderEnum.Female;
+    return gender === 'Male' ? GenderEnum.Male : GenderEnum.Female;
 }
 
 export function parseUserTypeEnum(type: string): UserTypeEnum {
-  return type === 'Admin' ? UserTypeEnum.Admin : UserTypeEnum.Staff;
+    return type === 'Admin' ? UserTypeEnum.Admin : UserTypeEnum.Staff;
 }
 
 /**
  * Check if the enum value is valid
  */
 export function isValidGender(value: number): value is GenderEnum {
-  return value === GenderEnum.Male || value === GenderEnum.Female;
+    return value === GenderEnum.Male || value === GenderEnum.Female;
 }
 
 export function isValidUserType(value: number): value is UserTypeEnum {
-  return value === UserTypeEnum.Admin || value === UserTypeEnum.Staff;
+    return value === UserTypeEnum.Admin || value === UserTypeEnum.Staff;
 }

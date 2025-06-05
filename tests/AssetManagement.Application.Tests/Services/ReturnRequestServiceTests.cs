@@ -1,4 +1,5 @@
 using AssetManagement.Application.Services;
+using AssetManagement.Contracts.DTOs;
 using AssetManagement.Contracts.Enums;
 using AssetManagement.Contracts.Parameters;
 using AssetManagement.Domain.Entities;
@@ -184,6 +185,154 @@ namespace AssetManagement.Application.Tests.Services
 
             // Act & Assert
             await Assert.ThrowsAsync<KeyNotFoundException>(() => _service.GetReturnRequestsAsync(_adminId, new ReturnRequestQueryParameters()));
+        }
+        [Fact]
+        public async Task CancelReturnRequestAsync_ReturnsCorrectDto_WhenValidRequestProvided()
+        {
+            // Arrange
+            var returnRequestId = Guid.NewGuid();
+            var adminId = Guid.NewGuid();
+            var requesterId = Guid.NewGuid();
+            var assetId = Guid.NewGuid();
+            var assignmentId = Guid.NewGuid();
+
+            var asset = new Asset
+            {
+                Id = assetId,
+                Code = "LA001",
+                Name = "Dell Laptop"
+            };
+
+            var assignment = new Assignment
+            {
+                Id = assignmentId,
+                Asset = asset,
+                AssignedDate = new DateTime(2023, 1, 15)
+            };
+
+            var requester = new User
+            {
+                Id = requesterId,
+                Username = "requester",
+                Password = "Password"
+            };
+
+            var admin = new User
+            {
+                Id = adminId,
+                Username = "admin",
+                Password = "Password"
+            };
+
+            var returnRequest = new ReturnRequest
+            {
+                Id = returnRequestId,
+                Assignment = assignment,
+                Requester = requester,
+                ReturnedDate = new DateTime(2023, 2, 1),
+                State = ReturnRequestState.WaitingForReturning
+            };
+
+            _mockReturnRequestRepository.Setup(repo => repo.GetByIdAsync(returnRequestId))
+                .ReturnsAsync(returnRequest);
+
+            _mockUserRepository.Setup(repo => repo.GetByIdAsync(adminId))
+                .ReturnsAsync(admin);
+
+            // Act
+            var result = await _service.CancelReturnRequestAsync(returnRequestId, adminId);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(returnRequestId, result.Id);
+            Assert.Equal(asset.Code, result.AssetCode);
+            Assert.Equal(asset.Name, result.AssetName);
+            Assert.Equal(assignment.AssignedDate.ToString("dd/MM/yyyy"), result.AssignedDate);
+            Assert.Equal(requester.Username, result.RequestedBy);
+            Assert.Equal(admin.Username, result.AcceptedBy);
+            Assert.Equal("Completed", result.State);
+
+            // Verify repository interactions
+            _mockReturnRequestRepository.Verify(repo => repo.Update(returnRequest), Times.Once);
+            _mockReturnRequestRepository.Verify(repo => repo.SaveChangesAsync(), Times.Once);
+        }
+
+        [Fact]
+        public async Task CancelReturnRequestAsync_ThrowsKeyNotFoundException_WhenReturnRequestNotFound()
+        {
+            // Arrange
+            var returnRequestId = Guid.NewGuid();
+            var adminId = Guid.NewGuid();
+
+            _mockReturnRequestRepository.Setup(repo => repo.GetByIdAsync(returnRequestId))
+                .ReturnsAsync((ReturnRequest)null);
+
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<KeyNotFoundException>(() =>
+                _service.CancelReturnRequestAsync(returnRequestId, adminId));
+
+            Assert.Contains($"Return request with id {returnRequestId} not found", exception.Message);
+
+            // Verify no updates were attempted
+            _mockReturnRequestRepository.Verify(repo => repo.Update(It.IsAny<ReturnRequest>()), Times.Never);
+            _mockReturnRequestRepository.Verify(repo => repo.SaveChangesAsync(), Times.Never);
+        }
+
+        [Fact]
+        public async Task CancelReturnRequestAsync_ThrowsInvalidOperationException_WhenRequestAlreadyCompletedOrCancelled()
+        {
+            // Arrange
+            var returnRequestId = Guid.NewGuid();
+            var adminId = Guid.NewGuid();
+
+            var returnRequest = new ReturnRequest
+            {
+                Id = returnRequestId,
+                State = ReturnRequestState.Completed
+            };
+
+            _mockReturnRequestRepository.Setup(repo => repo.GetByIdAsync(returnRequestId))
+                .ReturnsAsync(returnRequest);
+
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+                _service.CancelReturnRequestAsync(returnRequestId, adminId));
+
+            Assert.Contains($"Return request with id {returnRequestId} is already returned or cancelled", exception.Message);
+
+            // Verify no updates were attempted
+            _mockReturnRequestRepository.Verify(repo => repo.Update(It.IsAny<ReturnRequest>()), Times.Never);
+            _mockReturnRequestRepository.Verify(repo => repo.SaveChangesAsync(), Times.Never);
+        }
+
+        [Fact]
+        public async Task CancelReturnRequestAsync_ThrowsKeyNotFoundException_WhenAdminNotFound()
+        {
+            // Arrange
+            var returnRequestId = Guid.NewGuid();
+            var adminId = Guid.NewGuid();
+
+            var returnRequest = new ReturnRequest
+            {
+                Id = returnRequestId,
+                State = ReturnRequestState.WaitingForReturning
+            };
+
+            _mockReturnRequestRepository.Setup(repo => repo.GetByIdAsync(returnRequestId))
+                .ReturnsAsync(returnRequest);
+
+            _mockUserRepository.Setup(repo => repo.GetByIdAsync(adminId))
+                .ReturnsAsync((User)null);
+
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<KeyNotFoundException>(() =>
+                _service.CancelReturnRequestAsync(returnRequestId, adminId));
+
+            Assert.Contains($"Admin with id {adminId} not found", exception.Message);
+
+            // Verify no updates were attempted
+            _mockReturnRequestRepository.Verify(repo => repo.Update(It.IsAny<ReturnRequest>()), Times.Never);
+            _mockReturnRequestRepository.Verify(repo => repo.SaveChangesAsync(), Times.Never);
         }
 
         #region Create return request tests

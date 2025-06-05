@@ -1,9 +1,12 @@
 import returnRequestApi from '@/apis/returnRequest.api';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { IReturnRequestParams } from '@/types/returnRequest.type';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
+import useAssignmentQuery from './useAssignmentQuery';
 
 export function useReturnRequest() {
   const queryClient = useQueryClient();
+  const queryConfig = useAssignmentQuery();
 
   function useCreateReturnRequest() {
     return useMutation({
@@ -16,6 +19,9 @@ export function useReturnRequest() {
           exact: false,
         });
 
+        queryClient.invalidateQueries({
+          queryKey: ['returnRequests', queryConfig]});
+
         toast.success(response?.message ?? 'Return request created successfully');
       },
       onError: (err: any) => {
@@ -25,8 +31,32 @@ export function useReturnRequest() {
     });
   }
 
+  function useCancelReturnRequest() {
+    return useMutation({
+      mutationFn: async (returnRequestId: string) => returnRequestApi.cancelReturnRequest(returnRequestId),
+      onSuccess: (response) => {
+        queryClient.invalidateQueries({ queryKey: ['returnRequests', queryConfig], exact: true });
+        toast.success(response?.message ?? 'Return request cancelled successfully');
+      },
+      onError: (err: any) => {
+        queryClient.invalidateQueries({ queryKey: ['returnRequests', queryConfig], exact: true });
+        const errMsg = err.response?.data?.errors;
+        toast.error(errMsg?.[0] ?? 'Error cancelling return request');
+      },
+    });
+  }
+
+  function useGetReturnRequest(params: IReturnRequestParams){
+    return useQuery({
+        queryKey: ['returnRequests', params],
+        queryFn: () => returnRequestApi.getRequests(params),
+    });
+  }
+
   return {
     useCreateReturnRequest,
+    useCancelReturnRequest,
+    useGetReturnRequest,
   };
 }
 

@@ -7,14 +7,12 @@ export interface IReturnRequest {
   assignedDate: string;
   acceptedBy?: string;
   returnedDate?: string;
-  state: AssignmentState;
+  state: ReturnRequestState;
 }
 
-export type AssignmentState =
-  | "Accepted"
-  | "Declined"
-  | "Returned"
-  | "Waiting for acceptance";
+export type ReturnRequestState =
+  | "Completed"
+  | "Waiting for returning";
 
 export interface IReturnRequestParams {
   searchTerm?: string;
@@ -30,5 +28,5 @@ export interface IReturnRequestParams {
 
 export interface ICreateReturnRequestResponse {
     assetCode: string;
-    assignmentStatus: string;
+    returnRequestStatus: string;
 }

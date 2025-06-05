@@ -9,6 +9,7 @@ using AssetManagement.Domain.Enums;
 using AssetManagement.Domain.Extensions;
 using AssetManagement.Domain.Interfaces.Repositories;
 using Microsoft.EntityFrameworkCore;
+using AssetManagement.Contracts.Enums;
 using static AssetManagement.Contracts.Exceptions.ApiExceptionTypes;
 using AssetManagement.Contracts.Enums;
 using AssetManagement.Contracts.DTOs.Responses;
@@ -84,16 +85,16 @@ namespace AssetManagement.Application.Services
                     AssetName = rr.Assignment.Asset.Name,
                     AssignedDate = rr.Assignment.AssignedDate.ToString("dd/MM/yyyy"),
                     RequestedBy = rr.Requester.Username,
-                    AcceptedBy = rr.Acceptor.Username,
-                    ReturnedDate = rr.ReturnedDate.ToString("dd/MM/yyyy"),
+                    AcceptedBy = rr.Acceptor == null ? "" : rr.Acceptor.Username,
+                    ReturnedDate = rr.ReturnedDate == default ? "" : rr.ReturnedDate.ToString("dd/MM/yyyy"),
                     State = rr.State.GetDisplayName(),
                 }).ToList();
 
             return new PagedResult<ReturnRequestDto>(items, total, queryParams.PageSize, queryParams.PageNumber);
         }
 
-        public async Task<CreateReturnRequestResponseDto> CreateReturnRequestAsync(string assignmentId, 
-            string requesterId, 
+        public async Task<CreateReturnRequestResponseDto> CreateReturnRequestAsync(string assignmentId,
+            string requesterId,
             string role)
         {
             CreateReturningRequestValidator.Validate(new CreateReturnRequestDto
@@ -139,7 +140,7 @@ namespace AssetManagement.Application.Services
                 var assignment = await _assignmentRepository.GetAll()
                     .AsNoTracking()
                     .Include(a => a.Asset)
-                    .FirstOrDefaultAsync(a => a.Id == Guid.Parse(assignmentId) 
+                    .FirstOrDefaultAsync(a => a.Id == Guid.Parse(assignmentId)
                         && a.AssigneeId == Guid.Parse(requesterId)
                         && a.IsDeleted != true)
                     ?? throw new KeyNotFoundException("Assignment does not exist");
@@ -169,6 +170,59 @@ namespace AssetManagement.Application.Services
                     AssignmentStatus = assignment.State.GetDisplayName(),
                 };
             }
+        }
+        public async Task<ReturnRequestDto> CancelReturnRequestAsync(Guid returnRequestId, Guid adminId)
+        {
+            var returnRequest = await _returnRequestRepository.GetByIdAsync(returnRequestId);
+
+            if (returnRequest == null)
+            {
+                throw new KeyNotFoundException($"Return request with id {returnRequestId} not found");
+            }
+
+            if (returnRequest.State != ReturnRequestState.WaitingForReturning)
+            {
+                throw new InvalidOperationException($"Return request with id {returnRequestId} is already completed.");
+            }
+            
+            if(returnRequest.IsDeleted == true)
+            {
+                throw new InvalidOperationException($"Return request is already cancelled.");
+            }
+
+            var admin = await _userRepository.GetByIdAsync(adminId);
+            if (admin == null)
+            {
+                throw new KeyNotFoundException($"Admin with id {adminId} not found");
+            }
+
+            var assignment = await _assignmentRepository.GetByIdAsync(returnRequest.AssignmentId);
+            if (assignment == null)
+            {
+                throw new KeyNotFoundException($"Assignment with id {returnRequest.AssignmentId} not found");
+            }
+            assignment.State = AssignmentState.Accepted;
+            _assignmentRepository.Update(assignment);
+            await _assignmentRepository.SaveChangesAsync();
+
+            returnRequest.DeletedBy = adminId;
+            returnRequest.DeletedDate = DateTime.UtcNow;
+            returnRequest.IsDeleted = true;
+
+            _returnRequestRepository.Update(returnRequest);
+            await _returnRequestRepository.SaveChangesAsync();
+
+            return new ReturnRequestDto
+            {
+                Id = returnRequest.Id,
+                AssetCode = returnRequest.Assignment.Asset.Code,
+                AssetName = returnRequest.Assignment.Asset.Name,
+                AssignedDate = returnRequest.Assignment.AssignedDate.ToString("dd/MM/yyyy"),
+                RequestedBy = returnRequest.Requester.Username,
+                AcceptedBy = admin.Username,
+                ReturnedDate = returnRequest.ReturnedDate.ToString("dd/MM/yyyy"),
+                State = returnRequest.State.GetDisplayName(),
+            };
         }
     }
 }
