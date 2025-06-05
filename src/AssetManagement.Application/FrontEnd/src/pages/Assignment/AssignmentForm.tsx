@@ -31,6 +31,7 @@ export interface AssignmentFormProps {
   selectedUserInfo?: {
     id: string;
     username: string;
+    staffCode: string;
   };
 }
 

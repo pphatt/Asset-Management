@@ -1,11 +1,12 @@
 import TableSkeleton from '@/components/common/TableSkeleton';
 import useAsset from '@/hooks/useAsset';
 import useClickOutside from '@/hooks/useClickOutside';
-import { IAssetParams } from '@/types/asset.type';
+import { IAsset, IAssetParams } from '@/types/asset.type';
 import { X } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
 import Pagination from '../../components/common/Pagination';
 import useDebounce from '../../hooks/useDebounce';
+import { ASSET_STATE } from '@/constants/asset-params';
 
 interface AssetSearchDropdownProps {
   value: string;
@@ -45,7 +46,7 @@ const AssetSearchDropdown: React.FC<AssetSearchDropdownProps> = ({ value, onChan
     pageNumber: 1,
     pageSize: 5,
     sortBy: 'code:asc',
-    assetStates: ['Available'],
+    assetStates: [],
   });
 
   const { useAssetList } = useAsset();
@@ -77,6 +78,11 @@ const AssetSearchDropdown: React.FC<AssetSearchDropdownProps> = ({ value, onChan
     }
   }, [mode, selectedAssetInfo, selectedAssetId, onChange, value]);
 
+  // check whether the asset should be selected by user or not
+  const isAssetValid = (asset: IAsset) => {
+    return (asset.id === selectedAssetInfo?.id || asset.state === ASSET_STATE.AVAILABLE);
+  };
+
   const handleSearch = () => {
     setQueryParams((prev) => ({
       ...prev,
@@ -104,8 +110,8 @@ const AssetSearchDropdown: React.FC<AssetSearchDropdownProps> = ({ value, onChan
     }));
   };
 
-  const handleSelectAsset = (assetId: string) => {
-    setTempSelectedAssetId(assetId);
+  const handleSelectAsset = (asset: IAsset) => {
+    if (isAssetValid(asset)) setTempSelectedAssetId(asset.id);
   };
 
   const handleSaveSelection = () => {
@@ -273,12 +279,13 @@ const AssetSearchDropdown: React.FC<AssetSearchDropdownProps> = ({ value, onChan
                     <tbody>
                       {assetData?.items && assetData.items.length > 0 ? (
                         assetData.items.map((asset) => (
-                          <tr key={asset.id} onClick={() => handleSelectAsset(asset.id)} className="cursor-pointer hover:bg-gray-50">
+                          <tr key={asset.id} onClick={() => handleSelectAsset(asset)} className="cursor-pointer hover:bg-gray-50">
                             <td className="py-2 w-[30px]">
                               <input
                                 type="radio"
+                                disabled={!isAssetValid(asset)}
                                 checked={tempSelectedAssetId === asset.id}
-                                onChange={() => handleSelectAsset(asset.id)}
+                                onChange={() => handleSelectAsset(asset)}
                                 className="w-4 h-4 text-primary focus:ring-primary border-gray-300 accent-primary"
                                 onClick={(e) => e.stopPropagation()}
                               />

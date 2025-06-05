@@ -13,7 +13,7 @@ const EditAssignment: React.FC = () => {
   const [initialData, setInitialData] = useState<IAssignmentCreateUpdateRequest | undefined>(undefined);
 
   const [selectedAssetInfo, setSelectedAssetInfo] = useState<{ id: string; name: string; code: string } | undefined>(undefined);
-  const [selectedUserInfo, setSelectedUserInfo] = useState<{ id: string; username: string } | undefined>(undefined);
+  const [selectedUserInfo, setSelectedUserInfo] = useState<{ id: string; username: string; staffCode: string } | undefined>(undefined);
 
   const { useUpdateAssignment, useGetAssignmentDetails } = useAssignment();
   const { mutate: updateAssignmentMutation, isPending: isSubmitting } = useUpdateAssignment();
@@ -38,7 +38,7 @@ const EditAssignment: React.FC = () => {
 
         setInitialData({
           assetId: assignmentData.assetId,
-          assigneeId: assignmentData.assignedToId,
+          assigneeId: assignmentData.assigneeId,
           assignedDate: formattedDate,
           note: assignmentData.note || '',
         });
@@ -51,8 +51,9 @@ const EditAssignment: React.FC = () => {
 
         // Set selected user info for pre-selection in dropdown
         setSelectedUserInfo({
-          id: assignmentData.assignedToId,
+          id: assignmentData.assigneeId,
           username: assignmentData.assignedTo,
+          staffCode: assignmentData.assigneeStaffCode,
         });
       } catch (error) {
         console.error('Error formatting assignment data:', error);

@@ -14,6 +14,7 @@ interface UserSearchDropdownProps {
   selectedUserInfo?: {
     id: string;
     username: string;
+    staffCode: string;
   };
   className?: string;
 }
@@ -32,9 +33,9 @@ const UserSearchDropdown: React.FC<UserSearchDropdownProps> = ({ value, onChange
 
   // Khởi tạo searchTerm với username nếu đang ở chế độ edit và có selectedUserInfo
   useEffect(() => {
-    if (mode === 'edit' && selectedUserInfo && selectedUserInfo.username) {
+    if (mode === 'edit' && selectedUserInfo && selectedUserInfo.staffCode) {
       // Đặt term tìm kiếm để khi mở dropdown sẽ hiển thị user đã chọn
-      setSearchTerm(selectedUserInfo.username);
+      setSearchTerm(selectedUserInfo.staffCode);
     }
   }, [mode, selectedUserInfo]);
 

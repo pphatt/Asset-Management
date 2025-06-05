@@ -33,9 +33,10 @@ export interface IAssginmentDetail {
   assetCode: string;
   assetName: string;
   assignedTo: string;
-  assignedToId: string;
+  assigneeId: string;
+  assigneeStaffCode: string;
   assignedBy: string;
-  assignedById: string;
+  assignorId: string;
   assignedDate: string;
   state: AssignmentState;
   specification: string;
