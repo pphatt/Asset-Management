@@ -1,148 +1,91 @@
 variables:
-
   - name: BuildParameters.RestoreBuildProjects
-
     value: '**/*.csproj'
-
   - name: BuildParameters.TestProjects
-
     value: '**/*[Tt]ests/*.csproj'
-
   - name: BuildConfiguration
-
     value: 'Release'
 
 trigger:
-
   branches:
-
     include:
-
       - main
-
   batch: true
 
 name: $(date:yyyyMMdd)$(rev:.r)
 
 jobs:
-
 - job: BuildAndTest
-
   displayName: Build, Test, and Publish Job
-
   pool:
-
     vmImage: 'windows-latest'
-
   steps:
-
     - checkout: self
-
       fetchDepth: 1
 
     - task: DotNetCoreCLI@2
-
       displayName: Restore
-
       inputs:
-
         command: 'restore'
-
         projects: '$(BuildParameters.RestoreBuildProjects)'
 
     - task: DotNetCoreCLI@2
-
       displayName: Build
-
       inputs:
-
         projects: '$(BuildParameters.RestoreBuildProjects)'
-
         arguments: '--configuration $(BuildConfiguration)'
 
     - task: DotNetCoreCLI@2
-
       displayName: Test with Code Coverage
-
       inputs:
-
         command: 'test'
-
         projects: '$(BuildParameters.TestProjects)'
-
         arguments: '--configuration $(BuildConfiguration) --collect "XPlat Code Coverage"'
-
         publishTestResults: true
 
     - task: PowerShell@2
-
-      name: FindCoverage
-
-      displayName: 'Find Coverage Report Path'
-
+      name: FindCoverageFiles
+      displayName: 'Find Coverage Files'
       inputs:
-
         targetType: 'inline'
-
         script: |
-
-          $coverageFile = Get-ChildItem -Path "$(Agent.TempDirectory)" -Recurse -Filter 'coverage.cobertura.xml' | Select-Object -First 1
-
-          if (-not $coverageFile) {
-
-            Write-Error "coverage.cobertura.xml not found"
-
-            Write-Host "Looking for coverage.cobertura.xml in $(Agent.TempDirectory)"
-            Get-ChildItem -Path "$(Agent.TempDirectory)" -Recurse -Filter 'coverage.cobertura.xml' | ForEach-Object { Write-Host "Found: $($_.FullName)" }
-
+          $coverageFiles = Get-ChildItem -Path "$(Agent.TempDirectory)" -Recurse -Filter 'coverage.cobertura.xml' | ForEach-Object { $_.FullName }
+          if ($coverageFiles.Count -eq 0) {
+            Write-Error "No coverage.cobertura.xml files found"
           } else {
-            
-            Write-Host "##vso[task.setvariable variable=CoverageReportPath]$($coverageFile.FullName)"
-
-            Write-Host "Coverage report path: $($coverageFile.FullName)"
-          
+            $coverageFilesList = $coverageFiles -join ';'
+            Write-Host "##vso[task.setvariable variable=CoverageFiles]$coverageFilesList"
+            Write-Host "Found coverage files: $coverageFilesList"
           }
 
-    - task: PublishCodeCoverageResults@1
-
-      displayName: 'Publish Code Coverage Results'
-
-      condition: and(succeeded(), ne(variables['CoverageReportPath'], ''))
-
+    - task: PowerShell@2
+      displayName: 'Merge Coverage Reports'
+      condition: and(succeeded(), ne(variables['CoverageFiles'], ''))
       inputs:
+        targetType: 'inline'
+        script: |
+          reportgenerator -reports:"$(CoverageFiles)" -targetdir:"$(Build.ArtifactStagingDirectory)/CodeCoverage" -reporttypes:"Cobertura"
 
+    - task: PublishCodeCoverageResults@1
+      displayName: 'Publish Merged Code Coverage Results'
+      condition: and(succeeded(), ne(variables['CoverageFiles'], ''))
+      inputs:
         codeCoverageTool: 'Cobertura'
-
-        summaryFileLocation: '$(CoverageReportPath)'
-
+        summaryFileLocation: '$(Build.ArtifactStagingDirectory)/CodeCoverage/Cobertura.xml'
         reportDirectory: '$(Build.SourcesDirectory)'
 
-
     - task: DotNetCoreCLI@2
-
       displayName: Publish
-
       inputs:
-
         command: 'publish'
-
         publishWebProjects: true
-
         projects: '$(BuildParameters.RestoreBuildProjects)'
-
         arguments: '--configuration $(BuildConfiguration) --output $(build.artifactstagingdirectory)'
-
         zipAfterPublish: true
 
     - task: PublishBuildArtifacts@1
-
       displayName: Publish Artifact
-
       condition: succeededOrFailed()
-
       inputs:
-
         PathtoPublish: '$(build.artifactstagingdirectory)'
-
         TargetPath: '\\my\share\$(Build.DefinitionName)\$(Build.BuildNumber)'
- 
