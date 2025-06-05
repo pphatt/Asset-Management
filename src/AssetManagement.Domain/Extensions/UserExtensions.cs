@@ -16,7 +16,7 @@ namespace AssetManagement.Domain.Extensions
             return query.Where(u =>
                 (u.FirstName + " " + u.LastName).Trim().ToLower().Contains(normalizedSearchTerm) ||
                 (u.LastName + " " + u.FirstName).Trim().ToLower().Contains(normalizedSearchTerm) ||
-                u.StaffCode.Contains(normalizedSearchTerm));
+                u.StaffCode.Trim().ToLower().Contains(normalizedSearchTerm));
         }
 
         public static IQueryable<User> ApplyFilters(this IQueryable<User> query, string? userType, Location userLocation)
