@@ -43,6 +43,13 @@ jobs:
         arguments: '--configuration $(BuildConfiguration) --collect "XPlat Code Coverage"'
         publishTestResults: true
 
+    - task: DotNetCoreCLI@2
+      displayName: 'Install ReportGenerator'
+      inputs:
+        command: 'custom'
+        custom: 'tool'
+        arguments: 'install --global dotnet-reportgenerator-globaltool'
+
     - task: PowerShell@2
       name: FindCoverageFiles
       displayName: 'Find Coverage Files'
