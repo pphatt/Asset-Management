@@ -12,6 +12,7 @@ export default function useAssignmentQuery() {
       sortBy: queryParams.sortBy,
       states: queryParams.states,
       date: queryParams.date,
+      returnedDate: queryParams.returnedDate,
     },
     isUndefined
   );

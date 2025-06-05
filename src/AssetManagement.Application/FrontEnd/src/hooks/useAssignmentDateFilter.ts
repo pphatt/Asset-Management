@@ -1,18 +1,23 @@
 import { useState, useCallback } from "react";
 import { createSearchParams, useNavigate } from "react-router-dom";
-import path from "@/constants/path";
 import useQueryConfig from "@/hooks/useAssignmentQuery";
 import { format, isSameDay } from "date-fns";
+import { QueryConfig } from "@/pages/ReturnRequest/ReturnRequest";
 
-export default function useAssignmentDateFilter() {
+interface Props {
+  path: string;
+  paramName: keyof QueryConfig;
+}
+
+export default function useAssignmentDateFilter({ path, paramName }: Props) {
   const queryConfig = useQueryConfig();
   const navigate = useNavigate();
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
 
   // Parse date from URL query if it exists
   const [selectedDate, setSelectedDate] = useState<Date | null>(() => {
-    if (queryConfig.date) {
-      const parsedDate = new Date(queryConfig.date);
+    if (queryConfig[paramName]) {
+      const parsedDate = new Date(queryConfig[paramName]);
       return isNaN(parsedDate.getTime()) ? null : parsedDate;
     }
     return null;
@@ -27,12 +32,12 @@ export default function useAssignmentDateFilter() {
 
         const config = {
           ...queryConfig,
-          date: "",
+          [paramName]: "",
           pageNumber: "1",
         };
 
         navigate({
-          pathname: path.assignment,
+          pathname: path,
           search: createSearchParams(config).toString(),
         });
       } else {
@@ -43,12 +48,12 @@ export default function useAssignmentDateFilter() {
 
         const config = {
           ...queryConfig,
-          date: formattedDate,
+          [paramName]: formattedDate,
           pageNumber: "1",
         };
 
         navigate({
-          pathname: path.assignment,
+          pathname: path,
           search: createSearchParams(config).toString(),
         });
       }

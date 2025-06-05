@@ -1,4 +1,3 @@
-import path from "@/constants/path";
 import useQueryConfig from "@/hooks/useAssignmentQuery";
 import { querySchema } from "@/utils/rules";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -8,7 +7,11 @@ import { createSearchParams, useNavigate } from "react-router-dom";
 // type FormData = { searchName: string | undefined };
 const nameSchema = querySchema.pick(["searchName"]);
 
-export default function useAssignmentSearch() {
+interface Props {
+  path: string;
+}
+
+export default function useAssignmentSearch({ path }: Props) {
   const queryConfig = useQueryConfig();
   const navigate = useNavigate();
 
@@ -23,10 +26,10 @@ export default function useAssignmentSearch() {
     const config = {
       ...queryConfig,
       searchTerm: data.searchName ?? "",
-      pageNumber: "1"
+      pageNumber: "1",
     };
     navigate({
-      pathname: path.assignment,
+      pathname: path,
       search: createSearchParams(config).toString(),
     });
   });

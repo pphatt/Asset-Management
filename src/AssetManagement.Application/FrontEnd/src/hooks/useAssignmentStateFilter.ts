@@ -1,5 +1,4 @@
 import { ASSIGNMENT_STATE } from "@/constants/assignment-params";
-import path from "@/constants/path";
 import useQueryConfig from "@/hooks/useAssignmentQuery";
 import { querySchema } from "@/utils/rules";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -17,6 +16,8 @@ const nameSchema = querySchema.pick(["states"]);
 const formatStateForDisplay = (state: string) => {
   if (state === "WaitingForAcceptance")
     return ASSIGNMENT_STATE.WAITING_FOR_ACCEPTANCE;
+  if (state === "WaitingForReturning")
+    return ASSIGNMENT_STATE.WAITING_FOR_RETURNING;
   return state;
 };
 
@@ -24,10 +25,16 @@ const formatStateForDisplay = (state: string) => {
 const formatStateForApi = (state: string) => {
   if (state === ASSIGNMENT_STATE.WAITING_FOR_ACCEPTANCE)
     return "WaitingForAcceptance";
+  if (state === ASSIGNMENT_STATE.WAITING_FOR_RETURNING)
+    return "WaitingForReturning";
   return state;
 };
 
-export default function useAssignmentStateFilter() {
+interface Props {
+  path: string;
+}
+
+export default function useAssignmentStateFilter({ path }: Props) {
   const queryConfig = useQueryConfig();
   const navigate = useNavigate();
 
@@ -72,19 +79,10 @@ export default function useAssignmentStateFilter() {
     };
 
     navigate({
-      pathname: path.assignment,
+      pathname: path,
       search: createSearchParams(config).toString(),
     });
   };
-
-  const stateOptions = [
-    { value: "All", label: "All" },
-    { value: "Accepted", label: "Accepted" },
-    {
-      value: ASSIGNMENT_STATE.WAITING_FOR_ACCEPTANCE,
-      label: "Waiting for acceptance",
-    },
-  ];
 
   // Check if a state is currently selected
   const isStateSelected = (stateValue: string) => {
@@ -93,7 +91,6 @@ export default function useAssignmentStateFilter() {
 
   return {
     handleStateChange,
-    stateOptions,
     isStateSelected,
     selectedStates: initialStates,
   };

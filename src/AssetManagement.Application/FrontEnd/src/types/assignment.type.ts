@@ -18,7 +18,8 @@ export type AssignmentState =
   | "Accepted"
   | "Declined"
   | "Returned"
-  | "Waiting for acceptance";
+  | "Waiting for acceptance"
+  | "Waiting for returning";
 
 export interface IAssignmentParams {
   searchTerm?: string;
@@ -27,6 +28,7 @@ export interface IAssignmentParams {
   states?: string[];
   // Accepted,Declined,Returned,Waiting for acceptance
   date?: string;
+  returnedDate?: string;
   pageNumber?: number;
   pageSize?: number;
 }

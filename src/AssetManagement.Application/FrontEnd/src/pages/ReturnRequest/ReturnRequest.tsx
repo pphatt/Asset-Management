@@ -1,14 +1,14 @@
-import assignmentApi from "@/apis/assigment.api";
-import AssignmentDetailsPopup from "@/components/assignment/AssignmentDetailsPopup";
+import returnRequestApi from "@/apis/returnRequest.api";
 import Pagination from "@/components/assignment/Pagination";
 import TableSkeleton from "@/components/common/TableSkeleton";
+import { ASSIGNMENT_STATE } from "@/constants/assignment-params";
 import path from "@/constants/path";
 import useAssignmentDateFilter from "@/hooks/useAssignmentDateFilter";
 import useAssignmentQuery from "@/hooks/useAssignmentQuery";
 import useAssignmentSearch from "@/hooks/useAssignmentSearch";
 import useAssignmentStateFilter from "@/hooks/useAssignmentStateFilter";
 import "@/styles/datepicker.css"; // Import custom styles
-import { IAssignment, IAssignmentParams } from "@/types/assignment.type";
+import { IReturnRequestParams } from "@/types/returnRequest.type";
 import {
   isAssignmentModifiable,
   getAssignmentEditMessage,
@@ -18,40 +18,31 @@ import { isSameDay } from "date-fns";
 import { useEffect, useRef, useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { createSearchParams, NavLink, useNavigate } from "react-router-dom";
-import AssignmentDisabledPopup from "./AssignmentDisabledPopup";
-import AssignmentReturnPopup from "./AssignmentReturnPopup";
-import { ASSIGNMENT_STATE } from "@/constants/assignment-params";
+import { createSearchParams, useNavigate } from "react-router-dom";
 
 export type QueryConfig = {
-  [key in keyof IAssignmentParams]: string;
+  [key in keyof IReturnRequestParams]: string;
 };
 
-export default function Assignment() {
-  // Add state for the selected assignment and popup
-  const [selectedAssignment, setSelectedAssignment] =
-    useState<IAssignment | null>(null);
-  const [isPopupOpen, setIsPopupOpen] = useState(false);
-  const [isDisabledPopupOpen, setIsDisabledPopupOpen] = useState(false);
-  const [isReturnPopupOpen, setIsReturnPopupOpen] = useState(false);
+export default function ReturnRequest() {
   const [isStateDropdownOpen, setIsStateDropdownOpen] = useState(false);
   const queryConfig = useAssignmentQuery();
   const navigate = useNavigate();
   const { onSubmitSearch, register: searchRegister } = useAssignmentSearch({
-    path: path.assignment,
+    path: path.request,
   });
 
   const stateOptions = [
     { value: "All", label: "All" },
-    { value: "Accepted", label: "Accepted" },
+    { value: "Completed", label: "Completed" },
     {
-      value: ASSIGNMENT_STATE.WAITING_FOR_ACCEPTANCE,
-      label: "Waiting for acceptance",
+      value: ASSIGNMENT_STATE.WAITING_FOR_RETURNING,
+      label: "Waiting for returning",
     },
   ];
 
   const { handleStateChange, isStateSelected, selectedStates } =
-    useAssignmentStateFilter({ path: path.assignment });
+    useAssignmentStateFilter({ path: path.request });
 
   const {
     selectedDate,
@@ -61,8 +52,8 @@ export default function Assignment() {
     setIsDatePickerOpen,
     toggleDatePicker,
   } = useAssignmentDateFilter({
-    path: path.assignment,
-    paramName: "date",
+    path: path.request,
+    paramName: "returnedDate",
   });
 
   const datePickerRef = useRef<HTMLDivElement>(null);
@@ -96,30 +87,16 @@ export default function Assignment() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Handle browser back/forward navigation to close popups
-  useEffect(() => {
-    const handlePopState = () => {
-      setIsPopupOpen(false);
-      setIsDisabledPopupOpen(false);
-      setIsReturnPopupOpen(false);
-      setIsStateDropdownOpen(false);
-      setIsDatePickerOpen(false);
-    };
-
-    window.addEventListener("popstate", handlePopState);
-    return () => window.removeEventListener("popstate", handlePopState);
-  }, [setIsDatePickerOpen]);
-
   const { data, isLoading } = useQuery({
-    queryKey: ["assignments", queryConfig],
+    queryKey: ["returnRequests", queryConfig],
     queryFn: () => {
-      return assignmentApi.getAssignments(queryConfig as IAssignmentParams);
+      return returnRequestApi.getRequests(queryConfig as IReturnRequestParams);
     },
     placeholderData: (prevData) => prevData,
     staleTime: 3 * 60 * 1000,
   });
 
-  const assignments = data?.data.data.items || [];
+  const returnRequests = data?.data.data.items || [];
 
   // Parse current sort information from query config
   const parseSortCriteria = (sortString: string | undefined) => {
@@ -172,7 +149,7 @@ export default function Assignment() {
     */
 
     navigate({
-      pathname: path.assignment,
+      pathname: path.request,
       search: createSearchParams({
         ...queryConfig,
         sortBy: newSortBy,
@@ -185,9 +162,10 @@ export default function Assignment() {
     { key: "no", label: "No.", sortable: true },
     { key: "assetcode", label: "Asset Code", sortable: true },
     { key: "assetname", label: "Asset Name", sortable: true },
-    { key: "assignedto", label: "Assigned to", sortable: true },
-    { key: "assignedby", label: "Assigned by", sortable: true },
+    { key: "requestedby", label: "Requested by", sortable: true },
     { key: "assigneddate", label: "Assigned Date", sortable: true },
+    { key: "acceptedby", label: "Accepted by", sortable: true },
+    { key: "returneddate", label: "Returned Date", sortable: true },
     { key: "state", label: "State", sortable: true },
   ];
 
@@ -244,20 +222,9 @@ export default function Assignment() {
     );
   };
 
-  // Handle row click to open the popup
-  const handleRowClick = (assignment: IAssignment) => {
-    setSelectedAssignment(assignment);
-    setIsPopupOpen(true);
-  };
-
-  // Close the popup
-  const handleClosePopup = () => {
-    setIsPopupOpen(false);
-  };
-
   return (
     <div className="w-full max-w-6xl mx-auto px-4 py-6">
-      <h2 className="text-primary text-xl font-normal mb-5">Assignment List</h2>
+      <h2 className="text-primary text-xl font-normal mb-5">Request List</h2>
 
       <div className="flex justify-between mb-4">
         <div className="flex gap-2">
@@ -332,7 +299,7 @@ export default function Assignment() {
               <input
                 type="text"
                 readOnly
-                placeholder="Assigned Date"
+                placeholder="Returned Date"
                 value={displayDate}
                 className="w-full h-[34px] text-sm py-1.5 px-2 border border-quaternary rounded-l bg-white cursor-pointer"
                 onClick={toggleDatePicker}
@@ -513,13 +480,6 @@ export default function Assignment() {
               </svg>
             </button>
           </form>
-
-          <NavLink
-            to={path.assignmentCreate}
-            className="bg-primary text-white rounded px-3 py-2 text-sm hover:opacity-90"
-          >
-            Create new assignment
-          </NavLink>
         </div>
       </div>
 
@@ -543,13 +503,9 @@ export default function Assignment() {
           </tr>
         </thead>
         <tbody>
-          {assignments && assignments.length > 0 ? (
-            assignments.map((assignment) => (
-              <tr
-                className="hover:bg-gray-50 cursor-pointer"
-                key={assignment.id}
-                onClick={() => handleRowClick(assignment)}
-              >
+          {returnRequests && returnRequests.length > 0 ? (
+            returnRequests.map((assignment, index) => (
+              <tr className="hover:bg-gray-50 cursor-pointer" key={index}>
                 <td className="py-2 relative after:absolute after:bottom-0 after:left-0 after:w-[calc(100%-20px)] after:h-[1px] after:bg-gray-300">
                   {assignment.no}
                 </td>
@@ -560,13 +516,16 @@ export default function Assignment() {
                   {assignment.assetName}
                 </td>
                 <td className="py-2 relative after:absolute after:bottom-0 after:left-0 after:w-[calc(100%-20px)] after:h-[1px] after:bg-gray-300">
-                  {assignment.assignedTo}
-                </td>
-                <td className="py-2 relative after:absolute after:bottom-0 after:left-0 after:w-[calc(100%-20px)] after:h-[1px] after:bg-gray-300">
-                  {assignment.assignedBy}
+                  {assignment.requestedBy}
                 </td>
                 <td className="py-2 relative after:absolute after:bottom-0 after:left-0 after:w-[calc(100%-20px)] after:h-[1px] after:bg-gray-300">
                   {assignment.assignedDate}
+                </td>
+                <td className="py-2 relative after:absolute after:bottom-0 after:left-0 after:w-[calc(100%-20px)] after:h-[1px] after:bg-gray-300">
+                  {assignment.acceptedBy || ""}
+                </td>
+                <td className="py-2 relative after:absolute after:bottom-0 after:left-0 after:w-[calc(100%-20px)] after:h-[1px] after:bg-gray-300">
+                  {assignment.returnedDate || ""}
                 </td>
                 <td className="py-2 relative after:absolute after:bottom-0 after:left-0 after:w-[calc(100%-20px)] after:h-[1px] after:bg-gray-300">
                   {assignment.state}
@@ -580,10 +539,9 @@ export default function Assignment() {
                           ? "hover:text-gray-700"
                           : "opacity-50 cursor-not-allowed"
                       }`}
-                      disabled={!isAssignmentModifiable(assignment.state)}
                       title={
                         getAssignmentEditMessage(assignment.state) ||
-                        "Edit assignment"
+                        "Edit Request"
                       }
                       onClick={(e) => {
                         e.stopPropagation();
@@ -626,12 +584,6 @@ export default function Assignment() {
                           ? "hover:text-red-700"
                           : "opacity-50 cursor-not-allowed"
                       }`}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        // Delete action
-                        setIsDisabledPopupOpen(true);
-                        setSelectedAssignment(assignment);
-                      }}
                     >
                       <svg
                         width="14"
@@ -655,35 +607,6 @@ export default function Assignment() {
                         />
                       </svg>
                     </button>
-                    {/* Return assignment icon */}
-                    <button
-                      className={`text-blue-600 hover:text-blue-800 ${
-                        assignment.state !== "Accepted"
-                          ? "opacity-50 cursor-not-allowed"
-                          : ""
-                      }`}
-                      disabled={assignment.state !== "Accepted"}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setIsReturnPopupOpen(true);
-                        setSelectedAssignment(assignment);
-                      }}
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        strokeWidth="1.5"
-                        stroke="currentColor"
-                        className="size-4"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99"
-                        />
-                      </svg>
-                    </button>
                   </div>
                 </td>
               </tr>
@@ -704,31 +627,10 @@ export default function Assignment() {
         data.data.data.paginationMetadata && (
           <Pagination
             queryConfig={queryConfig}
-            pathName={path.assignment}
+            pathName={path.request}
             totalPage={data?.data.data.paginationMetadata.totalPages}
           />
         )}
-
-      {/* Assignment Details Popup */}
-      {selectedAssignment && (
-        <AssignmentDetailsPopup
-          assignment={selectedAssignment}
-          isOpen={isPopupOpen}
-          onClose={handleClosePopup}
-        />
-      )}
-
-      <AssignmentDisabledPopup
-        assignmentId={selectedAssignment?.id ?? ""}
-        isOpen={isDisabledPopupOpen}
-        onClose={() => setIsDisabledPopupOpen(false)}
-      />
-
-      <AssignmentReturnPopup
-        assignmentId={selectedAssignment?.id ?? ""}
-        isOpen={isReturnPopupOpen}
-        onClose={() => setIsReturnPopupOpen(false)}
-      />
     </div>
   );
 }
