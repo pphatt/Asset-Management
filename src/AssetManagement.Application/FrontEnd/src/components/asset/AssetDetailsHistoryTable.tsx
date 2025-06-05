@@ -42,14 +42,14 @@ const AssetDetailsHistoryTable: React.FC<{
               </td>
 
               <td className="py-2 relative w-[80px] after:absolute after:bottom-0 after:left-0 after:w-[calc(100%-20px)] after:h-[1px] after:bg-gray-300">
-                {history.returnedDate}
+                {history.returnedDate ?? "-"}
               </td>
             </tr>
           ))
         ) : (
           <tr>
             <td colSpan={6} className="py-4 text-center text-gray-500">
-              No asset details history.
+              No available assignment history.
             </td>
           </tr>
         )}

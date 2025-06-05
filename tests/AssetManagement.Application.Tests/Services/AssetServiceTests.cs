@@ -98,17 +98,13 @@ public class AssetServiceTests
             Name = "Laptop A",
             State = AssetState.Available,
             Category = new Category { Id = categoryId, Name = "Electronics" },
-            InstalledDate = new DateTime(2023, 1, 1),
+            InstalledDate = new DateTimeOffset(2023, 1, 1, 0, 0, 0, TimeSpan.Zero),
             Location = Location.HCM,
             Specification = "Intel i7, 16GB RAM"
         };
 
-        _assetRepository.Setup(repo => repo.GetSingleAsync(
-                It.IsAny<Expression<Func<Asset, bool>>>(),
-                It.IsAny<CancellationToken>(),
-                false,
-                It.IsAny<Expression<Func<Asset, object>>[]>()))
-            .ReturnsAsync(asset);
+        _assetRepository.Setup(repo => repo.GetAll())
+            .Returns(new List<Asset>([asset]).AsQueryable().BuildMock());
 
         // Act
         var result = await _assetService.GetAssetByIdAsync(assetId);
@@ -121,7 +117,7 @@ public class AssetServiceTests
         Assert.Equal("Available", result.State);
         Assert.Equal("Electronics", result.CategoryName);
         Assert.Equal("HCM", result.Location);
-        Assert.Equal(new DateTime(2023, 1, 1), result.InstalledDate);
+        Assert.Equal(new DateTimeOffset(2023, 1, 1, 0, 0, 0, TimeSpan.Zero), result.InstalledDate);
         Assert.Equal("Intel i7, 16GB RAM", result.Specification);
     }
 
@@ -131,12 +127,8 @@ public class AssetServiceTests
         // Arrange
         var assetId = Guid.NewGuid();
 
-        _assetRepository.Setup(repo => repo.GetSingleAsync(
-                It.IsAny<Expression<Func<Asset, bool>>>(),
-                It.IsAny<CancellationToken>(),
-                false,
-                It.IsAny<Expression<Func<Asset, object>>[]>()))
-            .ReturnsAsync((Asset?)null);
+        _assetRepository.Setup(repo => repo.GetAll())
+            .Returns(new List<Asset>().AsQueryable().BuildMock());
 
         // Act & Assert
         var exception = await Assert.ThrowsAsync<KeyNotFoundException>(() => _assetService.GetAssetByIdAsync(assetId));

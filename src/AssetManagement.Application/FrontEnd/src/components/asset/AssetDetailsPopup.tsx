@@ -1,6 +1,6 @@
 import type React from "react";
 import { X } from "lucide-react";
-import { IAssetDetails, IAssetDetailsHistory } from "@/types/asset.type.ts";
+import { IAssetDetails } from "@/types/asset.type.ts";
 import AssetDetailsHistoryTable from "@/components/asset/AssetDetailsHistoryTable.tsx";
 
 interface AssetDetailsPopupProps {
@@ -15,34 +15,6 @@ const AssetDetailsPopup: React.FC<AssetDetailsPopupProps> = ({
   onClose,
 }) => {
   if (!isOpen || !asset) return null;
-
-  const formatDate = (dateString: string): string => {
-    if (!dateString) return "";
-
-    const date = new Date(dateString);
-
-    // Check if the date is valid
-    if (isNaN(date.getTime())) {
-      return "Invalid date";
-    }
-
-    return date.toLocaleDateString("en-GB");
-  };
-
-  const mockupAssetHistory: IAssetDetailsHistory[] = [
-    {
-      date: "12/10/2018",
-      assignedTo: "hungtv1",
-      assignedBy: "binhnv",
-      returnedDate: "07/03/2019",
-    },
-    {
-      date: "10/03/2019",
-      assignedTo: "thinhptx",
-      assignedBy: "tuanha",
-      returnedDate: "22/03/2020",
-    },
-  ];
 
   return (
     <div className="fixed inset-0 bg-opacity-5 border-black-50 flex items-center justify-center z-50">
@@ -75,7 +47,7 @@ const AssetDetailsPopup: React.FC<AssetDetailsPopupProps> = ({
             <div>{asset.categoryName}</div>
 
             <div className="text-gray-600">Installed Date</div>
-            <div>{formatDate(asset.installedDate)}</div>
+            <div>{asset.installedDate}</div>
 
             <div className="text-gray-600">State</div>
             <div>{asset.state}</div>
@@ -87,9 +59,7 @@ const AssetDetailsPopup: React.FC<AssetDetailsPopupProps> = ({
             <div>{asset.specification}</div>
 
             <div className="text-gray-600">History</div>
-            <AssetDetailsHistoryTable
-              assetDetailsHistory={mockupAssetHistory}
-            />
+            <AssetDetailsHistoryTable assetDetailsHistory={asset.assignments} />
           </div>
         </div>
       </div>

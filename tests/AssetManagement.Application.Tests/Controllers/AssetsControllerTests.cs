@@ -112,17 +112,18 @@ public class AssetsControllerTests
         // Arrange
         var categoryId = Guid.NewGuid();
         var assetId = Guid.NewGuid();
-        var expectedAsset = new AssetDetailsDto(
-            assetId,
-            "LP000123",
-            "MacBook Pro 2022",
-            "Available",
-            "Laptop",
-            DateTimeOffset.UtcNow.AddYears(1),
-            "HN",
-            "M1 Pro, 16GB RAM, 512GB SSD",
-            categoryId
-        );
+        var expectedAsset = new AssetDetailsDto
+        {
+            Id = assetId,
+            Code = "LP000123",
+            Name = "MacBook Pro 2022",
+            State = "Available",
+            CategoryName = "Laptop",
+            InstalledDate = DateTimeOffset.UtcNow.AddYears(1),
+            Location = "HN",
+            Specification = "M1 Pro, 16GB RAM, 512GB SSD",
+            CategoryId = categoryId
+        };
 
         _assetServiceMock.Setup(s => s.GetAssetByIdAsync(assetId))
             .ReturnsAsync(expectedAsset)

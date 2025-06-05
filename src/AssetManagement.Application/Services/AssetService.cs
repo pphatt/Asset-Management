@@ -50,7 +50,9 @@ namespace AssetManagement.Application.Services
 
             IQueryable<Asset> query = _assetRepository.GetAll()
                 .AsNoTracking()
+                .AsSplitQuery()
                 .Include(a => a.Category)
+                .Include(a => a.Assignments)
                 .ApplySearch(queryParams.SearchTerm)
                 .ApplyFilters(queryParams.AssetStates, queryParams.AssetCategories, currentAdminLocation)
                 .ApplySorting(queryParams.GetSortCriteria())
@@ -67,7 +69,8 @@ namespace AssetManagement.Application.Services
                     Code = u.Code,
                     Name = u.Name,
                     CategoryName = u.Category.Name,
-                    State = u.State.GetDisplayName()
+                    State = u.State.GetDisplayName(),
+                    HasAssignments = u.Assignments.Count > 0
                 })
                 .ToListAsync();
 
@@ -76,27 +79,42 @@ namespace AssetManagement.Application.Services
 
         public async Task<AssetDetailsDto> GetAssetByIdAsync(Guid id)
         {
-            var asset = await _assetRepository.GetSingleAsync(
-                x => x.Id == id && x.IsDeleted != true,
-                new CancellationToken(),
-                false,
-                x => x.Category);
+            var asset = await _assetRepository
+                .GetAll()
+                .AsNoTracking()
+                .AsSplitQuery()
+                .Include(x => x.Category)
+                .Include(x => x.Assignments)
+                    .ThenInclude(a => a.Assignee)
+                .Include(x => x.Assignments)
+                    .ThenInclude(a => a.Assignor)
+                .FirstOrDefaultAsync(x => x.Id == id && x.IsDeleted != true);
 
             if (asset == null)
             {
                 throw new KeyNotFoundException($"Cannot find asset with id {id}");
             }
 
-            var result = new AssetDetailsDto(
-                asset.Id,
-                asset.Code,
-                asset.Name,
-                asset.State.GetDisplayName(),
-                asset.Category.Name,
-                asset.InstalledDate,
-                asset.Location.GetDisplayName(),
-                asset.Specification,
-                asset.CategoryId);
+            var result = new AssetDetailsDto
+            {
+                Id = asset.Id,
+                Code = asset.Code,
+                Name = asset.Name,
+                State = asset.State.GetDisplayName(),
+                CategoryId = asset.CategoryId,
+                CategoryName = asset.Category.Name,
+                InstalledDate = asset.InstalledDate,
+                Location = asset.Location.GetDisplayName(),
+                Specification = asset.Specification,
+                HasAssignments = asset.Assignments.Any(),
+                Assignments = asset.Assignments.Select(x => new AssignmentHistoryDto
+                {
+                    Date = x.AssignedDate.ToString("dd/MM/yyyy"),
+                    AssignedBy = x.Assignor.Username,
+                    AssignedTo = x.Assignee.Username,
+                    ReturnedDate = x.ReturnRequest?.ReturnedDate.ToString("dd/MM/yyyy"),
+                }).ToList(),
+            };
 
             return result;
         }

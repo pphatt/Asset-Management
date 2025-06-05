@@ -1,3 +1,5 @@
+using System.Diagnostics;
+
 namespace AssetManagement.Contracts.DTOs;
 
 public class AssetDto
@@ -7,4 +9,5 @@ public class AssetDto
     public string? Name { get; set; }
     public string? State { get; set; }
     public string? CategoryName { get; set; }
+    public bool? HasAssignments { get; set; }
 }

@@ -37,5 +37,4 @@ public class AssetRepository : GenericRepository<Asset>, IAssetRepository
 
         return await query.SingleOrDefaultAsync(predicate, cancellationToken);
     }
-
 }

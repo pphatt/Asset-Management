@@ -67,7 +67,8 @@ namespace AssetManagement.Application.Services
                     StaffCode = u.StaffCode,
                     Type = u.Type.ToString(),
                     Username = u.Username,
-                    HasAssignment = u.Assignments.Count > 0,
+                    HasAssignments = u.Assignments.Where(x => x.State == AssignmentState.Accepted || 
+                                                              x.State == AssignmentState.WaitingForReturning).Count() > 0,
                 })
                 .ToListAsync();
 

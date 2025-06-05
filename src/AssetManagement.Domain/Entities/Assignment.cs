@@ -1,4 +1,5 @@
 using AssetManagement.Domain.Enums;
+using MassTransit;
 
 namespace AssetManagement.Domain.Entities
 {
@@ -16,5 +17,7 @@ namespace AssetManagement.Domain.Entities
         public DateTimeOffset AssignedDate { get; set; }
         public string? Note { get; set; }
         public AssignmentState State { get; set; }
+
+        public ReturnRequest? ReturnRequest { get; set; }
     }
 }

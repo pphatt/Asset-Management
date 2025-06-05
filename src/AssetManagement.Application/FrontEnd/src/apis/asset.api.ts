@@ -22,10 +22,10 @@ const assetApi = {
     return data;
   },
 
-  getAssetByAssetCode: async (
-    assetCode: string,
+  getAssetByAssetId: async (
+    assetId: string,
   ): Promise<HttpResponse<IAssetDetails>> => {
-    const { data } = await http.get(`/assets/${assetCode}`);
+    const { data } = await http.get(`/assets/${assetId}`);
     return data;
   },
 
@@ -50,10 +50,12 @@ const assetApi = {
     return data;
   },
 
-  getReport: async (params: IAssetReportParams = {}): Promise<HttpResponse<IAssetReport[]>> => {
+  getReport: async (
+    params: IAssetReportParams = {},
+  ): Promise<HttpResponse<IAssetReport[]>> => {
     const { data } = await http.get("/assets/report", { params });
     return data;
-  }
+  },
 };
 
 export default assetApi;

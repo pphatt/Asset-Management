@@ -15,7 +15,7 @@ import AssetTable from "./AssetTable";
 import ActiveFilters from "./ActiveFilters";
 import AssetStateDropdown from "./AssetStateDropdown";
 import AssetDetailsPopup from "@/components/asset/AssetDetailsPopup.tsx";
-import { IAssetDetails } from "@/types/asset.type.ts";
+import { IAsset, IAssetDetails } from "@/types/asset.type.ts";
 import { IAssetParams } from "@/types/asset.type";
 import path from "@/constants/path.ts";
 import { useNavigate } from "react-router-dom";
@@ -43,7 +43,7 @@ const AssetList: React.FC = () => {
   ) as React.RefObject<HTMLDivElement>;
 
   // View asset details
-  const [selectedAssetCode, setSelectedAssetCode] = useState<string>("");
+  const [selectedAssetId, setSelectedAssetId] = useState<string>("");
   const [selectedAsset, setSelectedAsset] = useState<IAssetDetails | null>(
     null,
   );
@@ -51,7 +51,7 @@ const AssetList: React.FC = () => {
 
   // Disable asset
   const [confirmDeleteModal, setConfirmDeleteModal] = useState(false);
-  const [assetToDelete, setAssetToDelete] = useState<string | null>(null);
+  const [assetToDelete, setAssetToDelete] = useState<IAsset | null>(null);
 
   const [queryParams, setQueryParams] = useAssetFilterState();
 
@@ -68,7 +68,7 @@ const AssetList: React.FC = () => {
     data: fetchedAssetDetails,
     isError: isAssetDetailsError,
     error: assetDetailsError,
-  } = useAssetByAssetCode(selectedAssetCode);
+  } = useAssetByAssetCode(selectedAssetId);
 
   const { mutate: deleteAssetMutation, isPending: isDeleting } =
     useDeleteAsset();
@@ -198,8 +198,8 @@ const AssetList: React.FC = () => {
     }));
   }, [setQueryParams]);
 
-  const handleViewAssetDetails = useCallback((assetCode: string) => {
-    setSelectedAssetCode(assetCode);
+  const handleViewAssetDetails = useCallback((assetId: string) => {
+    setSelectedAssetId(assetId);
   }, []);
 
   /**
@@ -210,8 +210,9 @@ const AssetList: React.FC = () => {
    * @technique UseCallback
    */
   const handleDeleteAsset = useCallback(
-    (assetId: string) => {
-      setAssetToDelete(assetId);
+    (asset: IAsset) => {
+      console.log(asset);
+      setAssetToDelete(asset);
       setConfirmDeleteModal(true);
     },
     [assetData?.items],
@@ -225,7 +226,7 @@ const AssetList: React.FC = () => {
    */
   const confirmDeleteAsset = useCallback(() => {
     if (assetToDelete) {
-      deleteAssetMutation(assetToDelete, {
+      deleteAssetMutation(assetToDelete.id, {
         onSuccess: () => {
           refetchAssets();
           setConfirmDeleteModal(false);
@@ -257,7 +258,7 @@ const AssetList: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (fetchedAssetDetails && selectedAssetCode) {
+    if (fetchedAssetDetails && selectedAssetId) {
       const assetDetails: IAssetDetails = {
         id: fetchedAssetDetails.id,
         name: fetchedAssetDetails.name,
@@ -268,24 +269,25 @@ const AssetList: React.FC = () => {
         specification: fetchedAssetDetails.specification,
         location: fetchedAssetDetails.location,
         state: fetchedAssetDetails.state,
-        history: fetchedAssetDetails.history,
+        assignments: fetchedAssetDetails.assignments,
+        hasAssignments: fetchedAssetDetails.hasAssignments,
       };
 
       setSelectedAsset(assetDetails);
       setIsDetailsPopupOpen(true);
 
       // Reset the selectedAssetCode to prevent re-fetching
-      setSelectedAssetCode("");
+      setSelectedAssetId("");
     }
-  }, [fetchedAssetDetails, selectedAssetCode]);
+  }, [fetchedAssetDetails, selectedAssetId]);
 
   // Handle API errors
   useEffect(() => {
-    if (isAssetDetailsError && selectedAssetCode) {
+    if (isAssetDetailsError && selectedAssetId) {
       console.error("Error fetching user details:", assetDetailsError);
-      setSelectedAssetCode(""); // Reset on error
+      setSelectedAssetId(""); // Reset on error
     }
-  }, [isAssetDetailsError, assetDetailsError, selectedAssetCode]);
+  }, [isAssetDetailsError, assetDetailsError, selectedAssetId]);
 
   return (
     <div>
@@ -310,7 +312,6 @@ const AssetList: React.FC = () => {
           />
         </div>
         <div className="flex items-center">
-          {" "}
           <div className="flex items-center justify-between">
             <input
               type="text"
@@ -391,9 +392,17 @@ const AssetList: React.FC = () => {
         />
 
         {/* Disable Asset Popup */}
-        {confirmDeleteModal && (
+        {assetToDelete && (
           <DisableAssetPopup
-            isOpen={true}
+            asset={{
+              id: assetToDelete.id,
+              code: assetToDelete.code,
+              name: assetToDelete.name,
+              categoryName: assetToDelete.categoryName,
+              state: assetToDelete.state,
+              hasAssignments: assetToDelete.hasAssignments,
+            }}
+            isOpen={confirmDeleteModal}
             isDisabled={isDeleting}
             onClose={closeDeleteModal}
             onConfirm={confirmDeleteAsset}

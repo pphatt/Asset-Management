@@ -1,6 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback } from "react";
-import { IAssetParams, ICreateAssetRequest, IUpdateAssetRequest } from "@/types/asset.type";
+import {
+  IAssetParams,
+  ICreateAssetRequest,
+  IUpdateAssetRequest,
+} from "@/types/asset.type";
 import { AssetField, getAssetApiField } from "@/constants/asset-params";
 import assetApi from "@/apis/asset.api";
 import { STORAGE_KEYS } from "@/constants/user-params";
@@ -63,11 +67,11 @@ export function useAsset() {
     });
   }
 
-  function useAssetByAssetCode(assetCode: string) {
+  function useAssetByAssetId(assetId: string) {
     return useQuery({
-      queryKey: ["asset", assetCode],
+      queryKey: ["asset", assetId],
       queryFn: async () => {
-        const response = await assetApi.getAssetByAssetCode(assetCode);
+        const response = await assetApi.getAssetByAssetId(assetId);
         if (response.success && response.data) {
           return response.data;
         }
@@ -123,7 +127,7 @@ export function useAsset() {
       onError: (err: any) => {
         const errMsg = err.response?.data?.errors;
         toast.error(errMsg?.[0] || "Error deleting asset");
-      }
+      },
     });
   }
 
@@ -138,9 +142,7 @@ export function useAsset() {
       }) => assetApi.updateAsset(assetId, assetData),
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ["asset"] });
-        queryClient.invalidateQueries(
-          { queryKey: ["assets"], exact: false },
-        );
+        queryClient.invalidateQueries({ queryKey: ["assets"], exact: false });
         setQueryParams((prev) => ({
           ...prev,
           // currently keep this as a fixed string (TODO: refactor this)
@@ -160,11 +162,11 @@ export function useAsset() {
   return {
     useAssetList,
     useAssetStates,
-    useAssetByAssetCode,
+    useAssetByAssetCode: useAssetByAssetId,
     getCurrentAdminLocation,
     useCreateAsset,
     useDeleteAsset,
-    useUpdateAsset
+    useUpdateAsset,
   };
 }
 

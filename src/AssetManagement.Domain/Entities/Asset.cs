@@ -11,4 +11,6 @@ public class Asset : BaseEntity
     public string Specification { get; set; } = string.Empty;
     public Guid CategoryId { get; set; }
     public Category Category { get; set; } = null!;
+
+    public ICollection<Assignment> Assignments { get; set; } = new List<Assignment>();
 }

@@ -24,13 +24,14 @@ export const GetAssetState = (state: IAssetState | undefined) => {
     default:
       return undefined;
   }
-}
+};
 export interface IAsset {
   id: string;
   code: string;
   name: string;
   categoryName: string;
   state: IAssetState;
+  hasAssignments: boolean;
 }
 
 export interface IAssetCategory {
@@ -59,8 +60,9 @@ export interface IAssetDetails {
   specification: string;
   location: LocationEnum;
   state: IAssetState;
-  history: IAssetDetailsHistory[];
+  assignments: IAssetDetailsHistory[];
   categoryId?: string;
+  hasAssignments: boolean;
 }
 
 export interface IAssetDetailsHistory {
@@ -78,6 +80,4 @@ export interface ICreateAssetRequest {
   state: number;
 }
 
-export interface IUpdateAssetRequest extends ICreateAssetRequest {
-
-}
+export interface IUpdateAssetRequest extends ICreateAssetRequest {}

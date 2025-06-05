@@ -8,8 +8,8 @@ const AssetTable: React.FC<{
   isLoading: boolean;
   sortBy: string | undefined;
   onSort: (key: string) => void;
-  onDelete: (assetId: string) => void;
-  onViewDetails: (assetCode: string) => void;
+  onDelete: (asset: IAsset) => void;
+  onViewDetails: (assetId: string) => void;
 }> = ({ assets, isLoading, sortBy, onSort, onDelete, onViewDetails }) => {
   const navigate = useNavigate();
   const columns = [
@@ -124,7 +124,7 @@ const AssetTable: React.FC<{
                     onClick={(e) => {
                       e.stopPropagation();
                       if (asset.state != "Assigned") {
-                        onDelete(asset.id);
+                        onDelete(asset);
                       }
                     }}
                     disabled={asset.state === "Assigned"}
