@@ -66,5 +66,28 @@ namespace AssetManagement.Application.Controllers
 
             return this.ToApiResponse(returnRequest, "Successfully cancelled the return request");
         }
+
+        [HttpPost("{id}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<ActionResult<ApiResponse<bool>>> AcceptReturnRequest(Guid id)
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (userId is null)
+            {
+                throw new UnauthorizedAccessException("Cannot retrieve user id from claims");
+            }
+
+            var result = await _returnRequestService.AcceptReturnRequestAsync(id, Guid.Parse(userId));
+            
+            if (result)
+            {
+                return this.ToApiResponse(result, "Return request accepted successfully");
+            }
+            else
+            {
+                return this.ToApiResponse(result, "Failed to accept return request");
+            }
+        }
     }
 }

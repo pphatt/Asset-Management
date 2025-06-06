@@ -11,9 +11,9 @@ namespace AssetManagement.Domain.Entities
         public User Requester { get; set; } = null!;
 
         public Guid? AcceptorId { get; set; }
-        public User Acceptor { get; set; } = null!;
+        public User? Acceptor { get; set; }
 
-        public DateTimeOffset ReturnedDate { get; set; }
+        public DateTimeOffset? ReturnedDate { get; set; }
         public ReturnRequestState State { get; set; }
     }
 }

@@ -1,8 +1,9 @@
+using AssetManagement.Application.Extensions;
 using AssetManagement.Application.Services.Interfaces;
 using AssetManagement.Application.Validators;
-using AssetManagement.Application.Extensions;
 using AssetManagement.Contracts.Common.Pagination;
 using AssetManagement.Contracts.DTOs;
+using AssetManagement.Contracts.Enums;
 using AssetManagement.Contracts.Parameters;
 using AssetManagement.Domain.Entities;
 using AssetManagement.Domain.Enums;
@@ -86,11 +87,46 @@ namespace AssetManagement.Application.Services
                     AssignedDate = rr.Assignment.AssignedDate.ToString("dd/MM/yyyy"),
                     RequestedBy = rr.Requester.Username,
                     AcceptedBy = rr.Acceptor == null ? "" : rr.Acceptor.Username,
-                    ReturnedDate = rr.ReturnedDate == default ? "" : rr.ReturnedDate.ToString("dd/MM/yyyy"),
+                    ReturnedDate = rr.ReturnedDate == default ? "" : rr.ReturnedDate?.ToString("dd/MM/yyyy"),
                     State = rr.State.GetDisplayName(),
                 }).ToList();
 
             return new PagedResult<ReturnRequestDto>(items, total, queryParams.PageSize, queryParams.PageNumber);
+        }
+
+        public async Task<bool> AcceptReturnRequestAsync(Guid returnRequestId, Guid userId)
+        {
+            var returnRequest = await _returnRequestRepository
+                .GetAll()
+                .Where(a => a.Id.Equals(returnRequestId))
+                .Include(a => a.Assignment)
+                    .ThenInclude(a => a.Asset)
+                .FirstOrDefaultAsync();
+
+            if (returnRequest == null)
+            {
+                throw new KeyNotFoundException($"ReturnRequest with id {returnRequestId} not found");
+            } else if (returnRequest.State == ReturnRequestState.Completed)
+            {
+                throw new InvalidOperationException($"ReturnRequest with id {returnRequestId} is already completed");
+            }
+
+            // Update the state of the return request
+            returnRequest.State = ReturnRequestState.Completed;
+            returnRequest.ReturnedDate = DateTime.UtcNow;
+            returnRequest.AcceptorId = userId;
+
+            // Update the assignment states
+            returnRequest.Assignment.State = AssignmentState.Returned;
+            returnRequest.Assignment.LastModifiedDate = DateTime.UtcNow;
+
+            // Update the asset state
+            returnRequest.Assignment.Asset.State = AssetState.Available;
+            returnRequest.Assignment.Asset.LastModifiedDate = DateTime.UtcNow;
+
+            _returnRequestRepository.Update(returnRequest);
+
+            return await _returnRequestRepository.SaveChangesAsync();
         }
 
         public async Task<CreateReturnRequestResponseDto> CreateReturnRequestAsync(string assignmentId,
@@ -171,6 +207,7 @@ namespace AssetManagement.Application.Services
                 };
             }
         }
+        
         public async Task<ReturnRequestDto> CancelReturnRequestAsync(Guid returnRequestId, Guid adminId)
         {
             var returnRequest = await _returnRequestRepository.GetByIdAsync(returnRequestId);
@@ -220,7 +257,7 @@ namespace AssetManagement.Application.Services
                 AssignedDate = returnRequest.Assignment.AssignedDate.ToString("dd/MM/yyyy"),
                 RequestedBy = returnRequest.Requester.Username,
                 AcceptedBy = admin.Username,
-                ReturnedDate = returnRequest.ReturnedDate.ToString("dd/MM/yyyy"),
+                ReturnedDate = returnRequest.ReturnedDate?.ToString("dd/MM/yyyy"),
                 State = returnRequest.State.GetDisplayName(),
             };
         }

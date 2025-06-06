@@ -147,7 +147,7 @@ namespace AssetManagement.Domain.Extensions.Tests
 
             // Assert
             Assert.Single(result);
-            Assert.Equal(filterDate.Date, result.First().ReturnedDate.Date);
+            Assert.Equal(filterDate.Date, result.First().ReturnedDate?.Date);
         }
 
         [Fact]

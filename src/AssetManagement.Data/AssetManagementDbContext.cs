@@ -1,7 +1,9 @@
 ﻿using AssetManagement.Data.Extensions;
 using AssetManagement.Domain.Entities;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.Extensions.Configuration;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 
@@ -21,6 +23,7 @@ public class AssetManagementDbContext : DbContext
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         base.OnConfiguring(optionsBuilder);
+
 
         // Add this line to bypass the error
         // The model for context 'AssetManagementDbContext' has pending changes ...

@@ -114,7 +114,7 @@ namespace AssetManagement.Application.Services
                     Date = x.AssignedDate.ToString("dd/MM/yyyy"),
                     AssignedBy = x.Assignor.Username,
                     AssignedTo = x.Assignee.Username,
-                    ReturnedDate = x.ReturnRequest?.ReturnedDate.ToString("dd/MM/yyyy"),
+                    ReturnedDate = x.ReturnRequest?.ReturnedDate?.ToString("dd/MM/yyyy"),
                 }).ToList(),
             };
 

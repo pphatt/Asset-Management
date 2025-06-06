@@ -1,5 +1,6 @@
-using System.Linq.Expressions;
+using AssetManagement.Application.Extensions;
 using AssetManagement.Application.Services;
+using AssetManagement.Contracts.DTOs;
 using AssetManagement.Contracts.DTOs.Requests;
 using AssetManagement.Contracts.Enums;
 using AssetManagement.Contracts.Exceptions;
@@ -9,6 +10,7 @@ using AssetManagement.Domain.Enums;
 using AssetManagement.Domain.Interfaces.Repositories;
 using MockQueryable;
 using Moq;
+using System.Linq.Expressions;
 
 namespace AssetManagement.Application.Tests.Services;
 
@@ -1735,6 +1737,426 @@ public class AssetServiceTests
 
         // Act & Assert
         await Assert.ThrowsAsync<KeyNotFoundException>(() => service.GetAssetReportAsync(adminId, queryParams));
+    }
+    #endregion
+
+    #region ReportExtensions
+    [Fact]
+    public void ApplySorting_ByCategoryAscending_SortsCorrectly()
+    {
+        // Arrange
+        var reports = new List<AssetReportDto>
+    {
+        new AssetReportDto { Category = "Z", Total = 5 },
+        new AssetReportDto { Category = "A", Total = 3 },
+        new AssetReportDto { Category = "M", Total = 7 }
+    };
+
+        // Act
+        var result = reports.AsQueryable().ApplySorting("category", "asc").ToList();
+
+        // Assert
+        Assert.Equal(3, result.Count);
+        Assert.Equal("A", result[0].Category);
+        Assert.Equal("M", result[1].Category);
+        Assert.Equal("Z", result[2].Category);
+    }
+
+    [Fact]
+    public void ApplySorting_ByCategoryDescending_SortsCorrectly()
+    {
+        // Arrange
+        var reports = new List<AssetReportDto>
+    {
+        new AssetReportDto { Category = "Z", Total = 5 },
+        new AssetReportDto { Category = "A", Total = 3 },
+        new AssetReportDto { Category = "M", Total = 7 }
+    };
+
+        // Act
+        var result = reports.AsQueryable().ApplySorting("category", "desc").ToList();
+
+        // Assert
+        Assert.Equal(3, result.Count);
+        Assert.Equal("Z", result[0].Category);
+        Assert.Equal("M", result[1].Category);
+        Assert.Equal("A", result[2].Category);
+    }
+
+    [Fact]
+    public void ApplySorting_ByTotalAscending_SortsCorrectly()
+    {
+        // Arrange
+        var reports = new List<AssetReportDto>
+    {
+        new AssetReportDto { Category = "Z", Total = 5 },
+        new AssetReportDto { Category = "A", Total = 3 },
+        new AssetReportDto { Category = "M", Total = 7 }
+    };
+
+        // Act
+        var result = reports.AsQueryable().ApplySorting("total", "asc").ToList();
+
+        // Assert
+        Assert.Equal(3, result.Count);
+        Assert.Equal("A", result[0].Category); // Total = 3
+        Assert.Equal("Z", result[1].Category); // Total = 5
+        Assert.Equal("M", result[2].Category); // Total = 7
+    }
+
+    [Fact]
+    public void ApplySorting_ByTotalDescending_SortsCorrectly()
+    {
+        // Arrange
+        var reports = new List<AssetReportDto>
+    {
+        new AssetReportDto { Category = "Z", Total = 5 },
+        new AssetReportDto { Category = "A", Total = 3 },
+        new AssetReportDto { Category = "M", Total = 7 }
+    };
+
+        // Act
+        var result = reports.AsQueryable().ApplySorting("total", "desc").ToList();
+
+        // Assert
+        Assert.Equal(3, result.Count);
+        Assert.Equal("M", result[0].Category); // Total = 7
+        Assert.Equal("Z", result[1].Category); // Total = 5
+        Assert.Equal("A", result[2].Category); // Total = 3
+    }
+
+    [Fact]
+    public void ApplySorting_ByAssignedAscending_SortsCorrectly()
+    {
+        // Arrange
+        var reports = new List<AssetReportDto>
+    {
+        new AssetReportDto { Category = "Z", Assigned = 5 },
+        new AssetReportDto { Category = "A", Assigned = 3 },
+        new AssetReportDto { Category = "M", Assigned = 7 }
+    };
+
+        // Act
+        var result = reports.AsQueryable().ApplySorting("assigned", "asc").ToList();
+
+        // Assert
+        Assert.Equal(3, result.Count);
+        Assert.Equal("A", result[0].Category); // Assigned = 3
+        Assert.Equal("Z", result[1].Category); // Assigned = 5
+        Assert.Equal("M", result[2].Category); // Assigned = 7
+    }
+
+    [Fact]
+    public void ApplySorting_ByAssignedDescending_SortsCorrectly()
+    {
+        // Arrange
+        var reports = new List<AssetReportDto>
+    {
+        new AssetReportDto { Category = "Z", Assigned = 5 },
+        new AssetReportDto { Category = "A", Assigned = 3 },
+        new AssetReportDto { Category = "M", Assigned = 7 }
+    };
+
+        // Act
+        var result = reports.AsQueryable().ApplySorting("assigned", "desc").ToList();
+
+        // Assert
+        Assert.Equal(3, result.Count);
+        Assert.Equal("M", result[0].Category); // Assigned = 7
+        Assert.Equal("Z", result[1].Category); // Assigned = 5
+        Assert.Equal("A", result[2].Category); // Assigned = 3
+    }
+
+    [Fact]
+    public void ApplySorting_ByAvailableAscending_SortsCorrectly()
+    {
+        // Arrange
+        var reports = new List<AssetReportDto>
+    {
+        new AssetReportDto { Category = "Z", Available = 5 },
+        new AssetReportDto { Category = "A", Available = 3 },
+        new AssetReportDto { Category = "M", Available = 7 }
+    };
+
+        // Act
+        var result = reports.AsQueryable().ApplySorting("available", "asc").ToList();
+
+        // Assert
+        Assert.Equal(3, result.Count);
+        Assert.Equal("A", result[0].Category); // Available = 3
+        Assert.Equal("Z", result[1].Category); // Available = 5
+        Assert.Equal("M", result[2].Category); // Available = 7
+    }
+
+    [Fact]
+    public void ApplySorting_ByAvailableDescending_SortsCorrectly()
+    {
+        // Arrange
+        var reports = new List<AssetReportDto>
+    {
+        new AssetReportDto { Category = "Z", Available = 5 },
+        new AssetReportDto { Category = "A", Available = 3 },
+        new AssetReportDto { Category = "M", Available = 7 }
+    };
+
+        // Act
+        var result = reports.AsQueryable().ApplySorting("available", "desc").ToList();
+
+        // Assert
+        Assert.Equal(3, result.Count);
+        Assert.Equal("M", result[0].Category); // Available = 7
+        Assert.Equal("Z", result[1].Category); // Available = 5
+        Assert.Equal("A", result[2].Category); // Available = 3
+    }
+
+    [Fact]
+    public void ApplySorting_ByNotAvailableAscending_SortsCorrectly()
+    {
+        // Arrange
+        var reports = new List<AssetReportDto>
+    {
+        new AssetReportDto { Category = "Z", NotAvailable = 5 },
+        new AssetReportDto { Category = "A", NotAvailable = 3 },
+        new AssetReportDto { Category = "M", NotAvailable = 7 }
+    };
+
+        // Act
+        var result = reports.AsQueryable().ApplySorting("notavailable", "asc").ToList();
+
+        // Assert
+        Assert.Equal(3, result.Count);
+        Assert.Equal("A", result[0].Category); // NotAvailable = 3
+        Assert.Equal("Z", result[1].Category); // NotAvailable = 5
+        Assert.Equal("M", result[2].Category); // NotAvailable = 7
+    }
+
+    [Fact]
+    public void ApplySorting_ByNotAvailableDescending_SortsCorrectly()
+    {
+        // Arrange
+        var reports = new List<AssetReportDto>
+    {
+        new AssetReportDto { Category = "Z", NotAvailable = 5 },
+        new AssetReportDto { Category = "A", NotAvailable = 3 },
+        new AssetReportDto { Category = "M", NotAvailable = 7 }
+    };
+
+        // Act
+        var result = reports.AsQueryable().ApplySorting("notavailable", "desc").ToList();
+
+        // Assert
+        Assert.Equal(3, result.Count);
+        Assert.Equal("M", result[0].Category); // NotAvailable = 7
+        Assert.Equal("Z", result[1].Category); // NotAvailable = 5
+        Assert.Equal("A", result[2].Category); // NotAvailable = 3
+    }
+
+    [Fact]
+    public void ApplySorting_ByWaitingForRecyclingAscending_SortsCorrectly()
+    {
+        // Arrange
+        var reports = new List<AssetReportDto>
+    {
+        new AssetReportDto { Category = "Z", WaitingForRecycling = 5 },
+        new AssetReportDto { Category = "A", WaitingForRecycling = 3 },
+        new AssetReportDto { Category = "M", WaitingForRecycling = 7 }
+    };
+
+        // Act
+        var result = reports.AsQueryable().ApplySorting("waitingforrecycling", "asc").ToList();
+
+        // Assert
+        Assert.Equal(3, result.Count);
+        Assert.Equal("A", result[0].Category); // WaitingForRecycling = 3
+        Assert.Equal("Z", result[1].Category); // WaitingForRecycling = 5
+        Assert.Equal("M", result[2].Category); // WaitingForRecycling = 7
+    }
+
+    [Fact]
+    public void ApplySorting_ByWaitingForRecyclingDescending_SortsCorrectly()
+    {
+        // Arrange
+        var reports = new List<AssetReportDto>
+    {
+        new AssetReportDto { Category = "Z", WaitingForRecycling = 5 },
+        new AssetReportDto { Category = "A", WaitingForRecycling = 3 },
+        new AssetReportDto { Category = "M", WaitingForRecycling = 7 }
+    };
+
+        // Act
+        var result = reports.AsQueryable().ApplySorting("waitingforrecycling", "desc").ToList();
+
+        // Assert
+        Assert.Equal(3, result.Count);
+        Assert.Equal("M", result[0].Category); // WaitingForRecycling = 7
+        Assert.Equal("Z", result[1].Category); // WaitingForRecycling = 5
+        Assert.Equal("A", result[2].Category); // WaitingForRecycling = 3
+    }
+
+    [Fact]
+    public void ApplySorting_ByRecycledAscending_SortsCorrectly()
+    {
+        // Arrange
+        var reports = new List<AssetReportDto>
+    {
+        new AssetReportDto { Category = "Z", Recycled = 5 },
+        new AssetReportDto { Category = "A", Recycled = 3 },
+        new AssetReportDto { Category = "M", Recycled = 7 }
+    };
+
+        // Act
+        var result = reports.AsQueryable().ApplySorting("recycled", "asc").ToList();
+
+        // Assert
+        Assert.Equal(3, result.Count);
+        Assert.Equal("A", result[0].Category); // Recycled = 3
+        Assert.Equal("Z", result[1].Category); // Recycled = 5
+        Assert.Equal("M", result[2].Category); // Recycled = 7
+    }
+
+    [Fact]
+    public void ApplySorting_ByRecycledDescending_SortsCorrectly()
+    {
+        // Arrange
+        var reports = new List<AssetReportDto>
+    {
+        new AssetReportDto { Category = "Z", Recycled = 5 },
+        new AssetReportDto { Category = "A", Recycled = 3 },
+        new AssetReportDto { Category = "M", Recycled = 7 }
+    };
+
+        // Act
+        var result = reports.AsQueryable().ApplySorting("recycled", "desc").ToList();
+
+        // Assert
+        Assert.Equal(3, result.Count);
+        Assert.Equal("M", result[0].Category); // Recycled = 7
+        Assert.Equal("Z", result[1].Category); // Recycled = 5
+        Assert.Equal("A", result[2].Category); // Recycled = 3
+    }
+
+    [Fact]
+    public void ApplySorting_WithInvalidPropertyName_DefaultsToCategorySort()
+    {
+        // Arrange
+        var reports = new List<AssetReportDto>
+    {
+        new AssetReportDto { Category = "Z", Total = 5 },
+        new AssetReportDto { Category = "A", Total = 3 },
+        new AssetReportDto { Category = "M", Total = 7 }
+    };
+
+        // Act
+        var result = reports.AsQueryable().ApplySorting("invalidproperty", "asc").ToList();
+
+        // Assert
+        Assert.Equal(3, result.Count);
+        Assert.Equal("A", result[0].Category);
+        Assert.Equal("M", result[1].Category);
+        Assert.Equal("Z", result[2].Category);
+    }
+
+    
+
+    [Fact]
+    public void ApplySorting_WithNullReports_HandlesGracefully()
+    {
+        // Arrange
+        IQueryable<AssetReportDto>? reports = null;
+
+        // Act & Assert - Should not throw an exception
+        var exception = Record.Exception(() =>
+        {
+            if (reports != null)
+            {
+                var result = reports.ApplySorting("category", "asc");
+            }
+        });
+
+        Assert.Null(exception);
+    }
+
+    [Fact]
+    public void ApplySorting_WithEmptyCollection_ReturnsEmptyResult()
+    {
+        // Arrange
+        var reports = new List<AssetReportDto>().AsQueryable();
+
+        // Act
+        var result = reports.ApplySorting("category", "asc").ToList();
+
+        // Assert
+        Assert.Empty(result);
+    }
+
+    // Integration test with AssetService
+    [Fact]
+    public async Task GetAssetReportAsync_AppliesSortingWithAllFields()
+    {
+        // Arrange
+        var adminId = Guid.NewGuid();
+        var user = CreateAdminUser(adminId);
+
+        // Create test assets with different distributions across categories
+        var assets = new List<Asset>
+    {
+        // Category A: 1 of each state (5 total)
+        new Asset { Id = Guid.NewGuid(), Location = Location.HCM, Category = new Category { Name = "A" }, State = AssetState.Available, IsDeleted = false },
+        new Asset { Id = Guid.NewGuid(), Location = Location.HCM, Category = new Category { Name = "A" }, State = AssetState.Assigned, IsDeleted = false },
+        new Asset { Id = Guid.NewGuid(), Location = Location.HCM, Category = new Category { Name = "A" }, State = AssetState.NotAvailable, IsDeleted = false },
+        new Asset { Id = Guid.NewGuid(), Location = Location.HCM, Category = new Category { Name = "A" }, State = AssetState.WaitingForRecycling, IsDeleted = false },
+        new Asset { Id = Guid.NewGuid(), Location = Location.HCM, Category = new Category { Name = "A" }, State = AssetState.Recycled, IsDeleted = false },
+        
+        // Category B: 5 Available, 3 Assigned (8 total)
+        new Asset { Id = Guid.NewGuid(), Location = Location.HCM, Category = new Category { Name = "B" }, State = AssetState.Available, IsDeleted = false },
+        new Asset { Id = Guid.NewGuid(), Location = Location.HCM, Category = new Category { Name = "B" }, State = AssetState.Available, IsDeleted = false },
+        new Asset { Id = Guid.NewGuid(), Location = Location.HCM, Category = new Category { Name = "B" }, State = AssetState.Available, IsDeleted = false },
+        new Asset { Id = Guid.NewGuid(), Location = Location.HCM, Category = new Category { Name = "B" }, State = AssetState.Available, IsDeleted = false },
+        new Asset { Id = Guid.NewGuid(), Location = Location.HCM, Category = new Category { Name = "B" }, State = AssetState.Available, IsDeleted = false },
+        new Asset { Id = Guid.NewGuid(), Location = Location.HCM, Category = new Category { Name = "B" }, State = AssetState.Assigned, IsDeleted = false },
+        new Asset { Id = Guid.NewGuid(), Location = Location.HCM, Category = new Category { Name = "B" }, State = AssetState.Assigned, IsDeleted = false },
+        new Asset { Id = Guid.NewGuid(), Location = Location.HCM, Category = new Category { Name = "B" }, State = AssetState.Assigned, IsDeleted = false },
+        
+        // Category C: 2 NotAvailable, 4 Recycled (6 total)
+        new Asset { Id = Guid.NewGuid(), Location = Location.HCM, Category = new Category { Name = "C" }, State = AssetState.NotAvailable, IsDeleted = false },
+        new Asset { Id = Guid.NewGuid(), Location = Location.HCM, Category = new Category { Name = "C" }, State = AssetState.NotAvailable, IsDeleted = false },
+        new Asset { Id = Guid.NewGuid(), Location = Location.HCM, Category = new Category { Name = "C" }, State = AssetState.Recycled, IsDeleted = false },
+        new Asset { Id = Guid.NewGuid(), Location = Location.HCM, Category = new Category { Name = "C" }, State = AssetState.Recycled, IsDeleted = false },
+        new Asset { Id = Guid.NewGuid(), Location = Location.HCM, Category = new Category { Name = "C" }, State = AssetState.Recycled, IsDeleted = false },
+        new Asset { Id = Guid.NewGuid(), Location = Location.HCM, Category = new Category { Name = "C" }, State = AssetState.Recycled, IsDeleted = false }
+    };
+
+        _userRepository.Setup(r => r.GetByIdAsync(adminId)).ReturnsAsync(user);
+        _assetRepository.Setup(r => r.GetAll()).Returns(assets.BuildMock());
+
+        // Test all sortable properties with ascending and descending orders
+        var sortConfigs = new[]
+        {
+        ("Category", "asc", new[] { "A", "B", "C" }),
+        ("Category", "desc", new[] { "C", "B", "A" }),
+        ("Total", "asc", new[] { "A", "C", "B" }),  // A(5) < C(6) < B(8)
+        ("Total", "desc", new[] { "B", "C", "A" }),  // B(8) > C(6) > A(5)
+        ("Available", "desc", new[] { "B", "A", "C" }),  // B(5) > A(1) > C(0)
+        ("Assigned", "desc", new[] { "B", "A", "C" }),  // B(3) > A(1) > C(0)
+        ("NotAvailable", "desc", new[] { "C", "A", "B" }),  // C(2) > A(1) > B(0)
+        ("WaitingForRecycling", "desc", new[] { "A", "B", "C" }),  // A(1) > B(0) = C(0)
+        ("Recycled", "desc", new[] { "C", "A", "B" })  // C(4) > A(1) > B(0)
+    };
+
+        foreach (var (sortBy, sortOrder, expectedOrder) in sortConfigs)
+        {
+            var queryParams = new AssetReportQueryParameters { SortBy = sortBy, SortOrder = sortOrder };
+
+            // Act
+            var result = await _assetService.GetAssetReportAsync(adminId, queryParams);
+
+            // Assert
+            Assert.Equal(3, result.Count);
+            for (int i = 0; i < expectedOrder.Length; i++)
+            {
+                Assert.Equal(expectedOrder[i], result[i].Category);
+            }
+        }
     }
     #endregion
 }

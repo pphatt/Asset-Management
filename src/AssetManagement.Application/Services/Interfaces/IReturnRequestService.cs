@@ -14,6 +14,7 @@ namespace AssetManagement.Application.Services.Interfaces
             string requesterId,
             string role);
         Task<PagedResult<ReturnRequestDto>> GetReturnRequestsAsync(Guid adminId, ReturnRequestQueryParameters queryParams);
+        Task<bool> AcceptReturnRequestAsync(Guid returnRequestId, Guid userId);
         Task<ReturnRequestDto> CancelReturnRequestAsync(Guid returnRequestId, Guid adminId);
     }
 }
