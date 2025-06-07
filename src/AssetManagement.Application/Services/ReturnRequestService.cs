@@ -10,9 +10,7 @@ using AssetManagement.Domain.Enums;
 using AssetManagement.Domain.Extensions;
 using AssetManagement.Domain.Interfaces.Repositories;
 using Microsoft.EntityFrameworkCore;
-using AssetManagement.Contracts.Enums;
 using static AssetManagement.Contracts.Exceptions.ApiExceptionTypes;
-using AssetManagement.Contracts.Enums;
 using AssetManagement.Contracts.DTOs.Responses;
 using AssetManagement.Contracts.DTOs.Requests;
 
@@ -56,6 +54,7 @@ namespace AssetManagement.Application.Services
             var dateFilter = ReturnRequestValidator.ParseDate(queryParams.ReturnedDate);
 
             IQueryable<ReturnRequest> query = _returnRequestRepository.GetAll()
+                .AsNoTracking()
                 .Include(rr => rr.Assignment)
                 .ThenInclude(a => a.Asset)
                 .Include(rr => rr.Requester)
@@ -151,7 +150,6 @@ namespace AssetManagement.Application.Services
 
                 assignment.State = AssignmentState.WaitingForReturning;
                 _assignmentRepository.Update(assignment);
-                await _assignmentRepository.SaveChangesAsync();
 
                 var returningRequest = new ReturnRequest
                 {
@@ -186,7 +184,6 @@ namespace AssetManagement.Application.Services
 
                 assignment.State = AssignmentState.WaitingForReturning;
                 _assignmentRepository.Update(assignment);
-                await _assignmentRepository.SaveChangesAsync();
 
                 var returningRequest = new ReturnRequest
                 {
@@ -212,7 +209,7 @@ namespace AssetManagement.Application.Services
         {
             var returnRequest = await _returnRequestRepository.GetByIdAsync(returnRequestId);
 
-            if (returnRequest == null)
+            if (returnRequest == null || returnRequest.IsDeleted == true)
             {
                 throw new KeyNotFoundException($"Return request with id {returnRequestId} not found");
             }
@@ -240,7 +237,6 @@ namespace AssetManagement.Application.Services
             }
             assignment.State = AssignmentState.Accepted;
             _assignmentRepository.Update(assignment);
-            await _assignmentRepository.SaveChangesAsync();
 
             returnRequest.DeletedBy = adminId;
             returnRequest.DeletedDate = DateTime.UtcNow;

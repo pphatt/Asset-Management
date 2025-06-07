@@ -18,8 +18,7 @@ const createSchema = (mode: "create" | "edit") => {
   const baseSchema = {
     name: yup
       .string()
-      .required("Asset's Name is required")
-      .max(30, "Asset's Name can't be more than 30 characters long"),
+      .required("Asset's Name is required"),
     category: yup.string().required("Asset's Category is required"),
     specification: yup.string().required("Asset's Specification is required"),
     installedDate: yup

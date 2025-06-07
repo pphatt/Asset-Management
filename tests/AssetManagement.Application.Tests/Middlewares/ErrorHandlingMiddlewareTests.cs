@@ -65,9 +65,9 @@ public class ErrorHandlingMiddlewareTests
             x => x.Log(
                 LogLevel.Error,
                 It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => v.ToString().Contains("Custom error")),
+                It.Is<It.IsAnyType>((v, t) => (v.ToString() ?? string.Empty).Contains("Custom error")),
                 exception,
-                It.IsAny<Func<It.IsAnyType, Exception, string>>()),
+                It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
             Times.Once());
     }
 
@@ -95,9 +95,9 @@ public class ErrorHandlingMiddlewareTests
             x => x.Log(
                 LogLevel.Error,
                 It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => v.ToString().Contains("Resource not found")),
+                It.Is<It.IsAnyType>((v, t) => (v.ToString() ?? string.Empty).Contains("Resource not found")),
                 exception,
-                It.IsAny<Func<It.IsAnyType, Exception, string>>()),
+                It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
             Times.Once());
     }
 
@@ -154,9 +154,9 @@ public class ErrorHandlingMiddlewareTests
             x => x.Log(
                 LogLevel.Error,
                 It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => v.ToString().Contains("Unauthorized access")),
+                It.Is<It.IsAnyType>((v, t) => (v.ToString() ?? string.Empty).Contains("Unauthorized access")),
                 exception,
-                It.IsAny<Func<It.IsAnyType, Exception, string>>()),
+                It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
             Times.Once());
     }
 
@@ -184,9 +184,9 @@ public class ErrorHandlingMiddlewareTests
             x => x.Log(
                 LogLevel.Error,
                 It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => v.ToString().Contains("Unexpected error")),
+                It.Is<It.IsAnyType>((v, t) => (v.ToString() ?? string.Empty).Contains("Unexpected error")),
                 exception,
-                It.IsAny<Func<It.IsAnyType, Exception, string>>()),
+                It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
             Times.Once());
     }
 

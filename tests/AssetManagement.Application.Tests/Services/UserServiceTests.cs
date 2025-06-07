@@ -260,7 +260,7 @@ namespace AssetManagement.Application.Tests.Services
         {
             // Act & Assert
             var exception = await Assert.ThrowsAsync<ArgumentNullException>(
-                () => _userService.CreateUserAsync(Guid.NewGuid().ToString(), null));
+                () => _userService.CreateUserAsync(Guid.NewGuid().ToString(), null!));
 
             Assert.Equal("dto", exception.ParamName);
         }
@@ -271,13 +271,13 @@ namespace AssetManagement.Application.Tests.Services
         [InlineData(null, "Doe", "Null FirstName")]
         [InlineData("John", null, "Null LastName")]
         public async Task CreateUserAsync_InvalidNames_ThrowsFieldValidationException(
-            string firstName, string lastName, string testName)
+            string? firstName, string? lastName, string _)
         {
             // Arrange
             var dto = new CreateUserRequestDto
             {
-                FirstName = firstName,
-                LastName = lastName,
+                FirstName = firstName!,
+                LastName = lastName!,
                 DateOfBirth = "2000-01-01",
                 JoinedDate = "2023-05-20T00:00:00",
                 Type = UserTypeDto.Staff,
@@ -301,14 +301,14 @@ namespace AssetManagement.Application.Tests.Services
         [InlineData("not-a-date", "Invalid Date Format")]
         [InlineData("2/31/2000", "Invalid Date Value")]
         public async Task CreateUserAsync_InvalidDateOfBirth_ThrowsFieldValidationException(
-            string dateOfBirth, string testName)
+            string? dateOfBirth, string _)
         {
             // Arrange
             var dto = new CreateUserRequestDto
             {
                 FirstName = "John",
                 LastName = "Doe",
-                DateOfBirth = dateOfBirth,
+                DateOfBirth = dateOfBirth!,
                 JoinedDate = "2023-05-20T00:00:00",
                 Type = UserTypeDto.Staff,
                 Gender = GenderDto.Male
@@ -325,7 +325,7 @@ namespace AssetManagement.Application.Tests.Services
         [InlineData("1800-01-01", "Too Old")]
         [InlineData("2100-01-01", "Future Date")]
         public async Task CreateUserAsync_UnreasonableDateOfBirth_ThrowsFieldValidationException(
-            string dateOfBirth, string testName)
+            string dateOfBirth, string _)
         {
             // Arrange
             var dto = new CreateUserRequestDto
@@ -349,7 +349,7 @@ namespace AssetManagement.Application.Tests.Services
         [InlineData("2010-01-01", "15 Years Old")]
         [InlineData("2008-06-15", "Almost 17 Years Old")]
         public async Task CreateUserAsync_UserUnder18_ThrowsFieldValidationException(
-            string dateOfBirth, string testName)
+            string dateOfBirth, string _)
         {
             // Arrange
             var dto = new CreateUserRequestDto
@@ -377,7 +377,7 @@ namespace AssetManagement.Application.Tests.Services
         [InlineData("not-a-date", "Invalid Date Format")]
         [InlineData("2/31/2023", "Invalid Date Value")]
         public async Task CreateUserAsync_InvalidJoinedDate_ThrowsFieldValidationException(
-            string joinedDate, string testName)
+            string? joinedDate, string _)
         {
             // Arrange
             var dto = new CreateUserRequestDto
@@ -385,7 +385,7 @@ namespace AssetManagement.Application.Tests.Services
                 FirstName = "John",
                 LastName = "Doe",
                 DateOfBirth = "2000-01-01", // 18+ years old
-                JoinedDate = joinedDate,
+                JoinedDate = joinedDate!,
                 Type = UserTypeDto.Staff,
                 Gender = GenderDto.Male
             };
@@ -401,7 +401,7 @@ namespace AssetManagement.Application.Tests.Services
         [InlineData("1800-01-01T00:00:00", "Too Old")]
         [InlineData("2100-01-01T00:00:00", "Too Far in Future")]
         public async Task CreateUserAsync_UnreasonableJoinedDate_ThrowsFieldValidationException(
-            string joinedDate, string testName)
+            string joinedDate, string _)
         {
             // Arrange
             var dto = new CreateUserRequestDto
@@ -446,7 +446,7 @@ namespace AssetManagement.Application.Tests.Services
         [InlineData("2023-05-27T00:00:00", "Saturday")]
         [InlineData("2023-05-28T00:00:00", "Sunday")]
         public async Task CreateUserAsync_JoinedDateOnWeekend_ThrowsFieldValidationException(
-            string joinedDate, string testName)
+            string joinedDate, string _)
         {
             // Arrange
             var dto = new CreateUserRequestDto
@@ -474,7 +474,7 @@ namespace AssetManagement.Application.Tests.Services
         [InlineData(0, "Zero is Invalid")]
         [InlineData(99, "Out of Range")]
         public async Task CreateUserAsync_InvalidUserType_ThrowsFieldValidationException(
-            int userType, string testName)
+            int userType, string _)
         {
             // Arrange
             var dto = new CreateUserRequestDto
@@ -498,7 +498,7 @@ namespace AssetManagement.Application.Tests.Services
         [InlineData(0, "Zero is Invalid")]
         [InlineData(99, "Out of Range")]
         public async Task CreateUserAsync_InvalidGender_ThrowsFieldValidationException(
-            int gender, string testName)
+            int gender, string _)
         {
             // Arrange
             var dto = new CreateUserRequestDto
@@ -527,7 +527,7 @@ namespace AssetManagement.Application.Tests.Services
         {
             // Arrange
             _mockUserRepository.Setup(r => r.GetByIdAsync(It.IsAny<Guid>()))
-                .ReturnsAsync((User)null);
+                .ReturnsAsync((User?)null);
 
             var dto = new CreateUserRequestDto
             {
@@ -685,7 +685,7 @@ namespace AssetManagement.Application.Tests.Services
         [InlineData("2007-05-22", "2025-05-22T00:00:00", "Just Turned 18")] // User turns 18 on joining date
         [InlineData("1990-01-01", "2023-05-22T00:00:00", "Older User")]
         public async Task CreateUserAsync_ValidInput_Success(
-            string dateOfBirth, string joinedDate, string testName)
+            string dateOfBirth, string joinedDate, string _)
         {
             // Arrange
             var adminUserId = Guid.NewGuid();

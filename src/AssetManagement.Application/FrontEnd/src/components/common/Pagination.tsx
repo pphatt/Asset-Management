@@ -58,6 +58,7 @@ const Pagination: React.FC<PaginationProps> = ({
       <div className="flex items-center space-x-1">
         {" "}
         <button
+          type="button"
           aria-label="Previous page"
           className={`px-3 py-1 border border-tertiary rounded-sm ${
             !hasPreviousPage || currentPage <= 1 || isLoading
@@ -72,6 +73,7 @@ const Pagination: React.FC<PaginationProps> = ({
         {getPageNumbers().map((page, index) =>
           typeof page === "number" ? (
             <button
+              type="button"
               key={`page-${page}`}
               className={`px-3 py-1 border border-tertiary rounded-sm text-xs mr-1 ${
                 page === currentPage
@@ -91,6 +93,7 @@ const Pagination: React.FC<PaginationProps> = ({
           ),
         )}{" "}
         <button
+          type="button"
           aria-label="Next page"
           className={`px-3 py-1 border border-tertiary rounded-sm ${
             !hasNextPage || currentPage >= totalPages || isLoading

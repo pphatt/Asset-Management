@@ -32,7 +32,7 @@ namespace AssetManagement.Domain.Extensions
 
             if (date.HasValue)
             {
-                query = query.Where(rr => (rr.ReturnedDate.HasValue && Equals(rr.ReturnedDate.Value.Date, date.Value.Date)));
+                query = query.Where(rr => rr.ReturnedDate.HasValue && Equals(rr.ReturnedDate.Value.Date, date.Value.Date));
             }
 
             return query;
@@ -56,8 +56,8 @@ namespace AssetManagement.Domain.Extensions
                     "assetname" => rr => rr.Assignment.Asset.Name,
                     "requestedby" => rr => rr.Requester.Username,
                     "assigneddate" => rr => rr.Assignment.AssignedDate,
-                    "acceptedby" => rr => rr.Acceptor.Username,
-                    "returneddate" => rr => rr.ReturnedDate,
+                    "acceptedby" => rr => rr.Acceptor != null ? rr.Acceptor.Username : string.Empty,
+                    "returneddate" => rr => rr.ReturnedDate ?? default,
                     "state" => rr => rr.State,
                     "created" => rr => rr.CreatedDate,
                     "updated" => rr => rr.LastModifiedDate,

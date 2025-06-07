@@ -1,5 +1,4 @@
 using AssetManagement.Domain.Enums;
-using MassTransit;
 
 namespace AssetManagement.Domain.Entities
 {

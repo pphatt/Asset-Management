@@ -272,12 +272,14 @@ namespace AssetManagement.Application.Services
             }
 
             // Update asset state back to Available
-            var asset = await _assetRepository.GetByIdAsync(assignment.AssetId);
-            if (asset != null)
-            {
-                asset.State = AssetState.Available;
-                _assetRepository.Update(asset);
-            }
+            // We don't need to update the asset state since 'WaitingForAcceptance' assignment hasn't
+            // changed the state of asset yet. (For now I will just comment out these lines below)
+            // var asset = await _assetRepository.GetByIdAsync(assignment.AssetId);
+            // if (asset != null)
+            // {
+            //     asset.State = AssetState.Available;
+            //     _assetRepository.Update(asset);
+            // }
 
             // Soft delete
             assignment.IsDeleted = true;
@@ -292,11 +294,8 @@ namespace AssetManagement.Application.Services
         public async Task<AssignmentDto?> AcceptAssignmentAsync(Guid id, Guid userId)
         {
             // TODO: move these validation logic to the validator class
-            var assignment = await _assignmentRepository.GetByIdAsync(id);
-            if (assignment == null)
-            {
-                throw new KeyNotFoundException($"Assignment with id {id} not found");
-            }
+            var assignment = await _assignmentRepository.GetByIdAsync(id)
+                ?? throw new KeyNotFoundException($"Assignment with id {id} not found");
 
             if (assignment.AssigneeId != userId)
             {
@@ -309,21 +308,24 @@ namespace AssetManagement.Application.Services
             }
 
             var asset = await _assetRepository.GetByIdAsync(assignment.AssetId);
-            if (asset != null)
+            if (asset == null || asset.State != AssetState.Available)
             {
-                if (asset.State == AssetState.NotAvailable)
-                {
-                    throw new InvalidOperationException("This asset is already assigned to someone else.");
-                }
-                asset.State = AssetState.Assigned;
-                _assetRepository.Update(asset);
+                throw new InvalidOperationException("This asset is no longer available for assignment.");
             }
 
+            // Update asset state
+            asset.State = AssetState.Assigned;
+            _assetRepository.Update(asset);
+
+            // Accept this assignment
             assignment.State = AssignmentState.Accepted;
             assignment.LastModifiedBy = userId;
             assignment.LastModifiedDate = DateTime.UtcNow;
-
             _assignmentRepository.Update(assignment);
+
+            // TODO (optional): Decline other pending assignments for this asset
+
+            // Save pending changes
             await _assignmentRepository.SaveChangesAsync();
 
             return await GetAssignmentByIdAsync(id);
@@ -352,6 +354,7 @@ namespace AssetManagement.Application.Services
             assignment.LastModifiedBy = userId;
             assignment.LastModifiedDate = DateTime.UtcNow;
 
+            // Update asset state to available (we might not need this)
             var asset = await _assetRepository.GetByIdAsync(assignment.AssetId);
             if (asset != null)
             {

@@ -178,6 +178,7 @@ export const UserForm: React.FC<UserFormProps> = ({ mode }: UserFormProps) => {
                             <input
                                 type="text"
                                 {...register('firstName')}
+                                maxLength={30}
                                 disabled={isEditMode}
                                 className={`w-full p-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-primary transition-colors ${isEditMode
                                     ? 'bg-gray-100 text-gray-500 border-gray-200 cursor-not-allowed'
@@ -195,6 +196,7 @@ export const UserForm: React.FC<UserFormProps> = ({ mode }: UserFormProps) => {
                             <input
                                 type="text"
                                 {...register('lastName')}
+                                maxLength={30}
                                 disabled={isEditMode}
                                 className={`w-full p-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-primary transition-colors ${isEditMode
                                     ? 'bg-gray-100 text-gray-500 border-gray-200 cursor-not-allowed'

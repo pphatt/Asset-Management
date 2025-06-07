@@ -74,9 +74,10 @@ public class AuthConfigurationTests
 
         // Assert
         var jwtBearerOptions = serviceProvider.GetService<IOptionsMonitor<JwtBearerOptions>>();
-        var options = jwtBearerOptions.Get(JwtBearerDefaults.AuthenticationScheme);
-        var tokenParams = options.TokenValidationParameters;
+        var options = jwtBearerOptions?.Get(JwtBearerDefaults.AuthenticationScheme);
+        var tokenParams = options?.TokenValidationParameters;
 
+        Assert.NotNull(tokenParams);
         Assert.Equal("test-issuer", tokenParams.ValidIssuer);
         Assert.Equal("test-audience", tokenParams.ValidAudience);
         Assert.IsType<SymmetricSecurityKey>(tokenParams.IssuerSigningKey);

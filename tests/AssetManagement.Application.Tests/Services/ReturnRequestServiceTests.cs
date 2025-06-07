@@ -267,7 +267,7 @@ namespace AssetManagement.Application.Tests.Services
             var adminId = Guid.NewGuid();
  
             _mockReturnRequestRepository.Setup(repo => repo.GetByIdAsync(returnRequestId))
-                .ReturnsAsync((ReturnRequest)null);
+                .ReturnsAsync((ReturnRequest?)null);
  
             // Act & Assert
             var exception = await Assert.ThrowsAsync<KeyNotFoundException>(() =>
@@ -324,7 +324,7 @@ namespace AssetManagement.Application.Tests.Services
                 .ReturnsAsync(returnRequest);
  
             _mockUserRepository.Setup(repo => repo.GetByIdAsync(adminId))
-                .ReturnsAsync((User)null);
+                .ReturnsAsync((User?)null);
  
             // Act & Assert
             var exception = await Assert.ThrowsAsync<KeyNotFoundException>(() =>

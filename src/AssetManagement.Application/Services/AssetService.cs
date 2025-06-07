@@ -224,7 +224,6 @@ namespace AssetManagement.Application.Services
             return existingAsset.Code;
         }
 
-        [assembly: InternalsVisibleTo("AssetManagement.Application.Tests")]
         private static AssetState MapAssetState(AssetStateDto dto)
         {
             return dto switch
@@ -238,7 +237,6 @@ namespace AssetManagement.Application.Services
             };
         }
 
-        [assembly: InternalsVisibleTo("AssetManagement.Application.Tests")]
         private async Task<Location> GetCurrentAdminLocation(string userId)
         {
             var adminUser = await _userRepository.GetByIdAsync(Guid.Parse(userId));

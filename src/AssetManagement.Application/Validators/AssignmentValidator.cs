@@ -1,9 +1,23 @@
-using System.Security.Cryptography.X509Certificates;
 using AssetManagement.Contracts.DTOs.Requests;
 using AssetManagement.Contracts.Exceptions;
 using AssetManagement.Domain.Enums;
 using AssetManagement.Domain.Interfaces.Repositories;
 using Microsoft.EntityFrameworkCore;
+
+/*
+ * 2 main approaches
+ *
+ * We chose approach 2, the code which implements approach 1 is now turned into comments.
+ *
+ * 1. Allow multiple pendings per asset (first come, first serve)
+ * * * You can create N pending assignments for the same asset against N different staff
+ * * * The asset remains “Available” until one of those N staff actually Accepts.
+ *
+ * 2. Only 1 pending per asset at a time (process oriented)
+ * * * You only allow one "WaitingForAcceptance" record on an asset
+ * * * Until that invite is accepted or declined, nobody else—even the admin—can issue a new assignment on that asset.
+ * * * Once it’s accepted/declined, the admin can issue a fresh assignment.
+ */
 
 namespace AssetManagement.Application.Validators
 {
@@ -16,7 +30,11 @@ namespace AssetManagement.Application.Validators
             {
                 foreach (var stateString in stateStrings)
                 {
-                    if (!string.IsNullOrEmpty(stateString) && Enum.TryParse<AssignmentState>(stateString, true, out var state))
+                    if (stateString == "All")
+                    {
+                        return [];
+                    }
+                    else if (!string.IsNullOrEmpty(stateString) && Enum.TryParse<AssignmentState>(stateString, true, out var state))
                     {
                         states.Add(state);
                     }
@@ -50,10 +68,14 @@ namespace AssetManagement.Application.Validators
 
             // Parse and validate GUIDs
             if (!Guid.TryParse(dto.AssetId, out var assetId))
+            {
                 errors.Add(new FieldValidationException("AssetId", "Invalid Asset ID format"));
+            }
 
             if (!Guid.TryParse(dto.AssigneeId, out var assigneeId))
+            {
                 errors.Add(new FieldValidationException("AssigneeId", "Invalid Assignee ID format"));
+            }
 
             DateTimeOffset? assignedDate = null;
             if (!string.IsNullOrWhiteSpace(dto.AssignedDate))
@@ -74,8 +96,8 @@ namespace AssetManagement.Application.Validators
             // Async validations
             await ValidateAssetForAssignmentAsync(errors, assetId, adminLocation, assetRepository, assignmentRepository);
             await ValidateAssigneeAsync(errors, assigneeId, adminLocation, userRepository);
-
-            ThrowIfErrors(errors);
+            // Support approach 1
+            // await ValidateNoDuplicatePendingAsync(errors, assetId, assigneeId, assignmentRepository);
         }
 
         public static async Task ValidateUpdateAssignmentAsync(
@@ -90,7 +112,7 @@ namespace AssetManagement.Application.Validators
             var errors = new List<FieldValidationException>();
 
             var assignment = await assignmentRepository.GetByIdAsync(assignmentId);
-            if (assignment == null)
+            if (assignment == null || assignment.IsDeleted == true)
             {
                 throw new KeyNotFoundException($"Assignment with id {assignmentId} not found");
             }
@@ -120,28 +142,40 @@ namespace AssetManagement.Application.Validators
             // Validate new asset if provided
             if (!string.IsNullOrWhiteSpace(dto.AssetId))
             {
-                if (!Guid.TryParse(dto.AssetId, out var newAssetId))
+                if (!Guid.TryParse(dto.AssetId, out var parsedAssetId))
                 {
                     errors.Add(new FieldValidationException("AssetId", "Invalid Asset ID format"));
                 }
-                else if (newAssetId != assignment.AssetId)
+                else if (parsedAssetId != assignment.AssetId)
                 {
-                    await ValidateAssetForAssignmentAsync(errors, newAssetId, adminLocation, assetRepository, assignmentRepository, assignmentId);
+                    await ValidateAssetForAssignmentAsync(errors, parsedAssetId, adminLocation, assetRepository, assignmentRepository);
                 }
             }
 
             // Validate new assignee if provided
             if (!string.IsNullOrWhiteSpace(dto.AssigneeId))
             {
-                if (!Guid.TryParse(dto.AssigneeId, out var newAssigneeId))
+                if (!Guid.TryParse(dto.AssigneeId, out var parsedAssigneeId))
                 {
                     errors.Add(new FieldValidationException("AssigneeId", "Invalid Assignee ID format"));
                 }
-                else if (newAssigneeId != assignment.AssigneeId)
+                else if (parsedAssigneeId != assignment.AssigneeId)
                 {
-                    await ValidateAssigneeAsync(errors, newAssigneeId, adminLocation, userRepository);
+                    await ValidateAssigneeAsync(errors, parsedAssigneeId, adminLocation, userRepository);
                 }
             }
+
+            // Support approach 1
+            // if (newAssetId != assignment.AssetId ||
+            //     newAssigneeId != assignment.AssigneeId)
+            // {
+            //     await ValidateNoDuplicatePendingAsync(
+            //         errors,
+            //         newAssetId,
+            //         newAssigneeId,
+            //         assignmentRepository
+            //     );
+            // }
 
             // Validate new assigned date if provided
             if (!string.IsNullOrWhiteSpace(dto.AssignedDate))
@@ -178,12 +212,11 @@ namespace AssetManagement.Application.Validators
             Guid assetId,
             Location adminLocation,
             IAssetRepository assetRepository,
-            IAssignmentRepository assignmentRepository,
-            Guid? excludeAssignmentId = null)
+            IAssignmentRepository assignmentRepository)
         {
             // Check if asset exists
             var asset = await assetRepository.GetByIdAsync(assetId);
-            if (asset == null)
+            if (asset == null || asset.IsDeleted == true)
             {
                 errors.Add(new FieldValidationException("AssetId", "Asset not found"));
                 return;
@@ -204,21 +237,26 @@ namespace AssetManagement.Application.Validators
             }
 
             // Check if asset already has an active assignment
-            var query = assignmentRepository.GetAll()
-                .Where(a => a.AssetId == assetId &&
-                           (a.State == AssignmentState.Accepted || a.State == AssignmentState.WaitingForReturning || a.Asset.State != AssetState.Available));
+            var hasActiveAssignments = await assignmentRepository.GetAll()
+                .AnyAsync(a => a.AssetId == assetId && a.IsDeleted != true &&
+                   (a.State == AssignmentState.Accepted || a.State == AssignmentState.WaitingForReturning));
 
-            if (excludeAssignmentId.HasValue)
+            if (hasActiveAssignments)
             {
-                query = query.Where(a => a.AssetId != excludeAssignmentId);
+                errors.Add(new FieldValidationException("AssetId", "This asset already has active assignments"));
             }
 
-            var existingAssignment = await query.FirstOrDefaultAsync();
+            // Support approach 2
+            var hasPendings = await assignmentRepository.GetAll()
+                .AnyAsync(a => a.AssetId == assetId && a.IsDeleted != true &&
+                    a.State == AssignmentState.WaitingForAcceptance);
 
-            if (existingAssignment is not null)
+            if (hasPendings)
             {
-                errors.Add(new FieldValidationException("AssetId", "Asset is already assigned or accepted"));
+                errors.Add(new FieldValidationException("AssetId", "Another assignment is already pending for this asset"));
             }
+
+            ThrowIfErrors(errors);
         }
 
         private static async Task ValidateAssigneeAsync(
@@ -248,7 +286,31 @@ namespace AssetManagement.Application.Validators
                 errors.Add(new FieldValidationException("AssigneeId", "Cannot assign to inactive user"));
                 return;
             }
+
+            ThrowIfErrors(errors);
         }
+
+        // Support approach 1
+        // private static async Task ValidateNoDuplicatePendingAsync(
+        //     List<FieldValidationException> errors,
+        //     Guid assetId,
+        //     Guid assigneeId,
+        //     IAssignmentRepository assignmentRepository)
+        // {
+        //     // Check if this assignee already has a pending assignment of the same asset
+        //     var existingPendingAssignment = await assignmentRepository.GetAll()
+        //         .Where(a => a.AssigneeId == assigneeId
+        //             && a.AssetId == assetId
+        //             && a.State == AssignmentState.WaitingForAcceptance)
+        //         .FirstOrDefaultAsync();
+
+        //     if (existingPendingAssignment != null)
+        //     {
+        //         errors.Add(new FieldValidationException("AssigneeId", "User already has a pending assignment for this asset"));
+        //     }
+
+        //     ThrowIfErrors(errors);
+        // }
 
         private static void AddErrorIfEmpty(List<FieldValidationException> errors, string value, string field, string message)
         {

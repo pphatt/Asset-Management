@@ -22,9 +22,6 @@ public static class AssetValidator
     {
         var errors = new List<FieldValidationException>();
 
-        if (dto.State.HasValue)
-            AddErrorIfInvalidEnum(errors, dto.State.Value, "State", "Invalid asset state value");
-
         AddErrorIfEmpty(errors, dto.Name, "Name", "Asset name is required");
         if (dto.State is not null)
         {
