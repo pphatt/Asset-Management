@@ -81,8 +81,8 @@ namespace AssetManagement.Application.Tests.Controllers
         {
             // Arrange
             var returnRequestId = Guid.NewGuid();
-            var returnRequestDto = new ReturnRequestDto { Id = returnRequestId, AssetCode = "A123" };
-            _serviceMock.Setup(s => s.CancelReturnRequestAsync(returnRequestId, _adminId)).ReturnsAsync(returnRequestDto);
+            var expectedResult = "123123123";
+            _serviceMock.Setup(s => s.CancelReturnRequestAsync(returnRequestId, _adminId)).ReturnsAsync(expectedResult);
 
             var claimsPrincipal = CreateUserPrincipal();
             ApplyUserToController(claimsPrincipal);
@@ -91,12 +91,12 @@ namespace AssetManagement.Application.Tests.Controllers
             var result = await _controller.CancelReturnRequest(returnRequestId);
 
             // Assert
-            var okResult = Assert.IsType<ActionResult<ApiResponse<ReturnRequestDto>>>(result);
+            var okResult = Assert.IsType<ActionResult<ApiResponse<String>>>(result);
             var okObjectResult = Assert.IsType<OkObjectResult>(okResult.Result);
-            var apiResponse = Assert.IsType<ApiResponse<ReturnRequestDto>>(okObjectResult.Value);
+            var apiResponse = Assert.IsType<ApiResponse<String>>(okObjectResult.Value);
             Assert.True(apiResponse.Success);
             Assert.Equal("Successfully cancelled the return request", apiResponse.Message);
-            Assert.Equal(returnRequestDto, apiResponse.Data);
+            Assert.Equal(expectedResult, apiResponse.Data);
         }
 
         [Fact]

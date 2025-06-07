@@ -54,7 +54,7 @@ namespace AssetManagement.Application.Controllers
         
         [HttpDelete("{returnRequestId}")]
         [Authorize(Roles = "Admin")]
-        public async Task<ActionResult<ApiResponse<ReturnRequestDto>>> CancelReturnRequest(Guid returnRequestId)
+        public async Task<ActionResult<ApiResponse<string>>> CancelReturnRequest(Guid returnRequestId)
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (userId is null)

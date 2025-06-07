@@ -105,7 +105,8 @@ namespace AssetManagement.Application.Services
             if (returnRequest == null)
             {
                 throw new KeyNotFoundException($"ReturnRequest with id {returnRequestId} not found");
-            } else if (returnRequest.State == ReturnRequestState.Completed)
+            }
+            else if (returnRequest.State == ReturnRequestState.Completed)
             {
                 throw new InvalidOperationException($"ReturnRequest with id {returnRequestId} is already completed");
             }
@@ -205,7 +206,7 @@ namespace AssetManagement.Application.Services
             }
         }
         
-        public async Task<ReturnRequestDto> CancelReturnRequestAsync(Guid returnRequestId, Guid adminId)
+        public async Task<string> CancelReturnRequestAsync(Guid returnRequestId, Guid adminId)
         {
             var returnRequest = await _returnRequestRepository.GetByIdAsync(returnRequestId);
 
@@ -238,24 +239,10 @@ namespace AssetManagement.Application.Services
             assignment.State = AssignmentState.Accepted;
             _assignmentRepository.Update(assignment);
 
-            returnRequest.DeletedBy = adminId;
-            returnRequest.DeletedDate = DateTime.UtcNow;
-            returnRequest.IsDeleted = true;
-
-            _returnRequestRepository.Update(returnRequest);
+            _returnRequestRepository.Delete(returnRequest);
             await _returnRequestRepository.SaveChangesAsync();
 
-            return new ReturnRequestDto
-            {
-                Id = returnRequest.Id,
-                AssetCode = returnRequest.Assignment.Asset.Code,
-                AssetName = returnRequest.Assignment.Asset.Name,
-                AssignedDate = returnRequest.Assignment.AssignedDate.ToString("dd/MM/yyyy"),
-                RequestedBy = returnRequest.Requester.Username,
-                AcceptedBy = admin.Username,
-                ReturnedDate = returnRequest.ReturnedDate?.ToString("dd/MM/yyyy"),
-                State = returnRequest.State.GetDisplayName(),
-            };
+            return returnRequest.Id.ToString();
         }
     }
 }
