@@ -20,7 +20,8 @@ export function useReturnRequest() {
         });
 
         queryClient.invalidateQueries({
-          queryKey: ['returnRequests', queryConfig]});
+          queryKey: ['returnRequests', queryConfig]
+        });
 
         toast.success(response?.message ?? 'Return request created successfully');
       },
@@ -46,10 +47,24 @@ export function useReturnRequest() {
     });
   }
 
-  function useGetReturnRequest(params: IReturnRequestParams){
+  function useAcceptReturnRequest() {
+    return useMutation({
+      mutationFn: async (id: string) => returnRequestApi.acceptReturnRequest(id),
+      onSuccess: (response) => {
+        queryClient.invalidateQueries({ queryKey: ['returnRequests', queryConfig], exact: true });
+        toast.success(response?.message ?? 'Return request accepted successfully');
+      },
+      onError: (err: any) => {
+        const errMsg = err.response?.data?.errors;
+        toast.error(errMsg?.[0] ?? 'Error accepting return request');
+      },
+    });
+  }
+
+  function useGetReturnRequest(params: IReturnRequestParams) {
     return useQuery({
-        queryKey: ['returnRequests', params],
-        queryFn: () => returnRequestApi.getRequests(params),
+      queryKey: ['returnRequests', params],
+      queryFn: () => returnRequestApi.getRequests(params),
     });
   }
 
@@ -57,6 +72,7 @@ export function useReturnRequest() {
     useCreateReturnRequest,
     useCancelReturnRequest,
     useGetReturnRequest,
+    useAcceptReturnRequest
   };
 }
 

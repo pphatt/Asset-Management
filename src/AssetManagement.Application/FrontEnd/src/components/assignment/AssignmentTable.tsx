@@ -6,6 +6,7 @@ import useReturnRequest from '../../hooks/useReturnRequest';
 import Pagination from '../common/Pagination';
 import ReplyAssignmentPopup from './ReplyAssignmentPopup';
 import ReturnRequestPopup from './ReturnRequestPopup';
+import AssignmentDetailsPopup from './AssignmentDetailsPopup';
 
 export const AssignmentTable: React.FC = () => {
   const columns = [
@@ -23,10 +24,17 @@ export const AssignmentTable: React.FC = () => {
     assignmentId: '',
   });
   const [reply, setReply] = useState<'Accept' | 'Decline'>('Accept');
-  const [selectedAssignment, setSelectedAssignment] = useState<IMyAssignment | null>(null);
-  const { useGetMyAssignments } = useAssignment();
+  const [selectedMyAssignment, setSelectedMyAssignment] = useState<IMyAssignment | null>(null);
+  const { useGetMyAssignments, useGetAssignmentDetails } = useAssignment();
   const { useCreateReturnRequest } = useReturnRequest();
+  const { data: assignmentDetail } =
+    useGetAssignmentDetails(selectedMyAssignment?.assignmentId || '');
   const { mutate: createReturnRequest, isPending: isCreatingReturnRequest } = useCreateReturnRequest();
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const handleClosePopup = () => {
+    setIsPopupOpen(false);
+    setSelectedMyAssignment(null);
+  };
 
   const [page, setPage] = useState(1);
   const { data: myAssignments, isPending: isLoading } = useGetMyAssignments({
@@ -58,7 +66,7 @@ export const AssignmentTable: React.FC = () => {
   };
 
   const handleReplyAssignment = (assignment: IMyAssignment, reply: 'Accept' | 'Decline', isOpen: boolean) => {
-    setSelectedAssignment(assignment);
+    setSelectedMyAssignment(assignment);
     setReply(reply);
     setIsDisablePopupOpen(isOpen);
   };
@@ -90,9 +98,8 @@ export const AssignmentTable: React.FC = () => {
             {columns.map((col) => (
               <th
                 key={col.key}
-                className={`text-left relative py-2 after:absolute after:bottom-0 after:left-0 after:w-[calc(100%-20px)] after:h-[2px] ${
-                  sortBy?.startsWith(`${col.key}:`) ? 'after:bg-gray-600 font-semibold' : 'after:bg-gray-400 font-medium'
-                } ${col.sortable ? 'cursor-pointer select-none' : 'cursor-default select-none'}`}
+                className={`text-left relative py-2 after:absolute after:bottom-0 after:left-0 after:w-[calc(100%-20px)] after:h-[2px] ${sortBy?.startsWith(`${col.key}:`) ? 'after:bg-gray-600 font-semibold' : 'after:bg-gray-400 font-medium'
+                  } ${col.sortable ? 'cursor-pointer select-none' : 'cursor-default select-none'}`}
                 onClick={col.sortable ? () => handleSort(col.key) : undefined}
               >
                 {col.label}
@@ -120,7 +127,13 @@ export const AssignmentTable: React.FC = () => {
         <tbody>
           {myAssignments && myAssignments.items?.length > 0 ? (
             myAssignments?.items.map((assignment) => (
-              <tr key={assignment.assignmentId}>
+              <tr key={assignment.assignmentId}
+                className="hover:bg-gray-50 cursor-pointer"
+                onClick={() => {
+                  setSelectedMyAssignment(assignment);
+                  setIsPopupOpen(true);
+                }}
+              >
                 <td className="py-2 relative w-[100px] after:absolute after:bottom-0 after:left-0 after:w-[calc(100%-20px)] after:h-[1px] after:bg-gray-300 select-text">
                   {assignment.assetCode}
                 </td>
@@ -139,9 +152,8 @@ export const AssignmentTable: React.FC = () => {
                 <td className="py-2 relative">
                   <div className="flex items-center justify-center space-x-4">
                     <button
-                      className={`text-quaternary hover:text-gray-700 ${
-                        assignment.state !== 'Waiting for acceptance' ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
-                      }`}
+                      className={`text-quaternary hover:text-gray-700 ${assignment.state !== 'Waiting for acceptance' ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+                        }`}
                       onClick={(e) => {
                         e.stopPropagation();
                         handleReplyAssignment(assignment, 'Accept', true);
@@ -152,9 +164,8 @@ export const AssignmentTable: React.FC = () => {
                       <Check className="size-4" color="red" />
                     </button>
                     <button
-                      className={`text-primary hover:text-red-700 ${
-                        assignment.state !== 'Waiting for acceptance' ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
-                      }`}
+                      className={`text-primary hover:text-red-700 ${assignment.state !== 'Waiting for acceptance' ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+                        }`}
                       onClick={(e) => {
                         e.stopPropagation();
                         handleReplyAssignment(assignment, 'Decline', true);
@@ -168,9 +179,8 @@ export const AssignmentTable: React.FC = () => {
                       </svg>
                     </button>
                     <button
-                      className={`text-blue-600 hover:text-blue-800 ${
-                        assignment.state === 'Accepted' ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'
-                      }`}
+                      className={`text-blue-600 hover:text-blue-800 ${assignment.state === 'Accepted' ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'
+                        }`}
                       onClick={(e) => {
                         e.stopPropagation();
                         if (assignment.state === 'Accepted' && assignment.assignmentId) {
@@ -221,10 +231,19 @@ export const AssignmentTable: React.FC = () => {
         />
       )}
 
+      {/* Assignment Details Popup */}
+      {assignmentDetail && (
+        <AssignmentDetailsPopup
+          assignment={assignmentDetail}
+          isOpen={isPopupOpen}
+          onClose={handleClosePopup}
+        />
+      )}
+
       <ReplyAssignmentPopup
         isOpen={isDisablePopupOpen}
         onClose={() => setIsDisablePopupOpen(false)}
-        assignmentId={selectedAssignment?.assignmentId || ''}
+        assignmentId={selectedMyAssignment?.assignmentId || ''}
         reply={reply}
       />
       <ReturnRequestPopup

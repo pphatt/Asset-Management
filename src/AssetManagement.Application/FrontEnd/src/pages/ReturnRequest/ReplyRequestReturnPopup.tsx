@@ -5,26 +5,45 @@ interface CancelRequestReturnPopupProps {
     isOpen: boolean;
     onClose: () => void;
     returnRequestId: string;
+    type: 'cancel' | 'accept';
 }
 
-const CancelReturnRequestPopup: React.FC<CancelRequestReturnPopupProps> = ({
+const ReplyReturnRequestPopup: React.FC<CancelRequestReturnPopupProps> = ({
     isOpen,
     onClose,
     returnRequestId,
+    type
 }) => {
-    const { useCancelReturnRequest } = useReturnRequest();
-    const { mutate: cancelReturnRequest, isPending } = useCancelReturnRequest();
+    const message = type === 'cancel'
+        ? 'Do you want to cancel this returning request?'
+        : "Do you want to mark this returning request as 'Completed'?";
+    const { useCancelReturnRequest, useAcceptReturnRequest } = useReturnRequest();
+    const { mutate: cancelReturnRequest, isPending: isCancelLoading } = useCancelReturnRequest();
+    const { mutate: acceptReturnRequest, isPending: isAcceptLoading } = useAcceptReturnRequest();
+
+    const isPending = isCancelLoading || isAcceptLoading;
 
     const onConfirm = async () => {
-        console.log('Canceling return request:', returnRequestId);
-        cancelReturnRequest(returnRequestId, {
-            onSuccess: () => {
-                onClose();
-            },
-            onError: () => {
-                onClose();
-            },
-        });
+        if (type === 'accept') {
+            acceptReturnRequest(returnRequestId, {
+                onSuccess: () => {
+                    onClose();
+                },
+                onError: () => {
+                    onClose();
+                },
+            });
+            return;
+        } else {
+            cancelReturnRequest(returnRequestId, {
+                onSuccess: () => {
+                    onClose();
+                },
+                onError: () => {
+                    onClose();
+                },
+            });
+        }
     };
 
     if (!isOpen) return null;
@@ -44,13 +63,13 @@ const CancelReturnRequestPopup: React.FC<CancelRequestReturnPopupProps> = ({
                 }}
             >
                 {/* Header section with darker grey background */}
-                <div className="py-3 px-10 border-b border-gray-300 bg-gray-300 rounded-t-md">
+                <div className="py-3 px-8 border-b border-gray-300 bg-gray-300 rounded-t-md">
                     <h2 className="text-xl font-semibold text-primary">Are you sure?</h2>
                 </div>
 
                 {/* Message section */}
-                <div className="px-10 py-5">
-                    <p className="mb-6">Do you want to cancel this returning request?</p>
+                <div className="px-8 py-5">
+                    <p className="mb-6">{message}</p>
                     <div className="flex gap-4">
                         <button
                             onClick={() => {
@@ -75,4 +94,4 @@ const CancelReturnRequestPopup: React.FC<CancelRequestReturnPopupProps> = ({
     );
 };
 
-export default CancelReturnRequestPopup;
+export default ReplyReturnRequestPopup;

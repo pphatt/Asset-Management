@@ -37,7 +37,7 @@ const assignmentApi = {
     const { data } = await http.get('/assignments/my-assignments', { params });
 
     return data.data;
-  }
+  },
 
 };
 

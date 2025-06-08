@@ -16,7 +16,8 @@ import { useEffect, useRef, useState } from 'react';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { createSearchParams, useNavigate } from 'react-router-dom';
-import CancelReturnRequestPopup from './CancelRequestReturnPopup';
+import ReplyReturnRequestPopup from './ReplyRequestReturnPopup';
+import { Check } from 'lucide-react';
 
 export type QueryConfig = {
     [key in keyof IReturnRequestParams]: string;
@@ -26,7 +27,8 @@ export default function ReturnRequest() {
     const [isStateDropdownOpen, setIsStateDropdownOpen] = useState(false);
     const [selectedReturnRequest, setSelectedReturnRequest] =
         useState<IReturnRequest | null>(null);
-    const [isCancelReturnRequestPopupOpen, setIsCancelReturnRequestPopupOpen] = useState(false);
+    const [isReplyReturnRequestPopupOpen, setIsReplyReturnRequestPopupOpen] = useState(false);
+    const [type, setType] = useState<'cancel' | 'accept'>('cancel');
     const queryConfig = useAssignmentQuery();
     const navigate = useNavigate();
     const { onSubmitSearch, register: searchRegister } = useAssignmentSearch({
@@ -269,7 +271,7 @@ export default function ReturnRequest() {
                                                 type="checkbox"
                                                 className="mr-2 h-4 w-4 accent-red-600"
                                                 checked={isStateSelected(option.value)}
-                                                onChange={() => {}} // Empty handler as we're handling it in the label
+                                                onChange={() => { }} // Empty handler as we're handling it in the label
                                                 readOnly
                                             />
                                             <span>{option.label}</span>
@@ -517,17 +519,33 @@ export default function ReturnRequest() {
                                     {' '}
                                     <div className="flex items-center justify-center space-x-4">
                                         <button
-                                            className={`text-primary ${
-                                                isReturnRequestReturn(returnRequest.state)
-                                                    ? 'hover:text-red-700 hover:cursor-pointer'
-                                                    : 'opacity-50 cursor-not-allowed'
-                                            }`}
+                                            className={`${isReturnRequestReturn(returnRequest.state)
+                                                ? 'hover:cursor-pointer'
+                                                : 'opacity-50 cursor-not-allowed'
+                                                }`}
                                             disabled={!isReturnRequestReturn(returnRequest.state)}
                                             onClick={(e) => {
                                                 e.stopPropagation();
                                                 // Delete action
-                                                setIsCancelReturnRequestPopupOpen(true);
+                                                setIsReplyReturnRequestPopupOpen(true);
                                                 setSelectedReturnRequest(returnRequest);
+                                                setType('accept');
+                                            }}
+                                        >
+                                            <Check className="size-4" color="red" />
+                                        </button>
+                                        <button
+                                            className={`text-black ${isReturnRequestReturn(returnRequest.state)
+                                                ? 'hover:cursor-pointer'
+                                                : 'opacity-50 cursor-not-allowed'
+                                                }`}
+                                            disabled={!isReturnRequestReturn(returnRequest.state)}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                // Delete action
+                                                setIsReplyReturnRequestPopupOpen(true);
+                                                setSelectedReturnRequest(returnRequest);
+                                                setType('cancel');
                                             }}
                                         >
                                             <svg
@@ -575,10 +593,11 @@ export default function ReturnRequest() {
                 />
             )}
 
-            <CancelReturnRequestPopup
+            <ReplyReturnRequestPopup
                 returnRequestId={selectedReturnRequest?.id ?? ''}
-                isOpen={isCancelReturnRequestPopupOpen}
-                onClose={() => setIsCancelReturnRequestPopupOpen(false)}
+                isOpen={isReplyReturnRequestPopupOpen}
+                onClose={() => setIsReplyReturnRequestPopupOpen(false)}
+                type={type}
             />
         </div>
     );

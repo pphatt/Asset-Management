@@ -25,6 +25,12 @@ const returnRequestApi = {
         const response = await http.delete(`/returnrequests/${returnRequestId}`);
         return response.data;
     },
+    acceptReturnRequest: async (
+        id: string
+    ): Promise<HttpResponse<string>> => {
+        const response = await http.post(`/returnrequests/${id}`);
+        return response.data;
+    }
 };
 
 export default returnRequestApi;
