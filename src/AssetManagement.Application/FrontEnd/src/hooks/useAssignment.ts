@@ -127,13 +127,13 @@ export function useAssignment() {
           return assignmentApi.declineAssignment(id);
         }
       },
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ['my-assignments'], exact: false });
-        toast.success('Assignment accepted successfully');
+      onSuccess: (_, request) => {
+          queryClient.invalidateQueries({ queryKey: ['my-assignments'], exact: false });
+          toast.success(`Assignment ${request.reply.toLowerCase()} successfully`);
       },
-      onError: (err: any) => {
+      onError: (err: any, request) => {
         const errMsg = err?.response?.data?.errors?.[0];
-        toast.error(errMsg || 'Error accepting assignment');
+        toast.error(errMsg || `Error ${request.reply.toLowerCase()} assignment`);
       },
     });
   }

@@ -46,7 +46,7 @@ namespace AssetManagement.Application.Services
             // Handling searching, filtering, sorting here
             IQueryable<Assignment> query = _assignmentRepository.GetAll()
                 .ApplySorting(queryParams.GetSortCriteria())
-                .Where(a => a.AssigneeId.Equals(userId));
+                .Where(a => a.AssigneeId.Equals(userId) && (a.State != AssignmentState.Declined));
 
             // Pagination below here
             int total = await query.CountAsync();
