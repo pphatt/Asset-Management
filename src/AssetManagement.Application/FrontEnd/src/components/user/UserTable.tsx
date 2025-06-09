@@ -97,7 +97,7 @@ const UserTable: React.FC<{
               <td className="py-2 relative">
                 <div className="flex items-center justify-center space-x-4">
                   <button
-                    className="text-quaternary hover:text-gray-700"
+                    className="text-quaternary hover:text-gray-700 cursor-pointer hover:bg-gray-300 hover:scale-110 transition-all duration-150 p-1 rounded"
                     onClick={(e) => {
                       e.stopPropagation();
                       onEdit(user.staffCode);
@@ -122,7 +122,7 @@ const UserTable: React.FC<{
                     </svg>
                   </button>
                   <button
-                    className="text-primary hover:text-red-700"
+                    className="text-primary hover:text-red-700 cursor-pointer hover:bg-red-100 hover:scale-110 transition-all duration-150 p-1 rounded"
                     onClick={(e) => {
                       e.stopPropagation();
                       onDelete(user.staffCode);
@@ -134,14 +134,14 @@ const UserTable: React.FC<{
                       <path
                         d="M18 6L6 18"
                         stroke="currentColor"
-                        strokeWidth="2"
+                        strokeWidth="3"
                         strokeLinecap="round"
                         strokeLinejoin="round"
                       />
                       <path
                         d="M6 6L18 18"
                         stroke="currentColor"
-                        strokeWidth="2"
+                        strokeWidth="3"
                         strokeLinecap="round"
                         strokeLinejoin="round"
                       />

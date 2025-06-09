@@ -323,11 +323,10 @@ export const AssetForm: React.FC<AssetFormProps> = ({
           <button
             type="submit"
             disabled={isSubmitDisabled}
-            className={`px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors ${
-              isSubmitDisabled
+            className={`px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 ${isSubmitDisabled
                 ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                : "bg-primary text-white hover:bg-primary-dark focus:ring-primary"
-            }`}
+                : "bg-primary text-white hover:bg-primary-dark focus:ring-primary cursor-pointer hover:scale-110 transition-all duration-100"
+              }`}
           >
             {isSubmitting || createAssetMutation.isPending
               ? "Saving..."
@@ -336,7 +335,7 @@ export const AssetForm: React.FC<AssetFormProps> = ({
 
           <button
             type="button"
-            className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 transition-colors"
+            className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md cursor-pointer hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 hover:scale-110 transition-all duration-100"
             onClick={onCancel}
           >
             Cancel

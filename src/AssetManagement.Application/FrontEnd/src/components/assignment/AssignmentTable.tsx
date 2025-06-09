@@ -150,9 +150,9 @@ export const AssignmentTable: React.FC = () => {
                   {assignment.state}
                 </td>
                 <td className="py-2 relative">
-                  <div className="flex items-center justify-center space-x-4">
+                  <div className="flex items-center justify-center space-x-2">
                     <button
-                      className={`text-quaternary hover:text-gray-700 ${assignment.state !== 'Waiting for acceptance' ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+                      className={`p-1 rounded text-quaternary hover:text-red-700 ${assignment.state !== 'Waiting for acceptance' ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:scale-110 transition-all duration-150 hover:bg-red-100'
                         }`}
                       onClick={(e) => {
                         e.stopPropagation();
@@ -164,7 +164,7 @@ export const AssignmentTable: React.FC = () => {
                       <Check className="size-4" color="red" />
                     </button>
                     <button
-                      className={`text-primary hover:text-red-700 ${assignment.state !== 'Waiting for acceptance' ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+                      className={`p-1 rounded text-primary hover:text-gray-700 ${assignment.state !== 'Waiting for acceptance' ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:scale-110 transition-all duration-150 hover:bg-gray-200'
                         }`}
                       onClick={(e) => {
                         e.stopPropagation();
@@ -179,7 +179,7 @@ export const AssignmentTable: React.FC = () => {
                       </svg>
                     </button>
                     <button
-                      className={`text-blue-600 hover:text-blue-800 ${assignment.state === 'Accepted' ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'
+                      className={`p-1 rounded text-blue-600 hover:text-blue-800 ${assignment.state === 'Accepted' ? 'cursor-pointer hover:scale-110 transition-all duration-150 hover:bg-blue-100' : 'cursor-not-allowed opacity-50'
                         }`}
                       onClick={(e) => {
                         e.stopPropagation();

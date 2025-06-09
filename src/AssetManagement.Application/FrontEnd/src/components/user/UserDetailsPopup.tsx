@@ -32,7 +32,7 @@ const UserDetailsPopup: React.FC<UserDetailsPopupProps> = ({ user, isOpen, onClo
       <div className="bg-white rounded-md shadow-lg w-full max-w-md relative">
         <div className="flex justify-between items-center p-4 border bg-tertiary rounded-t-md border-black text-white">
           <h2 className="text-xl font-semibold text-primary">Detailed User Information</h2>
-          <button onClick={onClose} className="text-primary hover:text-dark-200 focus:outline-none border-red rounded-md border-3" aria-label="Close">
+          <button onClick={onClose} className="text-primary hover:text-dark-200 focus:outline-none border-red rounded-md border-3 cursor-pointer" aria-label="Close">
             <X size={24} />
           </button>
         </div>

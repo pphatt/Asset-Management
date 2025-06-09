@@ -235,7 +235,7 @@ export default function ReturnRequest() {
                             <button
                                 type="button"
                                 onClick={() => setIsStateDropdownOpen(!isStateDropdownOpen)}
-                                className="flex items-center justify-center h-[34px] w-[34px] border border-l-0 border-quaternary rounded-r bg-white hover:bg-gray-50"
+                                className="flex items-center justify-center h-[34px] w-[34px] border border-l-0 border-quaternary rounded-r bg-white hover:bg-gray-100 cursor-pointer"
                             >
                                 <svg
                                     width="16"
@@ -296,7 +296,7 @@ export default function ReturnRequest() {
                             <button
                                 type="button"
                                 onClick={toggleDatePicker}
-                                className="flex items-center justify-center h-[34px] w-[34px] border border-l-0 border-quaternary rounded-r bg-white hover:bg-gray-50"
+                                className="flex items-center justify-center h-[34px] w-[34px] border border-l-0 border-quaternary rounded-r bg-white hover:bg-gray-100 cursor-pointer"
                             >
                                 <svg
                                     width="16"
@@ -446,7 +446,7 @@ export default function ReturnRequest() {
                             placeholder="Search..."
                             {...searchRegister('searchName')}
                         />
-                        <button className="absolute right-1 top-1/2 -translate-y-1/2 bg-white p-1">
+                        <button className="absolute right-1 top-1/2 -translate-y-1/2 bg-white p-2 hover:bg-gray-100 cursor-pointer rounded">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
                                 <path
                                     d="M11 19C15.4183 19 19 15.4183 19 11C19 6.58172 15.4183 3 11 3C6.58172 3 3 6.58172 3 11C3 15.4183 6.58172 19 11 19Z"
@@ -490,7 +490,7 @@ export default function ReturnRequest() {
                 <tbody>
                     {returnRequests && returnRequests.length > 0 ? (
                         returnRequests.map((returnRequest, index) => (
-                            <tr className="hover:bg-gray-50 cursor-pointer" key={index}>
+                            <tr className="hover:bg-gray-50" key={index}>
                                 <td className="py-2 relative after:absolute after:bottom-0 after:left-0 after:w-[calc(100%-20px)] after:h-[1px] after:bg-gray-300">
                                     {returnRequest.no}
                                 </td>
@@ -517,10 +517,10 @@ export default function ReturnRequest() {
                                 </td>{' '}
                                 <td className="py-2 relative">
                                     {' '}
-                                    <div className="flex items-center justify-center space-x-4">
+                                    <div className="flex items-center justify-center space-x-2">
                                         <button
-                                            className={`${isReturnRequestReturn(returnRequest.state)
-                                                ? 'hover:cursor-pointer'
+                                            className={`p-1 rounded ${isReturnRequestReturn(returnRequest.state)
+                                                ? 'cursor-pointer hover:bg-red-100 hover:scale-110 transition-all duration-150'
                                                 : 'opacity-50 cursor-not-allowed'
                                                 }`}
                                             disabled={!isReturnRequestReturn(returnRequest.state)}
@@ -532,11 +532,11 @@ export default function ReturnRequest() {
                                                 setType('accept');
                                             }}
                                         >
-                                            <Check className="size-4" color="red" />
+                                            <Check className="size-4" color="red" strokeWidth={3} />
                                         </button>
                                         <button
-                                            className={`text-black ${isReturnRequestReturn(returnRequest.state)
-                                                ? 'hover:cursor-pointer'
+                                            className={`text-black p-1 rounded ${isReturnRequestReturn(returnRequest.state)
+                                                ? 'hover:text-gray-700 cursor-pointer hover:bg-gray-300 hover:scale-110 transition-all duration-150'
                                                 : 'opacity-50 cursor-not-allowed'
                                                 }`}
                                             disabled={!isReturnRequestReturn(returnRequest.state)}
@@ -557,14 +557,14 @@ export default function ReturnRequest() {
                                                 <path
                                                     d="M18 6L6 18"
                                                     stroke="currentColor"
-                                                    strokeWidth="2"
+                                                    strokeWidth="3"
                                                     strokeLinecap="round"
                                                     strokeLinejoin="round"
                                                 />
                                                 <path
                                                     d="M6 6L18 18"
                                                     stroke="currentColor"
-                                                    strokeWidth="2"
+                                                    strokeWidth="3"
                                                     strokeLinecap="round"
                                                     strokeLinejoin="round"
                                                 />

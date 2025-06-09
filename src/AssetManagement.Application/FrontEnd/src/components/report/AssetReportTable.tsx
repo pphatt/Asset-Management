@@ -70,7 +70,7 @@ const AssetReportTable: React.FC<{
           reportData.map((entry) => (
             <tr
               key={entry.category}
-              className="cursor-pointer hover:bg-gray-50"
+              className="hover:bg-gray-50"
             >
               <td className="py-2 relative w-[180px] after:absolute after:bottom-0 after:left-0 after:w-[calc(100%-20px)] after:h-[1px] after:bg-gray-300">
                 {entry.category}

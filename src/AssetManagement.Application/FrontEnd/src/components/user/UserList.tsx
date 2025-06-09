@@ -274,7 +274,7 @@ const UserList: React.FC = () => {
             <button
               type="button"
               onClick={handleSearch}
-              className="flex items-center justify-center h-[34px] w-[34px] border border-l-0 border-quaternary rounded-r bg-white hover:bg-gray-50"
+              className="flex items-center justify-center h-[34px] w-[34px] border border-l-0 border-quaternary rounded-r bg-white hover:bg-gray-100 cursor-pointer"
               aria-label="Search Button"
             >
               <svg
@@ -295,7 +295,7 @@ const UserList: React.FC = () => {
             </button>
           </div>
           <button
-            className="ml-4 bg-primary text-secondary px-4 py-1.5 text-sm rounded"
+            className="ml-4 bg-primary text-secondary px-4 py-1.5 text-sm rounded cursor-pointer hover:scale-110 transition-all duration-150"
             onClick={handleCreateNewUser}
           >
             Create new user

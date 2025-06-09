@@ -12,7 +12,7 @@ const ActiveFilters: React.FC<{
       {filterType && (
         <div className="px-2 py-1 bg-gray-200 text-sm rounded-full flex items-center">
           Type: {filterType}
-          <button className="ml-1 text-gray-600 hover:text-gray-800" onClick={onClearType}>
+          <button className="ml-1 text-gray-600 hover:text-gray-800 cursor-pointer" onClick={onClearType}>
             ×
           </button>
         </div>

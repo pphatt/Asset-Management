@@ -32,7 +32,7 @@ const AssetStateDropdown: React.FC<{
                 <button
                     type="button"
                     onClick={() => setShow(!show)}
-                    className="flex items-center justify-center h-[34px] w-[34px] border border-l-0 border-quaternary rounded-r bg-white hover:bg-gray-50"
+                    className="flex items-center justify-center h-[34px] w-[34px] border border-l-0 border-quaternary rounded-r bg-white cursor-pointer hover:bg-gray-100"
                 >
                     <svg
                         width="16"

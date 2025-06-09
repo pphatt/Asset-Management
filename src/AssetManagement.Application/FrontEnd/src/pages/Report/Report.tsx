@@ -70,7 +70,7 @@ export default function Report() {
       <h2 className="text-primary text-xl font-normal mb-5">Report</h2>
       <div className="flex justify-end mb-4">
         <button
-          className="ml-4 bg-primary text-secondary px-4 py-1.5 text-sm rounded disabled:opacity-50 disabled:cursor-not-allowed"
+          className="ml-4 bg-primary text-secondary px-4 py-1.5 text-sm rounded hover:scale-110 transition-all duration-150 hover:cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           onClick={handleExport}
           disabled={
             isExporting ||

@@ -28,24 +28,22 @@ const AssetTable: React.FC<{
           {columns.map((col) => (
             <th
               key={col.key}
-              className={`text-left relative py-2 after:absolute after:bottom-0 after:left-0 after:w-[calc(100%-20px)] after:h-[2px] ${
-                sortBy?.startsWith(`${col.key}:`)
-                  ? "after:bg-gray-600 font-semibold"
-                  : "after:bg-gray-400 font-medium"
-              } ${col.sortable ? "cursor-pointer" : ""}`}
+              className={`text-left relative py-2 after:absolute after:bottom-0 after:left-0 after:w-[calc(100%-20px)] after:h-[2px] ${sortBy?.startsWith(`${col.key}:`)
+                ? "after:bg-gray-600 font-semibold"
+                : "after:bg-gray-400 font-medium"
+                } ${col.sortable ? "cursor-pointer" : ""}`}
               onClick={col.sortable ? () => onSort(col.key) : undefined}
             >
               {col.label}
               {col.sortable && (
                 <svg
-                  className={`inline-block ml-1 w-3 h-3 ${
-                    sortBy?.startsWith(`${col.key}:`) ? "text-primary" : ""
-                  }`}
+                  className={`inline-block ml-1 w-3 h-3 ${sortBy?.startsWith(`${col.key}:`) ? "text-primary" : ""
+                    }`}
                   viewBox="0 0 24 24"
                   fill="none"
                 >
                   {sortBy?.startsWith(`${col.key}:`) &&
-                  sortBy?.endsWith(":desc") ? (
+                    sortBy?.endsWith(":desc") ? (
                     <path
                       d="M18 15L12 9L6 15"
                       stroke="currentColor"
@@ -97,7 +95,7 @@ const AssetTable: React.FC<{
               <td className="py-2 relative">
                 <div className="flex items-center justify-center space-x-4">
                   <button
-                    className="text-quaternary hover:text-gray-700 cursor-pointer"
+                    className="text-quaternary hover:text-gray-700 cursor-pointer hover:bg-gray-300 hover:scale-110 transition-all duration-150 p-1 rounded"
                     onClick={() =>
                       navigate(path.assetEdit.replace(":assetId", asset.id))
                     }
@@ -120,7 +118,8 @@ const AssetTable: React.FC<{
                     </svg>
                   </button>
                   <button
-                    className={`text-primary hover:text-red-700 ${asset.state === "Assigned" && "cursor-not-allowed opacity-50"}`}
+                    className={`text-primary hover:text-red-700 p-1
+                      ${asset.state === "Assigned" ? "cursor-not-allowed opacity-50" : "cursor-pointer hover:bg-red-100 hover:scale-110 transition-all duration-150 rounded"}`}
                     onClick={(e) => {
                       e.stopPropagation();
                       if (asset.state != "Assigned") {
@@ -133,14 +132,14 @@ const AssetTable: React.FC<{
                       <path
                         d="M18 6L6 18"
                         stroke="currentColor"
-                        strokeWidth="2"
+                        strokeWidth="3"
                         strokeLinecap="round"
                         strokeLinejoin="round"
                       />
                       <path
                         d="M6 6L18 18"
                         stroke="currentColor"
-                        strokeWidth="2"
+                        strokeWidth="3"
                         strokeLinecap="round"
                         strokeLinejoin="round"
                       />
