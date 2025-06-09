@@ -41,7 +41,7 @@ namespace AssetManagement.Domain.Extensions
         public static IQueryable<ReturnRequest> ApplySorting(this IQueryable<ReturnRequest> query, IList<(string property, string order)> sortingCriteria)
         {
             if (sortingCriteria == null || sortingCriteria.Count == 0)
-                return query.OrderBy(rr => rr.ReturnedDate);
+                return query.OrderBy(rr => rr.ReturnedDate != null).ThenBy(rr => rr.ReturnedDate);
 
             IOrderedQueryable<ReturnRequest>? ordered = null;
 

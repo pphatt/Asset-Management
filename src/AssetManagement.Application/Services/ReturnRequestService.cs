@@ -80,7 +80,7 @@ namespace AssetManagement.Application.Services
                     Id = rr.Id,
                     No = isNoDescending ?
                         total - (idx + (queryParams.PageSize * (queryParams.PageNumber - 1))) :
-                        idx + (queryParams.PageSize * (queryParams.PageNumber - 1)),
+                        idx + (queryParams.PageSize * (queryParams.PageNumber - 1)) + 1,
                     AssetCode = rr.Assignment.Asset.Code,
                     AssetName = rr.Assignment.Asset.Name,
                     AssignedDate = rr.Assignment.AssignedDate.ToString("dd/MM/yyyy"),
