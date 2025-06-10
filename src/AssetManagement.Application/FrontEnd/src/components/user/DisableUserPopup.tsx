@@ -1,6 +1,7 @@
 import React, { useContext } from "react";
 import { IUser } from "../../types/user.type";
 import { AppContext } from "@/contexts/app.context";
+import { X } from "lucide-react";
 
 interface DisableUserPopupProps {
   isOpen: boolean;
@@ -42,10 +43,18 @@ const DisableUserPopup: React.FC<DisableUserPopupProps> = ({
           }}
         >
           {/* Header section with darker grey background */}
-          <div className="py-3 px-10 border-b border-gray-300 bg-gray-300 rounded-t-md">
+          <div className="flex justify-between items-center py-3 px-10 border-b border-gray-300 bg-gray-300 rounded-t-md">
             <h2 className="text-xl font-semibold text-primary">
               Can not disable user
             </h2>
+
+            <button
+              onClick={onClose}
+              className="text-primary hover:text-dark-200 focus:outline-none border-red rounded-md border-3 cursor-pointer"
+              aria-label="Close"
+            >
+              <X size={24} />
+            </button>
           </div>
 
           {/* Message section */}

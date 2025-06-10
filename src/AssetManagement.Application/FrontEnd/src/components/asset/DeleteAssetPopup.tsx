@@ -45,9 +45,10 @@ const DisableAssetPopup: React.FC<DisableAssetPopupProps> = ({
             <h2 className="text-xl font-semibold text-primary">
               Cannot Delete Asset
             </h2>
+
             <button
               onClick={onClose}
-              className="text-primary hover:text-dark-200 focus:outline-none border-red rounded-md border-3"
+              className="text-primary hover:text-dark-200 focus:outline-none border-red rounded-md border-3 cursor-pointer"
               aria-label="Close"
             >
               <X size={24} />
