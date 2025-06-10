@@ -21,7 +21,7 @@ const DisableUserPopup: React.FC<DisableUserPopupProps> = ({
 
   if (!isOpen) return null;
 
-  if (targetUser.hasAssignment) {
+  if (targetUser.hasAssignments) {
     return (
       <div className="fixed inset-0 z-50">
         {/* Overlay to prevent interaction */}

@@ -27,7 +27,7 @@ export interface IUser {
   joinedDate: string; // Format: ISO 8601
   type: IUserType;
   isPasswordUpdated?: boolean;
-  hasAssignment?: boolean;
+  hasAssignments?: boolean;
 }
 
 export interface IUserDetails {

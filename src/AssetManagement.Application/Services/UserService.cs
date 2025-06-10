@@ -68,7 +68,7 @@ namespace AssetManagement.Application.Services
                     Type = u.Type.ToString(),
                     Username = u.Username,
                     HasAssignments = u.Assignments.Where(x => x.State == AssignmentState.Accepted || 
-                                                              x.State == AssignmentState.WaitingForReturning).Count() > 0,
+                                                              x.State == AssignmentState.WaitingForReturning).Any(),
                 })
                 .ToListAsync();
 
