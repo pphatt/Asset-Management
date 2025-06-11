@@ -59,13 +59,15 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
+app.MapOpenApi();
+
+app.UseSwagger();
+
+app.UseSwaggerUI();
+
 // Swagger in development mode
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
-    app.UseSwagger();
-    app.UseSwaggerUI();
-
     // Seeding data in development mode
     using (var scope = app.Services.CreateScope())
     {
