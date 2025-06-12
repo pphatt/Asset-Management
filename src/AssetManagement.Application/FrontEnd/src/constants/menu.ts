@@ -8,6 +8,7 @@ interface NavigationItem {
 
 export const adminNavigationItems: NavigationItem[] = [
     { title: "Home", path: path.home, showInNav: true },
+    { title: "Dashboard", path: path.dashboard, showInNav: true },
     { title: "Manage User", path: path.user, showInNav: true },
     { title: "Manage Asset", path: path.asset, showInNav: true },
     { title: "Manage Assignment", path: path.assignment, showInNav: true },

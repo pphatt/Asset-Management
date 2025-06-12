@@ -1,5 +1,3 @@
-using System.Diagnostics;
-
 namespace AssetManagement.Contracts.DTOs;
 
 public class AssetDto

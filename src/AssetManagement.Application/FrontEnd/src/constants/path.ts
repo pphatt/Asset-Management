@@ -14,6 +14,7 @@ const path = {
   login: '/login',
   register: '/register',
   logout: '/logout',
+  dashboard: '/dashboard',
 } as const;
 
 export default path;

@@ -3,7 +3,6 @@ import { IMyAssignment, IMyAssignmentParams } from '@/types/assignment.type';
 import { IAssginmentDetail, IAssignmentCreateUpdateRequest, IAssignmentCreateUpdateResponse } from '../types/assingment.type';
 
 const assignmentApi = {
-
   createAssignment: async (payload: IAssignmentCreateUpdateRequest): Promise<HttpResponse<IAssignmentCreateUpdateResponse>> => {
     const { data } = await http.post('/assignments', payload);
     return data;
@@ -38,7 +37,6 @@ const assignmentApi = {
 
     return data.data;
   },
-
 };
 
 export default assignmentApi;

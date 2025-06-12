@@ -29,6 +29,7 @@ const Assignment = lazy(() => import("./pages/Assignment"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const Report = lazy(() => import("./pages/Report"));
 const ReturnRequest = lazy(() => import("./pages/ReturnRequest"));
+const Dashboard = lazy(() => import("./pages/Dashboard"));
 
 // Assignment components
 const CreateAssignment = lazy(
@@ -146,6 +147,14 @@ const ProtectedRoutes: RouteObject[] = [
             <Report />
           </MainLayout>
         ),
+      },
+      {
+        path: path.dashboard,
+        element: (
+          <MainLayout>
+            <Dashboard />
+          </MainLayout>
+        )
       },
     ],
   },
