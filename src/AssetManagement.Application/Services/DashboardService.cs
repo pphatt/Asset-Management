@@ -206,10 +206,10 @@ namespace AssetManagement.Application.Services
                 {
                     Id = a.Id,
                     Type = "assignment",
-                    Description = $"Asset {a.Asset.Code} assigned to {a.Assignee.FirstName} {a.Assignee.LastName}",
+                    Description = $"Asset {a.Asset.Code} assigned to {a.Assignee.Username} ({a.Assignee.FirstName} {a.Assignee.LastName})",
                     Timestamp = a.CreatedDate,
                     UserId = a.AssignorId,
-                    UserName = $"{a.Assignor.FirstName} {a.Assignor.LastName}",
+                    UserName = a.Assignor.Username,
                     AssetId = a.AssetId,
                     AssetCode = a.Asset.Code
                 })
