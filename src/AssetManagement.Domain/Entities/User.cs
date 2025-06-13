@@ -20,5 +20,7 @@ namespace AssetManagement.Domain.Entities
 
         [InverseProperty(nameof(Assignment.Assignee))]
         public ICollection<Assignment> Assignments = new List<Assignment>();
+
+        public ICollection<string> HistoryPasswords { get; set; } = new List<string>();
     }
 }

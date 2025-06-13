@@ -161,6 +161,7 @@ namespace AssetManagement.Application.Services
                 Location = location,
                 CreatedBy = Guid.Parse(adminUserId),
                 CreatedDate = DateTime.UtcNow,
+                HistoryPasswords = new List<string> { hashedPassword },
             };
 
             await _userRepository.AddAsync(user);

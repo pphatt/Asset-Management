@@ -30,6 +30,8 @@ export default function ResetPassword() {
   const navigate = useNavigate();
   const [result, setResult] = useState(false);
   const [messageError, setMessageError] = useState("");
+  const [newPasswordMessageError, setNewPasswordMessageError] =
+    useState("");
 
   const {
     handleSubmit,
@@ -46,8 +48,15 @@ export default function ResetPassword() {
 
   const { isPending: isLoading, mutate } = useMutation({
     mutationFn: (body: PasswordUpdateRequest) => authApi.changePassword(body),
-    onError: () => {
-      setMessageError("Password is incorrect");
+    onError: (err: any) => {
+      const errMsg = err.response?.data?.errors;
+      if (errMsg?.[0]?.includes("New password must be different from the old password")) {
+        setNewPasswordMessageError(
+          errMsg?.[0] || "New password is error.")
+      } else {
+        setMessageError(errMsg?.[0] || "Password is incorrect");
+      }
+
     },
   });
 
@@ -145,7 +154,6 @@ export default function ResetPassword() {
 
                   <div
                     style={{
-                      width: "222px",
                       height: "20px",
                       marginTop: "calc(var(--spacing) * 2)",
                     }}
@@ -182,13 +190,12 @@ export default function ResetPassword() {
 
                   <div
                     style={{
-                      width: "222px",
                       height: "20px",
                       marginTop: "calc(var(--spacing) * 2)",
                     }}
                     className="mt-2 text-sm font-medium text-red-500"
                   >
-                    {errors?.newPassword?.message}
+                    {errors?.newPassword?.message || newPasswordMessageError}
                   </div>
                 </div>
               </div>
@@ -219,7 +226,6 @@ export default function ResetPassword() {
 
                   <div
                     style={{
-                      width: "222px",
                       height: "20px",
                       marginTop: "calc(var(--spacing) * 2)",
                     }}

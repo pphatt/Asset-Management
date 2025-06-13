@@ -113,13 +113,18 @@ namespace AssetManagement.Application.Services
                 throw new UnauthorizedAccessException("Invalid username or password");
             }
 
-            if (_passwordHasher.VerifyPassword(request.NewPassword, user.Password))
+            foreach (var password in user.HistoryPasswords)
             {
-                throw new InvalidOperationException("New password must be different from the old password");
+                if (_passwordHasher.VerifyPassword(request.NewPassword, password))
+                {
+                    throw new InvalidOperationException("New password must be different from the old password");
+                }
             }
 
-            user.Password = _passwordHasher.HashPassword(request.NewPassword);
+            var newPasswordHash = _passwordHasher.HashPassword(request.NewPassword);
+            user.Password = newPasswordHash;
             user.IsPasswordUpdated = true;
+            user.HistoryPasswords = user.HistoryPasswords.Prepend(newPasswordHash).Take(5).ToList();
             _userRepository.Update(user);
 
             await _userRepository.SaveChangesAsync();

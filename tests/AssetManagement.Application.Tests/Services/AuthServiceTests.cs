@@ -285,18 +285,22 @@ namespace AssetManagement.Application.Tests.Services
                 NewPassword = "currentpassword"
             };
 
+            _mockPasswordHasher.Setup(x => x.HashPassword(request.NewPassword))
+                .Returns("hashednewpassword");
+
             var user = new User
             {
                 Id = Guid.NewGuid(),
                 Username = username,
-                Password = "hashedpassword"
+                Password = "hashedpassword",
+                HistoryPasswords = new List<string> { "hashednewpassword" }
             };
 
             _mockUserRepository.Setup(x => x.GetByUsernameAsync(username))
                 .ReturnsAsync(user);
             _mockPasswordHasher.Setup(x => x.VerifyPassword(request.Password, user.Password))
                 .Returns(true);
-            _mockPasswordHasher.Setup(x => x.VerifyPassword(request.NewPassword, user.Password))
+            _mockPasswordHasher.Setup(x => x.VerifyPassword(request.NewPassword, user.HistoryPasswords.ElementAt(0)!))
                 .Returns(true);
 
             // Act & Assert
